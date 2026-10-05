@@ -268,7 +268,7 @@ export function parseBestTrack(text) {
 
 async function gatherHistory(file) {
   const pts = parseBestTrack(await get(`btk-${file}`, `https://ftp.nhc.noaa.gov/atcf/btk/b${file.slice(1).replace('.gz', '')}`));
-  const features = pts.map((p) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [p.lon, p.lat] }, properties: { role: 'pastpt', t: p.t, wind: p.wind } }));
+  const features = pts.map((p, i) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [p.lon, p.lat] }, properties: { role: 'pastpt', t: p.t, wind: p.wind, now: i === pts.length - 1 } }));
   if (pts.length > 1) features.unshift({ type: 'Feature', geometry: { type: 'LineString', coordinates: pts.map((p) => [p.lon, p.lat]) }, properties: { role: 'past' } });
   return { features, winds: pts.length ? pts[pts.length - 1].wind : null };
 }
@@ -514,7 +514,12 @@ async function main() {
   // The map is a nice-to-have: if its service is down, keep the last map and carry on.
   const map = await gatherMap(gulf, storms[0]).catch((e) => { console.warn(`map layers unavailable: ${e.message}`); return null; });
   const models = await gatherModels(gulf, storms[0]).catch((e) => { console.warn(`model guidance unavailable: ${e.message}`); return undefined; });
-  if (map && models) { map.features = [...models.features, ...map.features, ...(models.history || [])]; map.models = models.label; }
+  if (map && models) {
+    // One "now" position: once the best track exists, its latest fix replaces the outlook's X.
+    const base = models.history?.length ? map.features.filter((f) => f.properties.role !== 'origin') : map.features;
+    map.features = [...models.features, ...base, ...(models.history || [])];
+    map.models = models.label;
+  }
   if (gulf && models?.invest) { gulf.invest = models.invest; if (models.winds) gulf.winds = models.winds; }
   else if (gulf && models === undefined && prior?.gulf?.invest) gulf.invest = prior.gulf.invest; // guidance fetch failed: keep the known Invest number
   const status = build(prior, gulf, storms, ww);
