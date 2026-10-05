@@ -26,6 +26,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - uses: actions/setup-python@v5
+        if: ${{ !inputs.test_notify }}
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: European ensemble tracks (optional layer)
+        if: ${{ !inputs.test_notify }}
+        continue-on-error: true
+        run: pip install -q -r requirements.txt && python ecmwf_tracks.py
       - name: Check NHC and update status
         run: node check.mjs
         env:

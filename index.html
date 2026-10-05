@@ -140,10 +140,13 @@ a{color:var(--accent)}
     <header><h2 id="map-title">Storm map</h2><span class="tag" id="map-src">NHC</span></header>
     <div id="map"></div>
     <div class="legend" id="map-legend"></div>
+    <div class="legend" id="ec-legend"></div>
     <div class="map-note" id="map-note"></div>
+    <div class="map-note" id="ec-sum"></div>
     <div class="foot">
       <span>More model views:</span>
       <a href="https://spaghettimodels.com/" target="_blank" rel="noopener">Mike's Weather Page</a>
+      <a href="https://www.weathernerds.org/tc_guidance/tcs.html" target="_blank" rel="noopener">Weathernerds ensemble tracks</a>
       <a href="https://www.tropicaltidbits.com/storminfo/" target="_blank" rel="noopener">Tropical Tidbits</a>
       <a href="https://deepmind.google.com/science/weatherlab" target="_blank" rel="noopener">Google Weather Lab (AI ensemble)</a>
       <a href="https://arctic.som.ou.edu/tburg/products/realtime/tropical/" target="_blank" rel="noopener">Tomer Burg model plots</a>
@@ -246,6 +249,22 @@ a{color:var(--accent)}
   var WIND=[[96,"#b3261e","Major hurricane"],[64,"#d8631c","Hurricane"],[34,"#ef8f2b","Tropical storm"],[0,"#e8c547","Depression"]];
   // [colour, weight, opacity, legend label] per model group; drawn under the official NHC layers.
   var MODEL={ens:["#6f9fc4",1,.5,"GEFS ensemble members"],model:["#3f7fb5",1.6,.85,"Individual models"],consensus:["#8b5fbf",2.6,.95,"Consensus / ensemble mean"],google:["#2e9e5b",2.6,.95,"Google DeepMind AI"]};
+  var EC={ecens:["#d08a2e","European ensemble (ECENS)"],ecaie:["#c44f8a","European AI ensemble (AIFS)"]}, ecGroups={};
+  function renderEC(d){
+    initMap(); if(!map) return;
+    var ens=(d&&d.ensembles)||[], sums=[], legend="";
+    Object.keys(ecGroups).forEach(function(k){ecGroups[k].clearLayers()});
+    ens.forEach(function(e){ var c=EC[e.key]; if(!c||!ecGroups[e.key]) return;
+      (e.features||[]).forEach(function(f){ var p=f.properties;
+        ecGroups[e.key].addLayer(L.geoJSON(f,{pane:"ec",style:{color:c[0],weight:1.2,opacity:.6}}).bindTooltip(c[1]+" member "+p.member+", peak "+p.peak+" kt",{sticky:true})); });
+      if(!(e.features||[]).length) return;
+      legend+=sw(c[0],c[1],1);
+      var by=STATES.filter(function(s){return e.coast[s]}).sort(function(a,b){return e.coast[b]-e.coast[a]}).map(function(s){return s+" "+e.coast[s]}).join(", ");
+      sums.push(c[1]+", run "+fmt(e.run)+": "+e.developing+" members track a system through the Gulf; "+(e.hits?e.hits+" bring it to the Louisiana-to-Florida coast ("+by+"), typically around "+fmt(e.eta):"none bring it to the Louisiana-to-Florida coast")+"; "+e.hurricane+" reach hurricane strength.");
+    });
+    $("ec-legend").innerHTML=legend;
+    $("ec-sum").innerHTML=sums.length?sums.map(esc).join("<br>")+"<br>European ensemble lines are raw model runs out to 7 days (6 days for the 1 AM and 1 PM runs of ECENS), not a forecast. Switch them on or off with the layers button on the map. Data: &copy; ECMWF open data, CC BY 4.0, filtered to Gulf tracks.":"";
+  }
   var windColor=function(kt){for(var i=0;i<WIND.length;i++) if(kt>=WIND[i][0]) return WIND[i][1]};
   var sw=function(c,t,line){return '<span><i'+(line?' class="ln" style="border-color:'+c+'"':' style="background:'+c+'"')+'></i>'+t+'</span>'};
   function initMap(){
@@ -255,6 +274,11 @@ a{color:var(--accent)}
     var esri="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_"+(dark?"Dark":"Light")+"_Gray_";
     L.tileLayer(esri+"Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Map: Esri, HERE, Garmin, &copy; OpenStreetMap contributors",maxZoom:10}).addTo(map);
     L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
+    // European ensemble lines sit in their own pane under everything else, each with an on/off switch.
+    map.createPane("ec").style.zIndex=350;
+    var overlays={};
+    Object.keys(EC).forEach(function(k){ ecGroups[k]=L.layerGroup().addTo(map); overlays[EC[k][1]]=ecGroups[k]; });
+    L.control.layers(null,overlays,{collapsed:true}).addTo(map);
     group=L.featureGroup().addTo(map);
     map.fitBounds([[18,-98],[31,-80]]);
   }
@@ -304,6 +328,7 @@ a{color:var(--accent)}
     var RAW="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/main/";
     var get=function(f){return fetch(RAW+f+t).then(function(r){if(!r.ok) throw 0; return r.json()}).catch(function(){return fetch(f+t).then(function(r){return r.json()})})};
     get("data/status.json").then(renderStatus).catch(function(){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; });
+    get("data/ecmwf.json").then(renderEC).catch(function(){ renderEC(null); });
     get("data/map.json").then(renderMap).catch(function(){ renderMap(null); });
     get("data/log.json").then(renderLog).catch(function(){});
   }
