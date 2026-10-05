@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-05T19:03:58.687Z",
+  "updatedAt": "2026-10-05T19:07:33.410Z",
   "nextCheck": "2026-10-05T20:00:00.000Z",
   "alertLevel": "watch",
   "headline": "NHC gives the Southwestern Gulf of America disturbance a 80% chance of forming within 7 days (60% within 48 hours). No advisories or forecast track yet.",
@@ -8,7 +8,8 @@
     "text": "A trough of low pressure over the southwestern Gulf of America is producing disorganized showers and thunderstorms. Although environmental conditions appear to be marginally conducive, gradual development is becoming more likely, and a tropical depression is expected to form during the middle portion of the week. This system is expected to drift eastward over the next couple of days, before it turns northward. It is too early to determine the specific impacts to the northern Gulf Coast, but interests there should closely monitor the progress of this system.",
     "formation48": 60,
     "formation7d": 80,
-    "source": "NHC outlook, 200 PM EDT Mon Oct 5 2026"
+    "source": "NHC outlook, 200 PM EDT Mon Oct 5 2026",
+    "invest": "Invest 92L"
   },
   "storms": [],
   "watchesWarnings": {
