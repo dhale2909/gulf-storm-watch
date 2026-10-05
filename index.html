@@ -108,20 +108,20 @@ dialog .go{display:inline-block;font-weight:600;padding:6px 12px;border-radius:8
 body.card{padding:0;overflow:hidden}
 body.card .wrap{display:none}
 body.card #card{display:flex;flex-direction:column;position:relative;width:1200px;height:630px;background:var(--bg)}
-#card-map{flex:1;min-height:0;position:relative}
-body.card #map{height:100%;border:0;border-radius:0}
-#card #c-pill{position:absolute;left:28px;top:26px;z-index:600;font-size:46px;padding:8px 30px}
+#card-map{flex:1;min-height:0;position:relative;overflow:hidden}
+body.card #map{width:1667px;height:649px;transform:scale(.72);transform-origin:0 0;border:0;border-radius:0}
+#card #c-pill{position:absolute;right:28px;top:26px;z-index:600;font-size:46px;padding:8px 30px}
 #card .c-bar{height:164px;box-sizing:border-box;background:var(--bg);border-top:10px solid var(--lvl,var(--watch));padding:14px 34px 20px;font-family:var(--display);white-space:nowrap;overflow:hidden}
 #c-l1{display:flex;align-items:baseline;gap:22px;font-weight:700;font-size:118px;line-height:1}
 #c-l1 span{font:500 46px var(--body);color:#c3ced6;margin-right:26px}
 #c-l1 .nm{font-size:84px}
 #c-l2{font:500 42px/1.2 var(--body);color:#c3ced6;margin-top:8px}
 #c-l2:empty{display:none}
-.c-city{font:600 30px var(--body);color:#cfd8df;white-space:nowrap;text-shadow:0 0 4px #0d151c,0 0 4px #0d151c,0 0 8px #0d151c}
-.c-city i{display:inline-block;width:10px;height:10px;border-radius:50%;background:#93a3b0;margin:0 8px;vertical-align:middle}
+.c-city{font:600 38px var(--body);color:#cfd8df;white-space:nowrap;text-shadow:0 0 4px #0d151c,0 0 4px #0d151c,0 0 8px #0d151c}
+.c-city i{display:inline-block;width:14px;height:14px;border-radius:50%;background:#93a3b0;margin:0 10px;vertical-align:middle}
 .c-city .l{display:inline-block;transform:translateX(-100%)}
-body.card .leaflet-tile{width:257px!important;height:257px!important}
-body.card .xmark{font-size:52px;line-height:52px}
+
+body.card .xmark{font-size:72px;line-height:72px}
 body.card .leaflet-control-container{display:none}
 .logbox summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;cursor:pointer;list-style:none}
 .logbox summary::-webkit-details-marker{display:none}
@@ -260,11 +260,11 @@ body.card .leaflet-control-container{display:none}
     if(/depression/.test(t)) return "TD"; if(/hurricane/.test(t)) return "H"+(s.category||1); if(/storm/.test(t)) return "TS"; return "PT"; };
 
   // Card mode (index.html?card=1): the share preview image. Default layers, local data, Central time.
-  var CARD=/[?&]card=1/.test(location.search), ready={}, K=CARD?2.4:1; // K: line weight multiplier for the card
+  var CARD=/[?&]card=1/.test(location.search), ready={}, K=CARD?3.3:1; // K: line weight multiplier for the card
   var cardKeys={};
   var done=function(k){ ready[k]=1; if(!(ready.s&&ready.m&&ready.e)) return;
     // The card's layout settles after the text is filled in; re-measure the map and refit before the screenshot.
-    if(CARD&&map){ map.invalidateSize(); if(lastBounds) map.fitBounds(lastBounds,{padding:[24,24],animate:false}); }
+    if(CARD&&map){ map.invalidateSize(); if(lastBounds) map.fitBounds(lastBounds,{padding:[20,20],animate:false}); }
     window.cardReady=true; };
   if(CARD){ document.body.classList.add("card"); $("card-map").appendChild($("map")); }
   var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
@@ -370,13 +370,13 @@ body.card .leaflet-control-container{display:none}
   var sw=function(c,t,line){return '<span><i'+(line?' class="ln" style="border-color:'+c+'"':' style="background:'+c+'"')+'></i>'+t+'</span>'};
   function initMap(){
     if(map||!window.L) return;
-    map=L.map("map",{scrollWheelZoom:false,zoomSnap:CARD?0.1:1});
+    map=L.map("map",{scrollWheelZoom:false,zoomSnap:1});
     var esri="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_";
     L.tileLayer(esri+"Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Map: Esri, HERE, Garmin, &copy; OpenStreetMap contributors",maxZoom:10}).addTo(map);
     if(!CARD) L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
     // The card is viewed at thumbnail size, so it gets a few large city labels instead of the fine map text.
-    else [["Houston",29.76,-95.37],["New Orleans",29.95,-90.07,1],["Pensacola",30.42,-87.22],["Tampa",27.95,-82.46]].forEach(function(c){
-      L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city"+(c[3]?" left":""),html:c[3]?'<span class="l">'+c[0]+"<i></i></span>":"<i></i>"+c[0],iconSize:[0,0],iconAnchor:c[3]?[-13,18]:[13,18]})}).addTo(map); });
+    else [["Houston",29.76,-95.37,1],["New Orleans",29.95,-90.07,1],["Pensacola",30.42,-87.22],["Tampa",27.95,-82.46]].forEach(function(c){
+      L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city"+(c[3]?" left":""),html:c[3]?'<span class="l">'+c[0]+"<i></i></span>":"<i></i>"+c[0],iconSize:[0,0],iconAnchor:c[3]?[-17,24]:[17,24]})}).addTo(map); });
     // European ensemble lines sit in their own pane under everything else, each with an on/off switch.
     map.createPane("ec").style.zIndex=350;
     // Every kind of line gets its own on/off switch in the layers button; choices are remembered on this device.
@@ -403,12 +403,12 @@ body.card .leaflet-control-container{display:none}
         l=L.geoJSON(f,{style:{color:ms[0],weight:ms[1]*K,opacity:ms[2]}}).bindTooltip(esc(p.name)+" ("+esc(p.tech)+")",{sticky:true}); }
       else if(r==="area"){ risk=p.risk; l=L.geoJSON(f,{style:{color:RISK[p.risk]||RISK.Medium,weight:2*K,dashArray:CARD?"14 10":"6 4",fillOpacity:.28}}).bindTooltip("Where NHC expects development: "+esc(p.prob7)+" within 7 days",{sticky:true}); }
       else if(r==="motion") l=L.geoJSON(f,{style:{color:RISK[risk]||RISK.Medium,weight:3*K}});
-      else if(r==="origin") l=L.marker([c[1],c[0]],{icon:L.divIcon({className:"xmark",html:"&#10005;",iconSize:CARD?[52,52]:[20,20]})}).bindTooltip("Disturbance now: "+esc(p.prob2)+" in 48 hours, "+esc(p.prob7)+" in 7 days");
+      else if(r==="origin") l=L.marker([c[1],c[0]],{icon:L.divIcon({className:"xmark",html:"&#10005;",iconSize:CARD?[72,72]:[20,20]})}).bindTooltip("Disturbance now: "+esc(p.prob2)+" in 48 hours, "+esc(p.prob7)+" in 7 days");
       else if(r==="cone") l=L.geoJSON(f,{style:{color:muted,weight:1.5*K,fillColor:muted,fillOpacity:.22}}).bindTooltip("Forecast cone: probable path of the storm center",{sticky:true});
       else if(r==="track") l=L.geoJSON(f,{style:{color:fg,weight:2.5*K}});
       else if(r==="past") l=L.geoJSON(f,{style:{color:muted,weight:2*K,dashArray:"3 5"}});
       else if(r==="ww"){ kinds[p.kind]=1; l=L.geoJSON(f,{style:{color:(WW[p.kind]||["#888"])[0],weight:6*K,lineCap:"butt"}}).bindTooltip((WW[p.kind]||[0,"Coastal alert"])[1],{sticky:true}); }
-      else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:(p.now?9:6)*(CARD?1.8:1),color:fg,weight:(p.now?2.5:1.5)*(CARD?1.8:1),fillColor:windColor(+p.wind||0),fillOpacity:1})
+      else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:(p.now?9:6)*(CARD?2.5:1),color:fg,weight:(p.now?2.5:1.5)*(CARD?2.5:1),fillColor:windColor(+p.wind||0),fillOpacity:1})
         .bindTooltip(esc(p.label)+" · "+esc(p.wind)+" kt",{permanent:!CARD,direction:"right",offset:[8,0],className:"pt"});
       if(l) (r==="model"?(modelGroups[p.group]||modelGroups.model):group).addLayer(l);
     });
