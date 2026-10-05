@@ -21,7 +21,8 @@
     "pushed": false,
     "alertLevel": "watch",
     "formation7d": 80,
-    "summary": "No change. NHC gives the Southwestern Gulf of America disturbance a 80% chance of forming within 7 days (60% within 48 hours). No advisories or forecast track yet."
+    "summary": "Update, below the alert threshold: NHC designated the system Invest 92L.",
+    "updated": true
   },
   {
     "ts": "2026-10-05T19:03:58.687Z",
@@ -109,7 +110,8 @@
     "pushed": false,
     "alertLevel": "watch",
     "formation7d": 80,
-    "summary": "No change. NHC gives the Southwestern Gulf of America disturbance a 80% chance of forming within 7 days (60% within 48 hours). No advisories or forecast track yet."
+    "summary": "Update, below the alert threshold: 7-day odds 70% -> 80%. 48-hour odds 30% -> 60%.",
+    "updated": true
   },
   {
     "ts": "2026-10-05T17:25:25.443Z",

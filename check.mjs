@@ -412,6 +412,22 @@ function diff(prior, cur) {
   return ch;
 }
 
+// Smaller movements that are worth a line in the log but not a push.
+function minorDiff(prior, cur) {
+  const notes = [];
+  if (!prior) return notes;
+  const pg = prior.gulf || {}, cg = cur.gulf || {};
+  if (pg.formation7d != null && cg.formation7d != null && pg.formation7d !== cg.formation7d) notes.push(`7-day odds ${pg.formation7d}% -> ${cg.formation7d}%`);
+  if (pg.formation48 != null && cg.formation48 != null && pg.formation48 !== cg.formation48) notes.push(`48-hour odds ${pg.formation48}% -> ${cg.formation48}%`);
+  if (cg.invest && cg.invest !== pg.invest) notes.push(`NHC designated the system ${cg.invest}`);
+  const ps = new Map((prior.storms || []).map((s) => [s.id, s]));
+  for (const s of cur.storms) {
+    const p = ps.get(s.id);
+    if (p && p.type === s.type && (p.category || 0) === (s.category || 0) && p.winds !== s.winds) notes.push(`${s.name} winds ${p.winds} -> ${s.winds} kt`);
+  }
+  return notes;
+}
+
 // ---------- output ----------
 
 async function notify(title, message, level, topic = process.env.NTFY_TOPIC) {
@@ -466,9 +482,10 @@ async function main() {
   const ww = await gatherAlerts(prior, storms.length > 0);
   // The map is a nice-to-have: if its service is down, keep the last map and carry on.
   const map = await gatherMap(gulf, storms[0]).catch((e) => { console.warn(`map layers unavailable: ${e.message}`); return null; });
-  const models = await gatherModels(gulf, storms[0]).catch((e) => { console.warn(`model guidance unavailable: ${e.message}`); return null; });
+  const models = await gatherModels(gulf, storms[0]).catch((e) => { console.warn(`model guidance unavailable: ${e.message}`); return undefined; });
   if (map && models) { map.features = [...models.features, ...map.features]; map.models = models.label; }
   if (gulf && models?.invest) gulf.invest = models.invest;
+  else if (gulf && models === undefined && prior?.gulf?.invest) gulf.invest = prior.gulf.invest; // guidance fetch failed: keep the known Invest number
   const status = build(prior, gulf, storms, ww);
   status.google = await gatherGoogle(storms[0], models?.invest).catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return prior?.google ?? null; });
   const changes = diff(prior, status);
@@ -487,8 +504,11 @@ async function main() {
     }
   }
 
-  const summary = changed ? changes.join('. ') + '.' : prior ? 'No change. ' + status.headline : 'Watch opened. ' + status.headline;
-  await save(status, { ts: NOW.toISOString(), changed, pushed, alertLevel: status.alertLevel, formation7d: status.gulf.formation7d, summary }, map);
+  const minor = changed ? [] : minorDiff(prior, status);
+  const summary = changed ? changes.join('. ') + '.'
+    : minor.length ? `Update, below the alert threshold: ${minor.join('. ')}.`
+    : prior ? 'No change. ' + status.headline : 'Watch opened. ' + status.headline;
+  await save(status, { ts: NOW.toISOString(), changed, pushed, updated: minor.length > 0, alertLevel: status.alertLevel, formation7d: status.gulf.formation7d, summary }, map);
   console.log(`${status.alertLevel.toUpperCase()} | changed=${changed} pushed=${pushed} | ${summary}`);
 }
 

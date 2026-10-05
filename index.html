@@ -83,6 +83,7 @@ a{color:var(--accent)}
 .log-row:first-child{border-top:0}
 @media (max-width:600px){.log-row{grid-template-columns:1fr auto}.log-row .mono{grid-column:1/-1}}
 .chg{font-family:var(--mono);font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chg[data-u="1"]{color:var(--watch);border-color:var(--watch)}
 .chg[data-c="1"]{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
 
 #map{height:440px;border-radius:8px;border:1px solid var(--line);z-index:0;background:var(--bg)}
@@ -345,7 +346,7 @@ body.card .leaflet-control-container{display:none}
   function renderLog(rows){
     rows=rows.slice(0,40);
     $("logcount").textContent=rows.length?rows.length+" recent checks":"";
-    $("log").innerHTML=rows.length?rows.map(function(x){return '<div class="log-row"><span class="mono">'+fmt(x.ts)+'</span><span>'+esc(x.summary)+'</span><span class="chg" data-c="'+(x.changed?1:0)+'">'+(x.changed?(x.pushed?"CHANGE · PUSHED":"CHANGE"):"no change")+'</span></div>'}).join(""):'<div class="empty">No checks logged yet.</div>';
+    $("log").innerHTML=rows.length?rows.map(function(x){return '<div class="log-row"><span class="mono">'+fmt(x.ts)+'</span><span>'+esc(x.summary)+'</span><span class="chg" data-c="'+(x.changed?1:0)+'" data-u="'+(x.updated?1:0)+'">'+(x.changed?(x.pushed?"ALERT SENT":"ALERT"):x.updated?"update":"no change")+'</span></div>'}).join(""):'<div class="empty">No checks logged yet.</div>';
   }
   // ----- map: development area before formation; cone, track and coastal alerts after -----
   var map, group, modelGroups={}, lastBounds;
