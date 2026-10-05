@@ -8,6 +8,8 @@
 // TEST_NOTIFY=1 (send a test push), FIXTURES=dir + NOW=iso (offline testing).
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { gunzipSync } from 'node:zlib';
+import { pathToFileURL } from 'node:url';
 
 const UA = 'gulf-storm-watch (github.com/dhale2909/gulf-storm-watch)';
 const FIX = process.env.FIXTURES;
@@ -39,6 +41,13 @@ async function get(name, url, json = false) {
     } catch (e) { err = e; }
   }
   throw err;
+}
+
+async function getBuf(name, url) {
+  if (FIX) return readFile(`${FIX}/${name}`);
+  const r = await fetch(url, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(60000) });
+  if (!r.ok) throw new Error(`${url} -> HTTP ${r.status}`);
+  return Buffer.from(await r.arrayBuffer());
 }
 
 const preText = (html) => {
@@ -202,6 +211,71 @@ async function gatherMap(gulf, storm) {
   return { kind: 'none', name: '', source: '', features };
 }
 
+// Model guidance ("spaghetti") from NHC's public ATCF aid files. These are raw model runs,
+// not a forecast: they are drawn under the official track and never drive alerts.
+const ADECK = 'https://ftp.nhc.noaa.gov/atcf/aid_public/';
+// Not track models: the official forecast (drawn separately), climatology/extrapolation, intensity-only aids.
+const SKIP_TECH = /^(CARQ|WRNG|OFC.|XTRP|CLP5|DRCL|TCLP|TAB[DMS]|BAM[DMS]|NNI.|ICON|(DS|SH|LG|IV|RV|OC|RI|KS|KL|KD|KO).*)$/;
+const MODEL_NAMES = [
+  [/^AVN/, 'GFS (American)'], [/^GDM/, 'Google DeepMind AI'], [/^A[PC]\d\d$/, 'GEFS ensemble member'], [/^AEM/, 'GEFS ensemble mean'],
+  [/^HFSA|^HFA/, 'HAFS-A hurricane model'], [/^HFSB|^HFB/, 'HAFS-B hurricane model'], [/^HWRF|^HWF/, 'HWRF hurricane model'], [/^HMON|^HMN/, 'HMON hurricane model'],
+  [/^CMC/, 'Canadian'], [/^CEM/, 'Canadian ensemble mean'], [/^UK|^EGR/, 'UKMET (British)'], [/^NVG|^NGX/, 'NAVGEM (US Navy)'],
+  [/^CTC/, 'COAMPS-TC (US Navy)'], [/^EMX|^ECM/, 'ECMWF (European)'], [/^EEM|^EMN/, 'European ensemble mean'],
+  [/^TVC/, 'TVCN consensus'], [/^HCCA/, 'HCCA consensus'], [/^GFEX/, 'GFS/European consensus'],
+];
+const modelGroup = (t) => (/^GDM/.test(t) ? 'google' : /^A[PC]\d\d$/.test(t) ? 'ens' : /^(TVC.|HCCA|GFEX|AEM.|CEM.|EEM.|EMN.)$/.test(t) ? 'consensus' : 'model');
+const cycleMs = (d) => Date.UTC(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8), +d.slice(8, 10));
+
+export function parseAdeck(text) {
+  const latest = new Map(); // tech -> { date, pts: Map(tau -> [lon, lat]) }
+  let origin = null, originDate = '';
+  for (const line of text.split('\n')) {
+    const c = line.split(',').map((x) => x.trim());
+    if (c.length < 8 || !/^\d{10}$/.test(c[2])) continue;
+    const [date, tech, tau] = [c[2], c[4], +c[5]];
+    const la = /^(\d+)([NS])$/.exec(c[6]), lo = /^(\d+)([EW])$/.exec(c[7]);
+    if (!la || !lo || (+la[1] === 0 && +lo[1] === 0)) continue;
+    const lat = (+la[1] / 10) * (la[2] === 'S' ? -1 : 1), lon = (+lo[1] / 10) * (lo[2] === 'W' ? -1 : 1);
+    if (tech === 'CARQ') { if (tau === 0 && date >= originDate) { originDate = date; origin = { lat, lonW: -lon }; } continue; }
+    if (SKIP_TECH.test(tech) || tau < 0 || tau > 168) continue;
+    let t = latest.get(tech);
+    if (!t || date > t.date) latest.set(tech, (t = { date, pts: new Map() }));
+    if (date === t.date) t.pts.set(tau, [lon, lat]);
+  }
+  if (!latest.size) return null;
+  const init = [...latest.values()].map((t) => t.date).sort().pop();
+  const tracks = [];
+  for (const [tech, t] of latest) {
+    if (cycleMs(init) - cycleMs(t.date) > 12 * 3600e3 || t.pts.size < 3) continue; // stale run or too short to draw
+    tracks.push({ tech, group: modelGroup(tech), name: (MODEL_NAMES.find(([re]) => re.test(tech)) || [0, tech])[1],
+      coords: [...t.pts.entries()].sort((a, b) => a[0] - b[0]).map(([, p]) => p) });
+  }
+  return { init, origin, tracks };
+}
+
+async function gatherModels(gulf, storm) {
+  let files = [];
+  if (storm) files = [`a${storm.id}.dat.gz`];
+  else if (gulf) {
+    // Before a storm is named, guidance is filed under an "Invest" number (AL90-AL99). Find a fresh one in the Gulf.
+    const list = await get('adeck-list.html', ADECK);
+    const re = new RegExp(`href="(aal9\\d${NOW.getUTCFullYear()}\\.dat\\.gz)">[^<]*</a>\\s+(\\d{4}-\\d\\d-\\d\\d \\d\\d:\\d\\d)`, 'g');
+    files = [...list.matchAll(re)].filter((m) => NOW - new Date(m[2].replace(' ', 'T') + 'Z') < 36 * 3600e3).map((m) => m[1]);
+  }
+  for (const f of files) {
+    const d = parseAdeck(gunzipSync(await getBuf(`adeck-${f}`, ADECK + f)).toString('latin1'));
+    if (!d || !d.tracks.length || NOW - cycleMs(d.init) > 24 * 3600e3) continue;
+    if (!storm && !(d.origin && inGulf(d.origin))) continue;
+    const invest = storm ? null : `Invest ${f.slice(3, 5)}L`;
+    const run = new Date(cycleMs(d.init)).toLocaleString('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric' }) + ' CT';
+    return {
+      invest, label: `${d.tracks.length} model tracks, latest run ${run}`,
+      features: d.tracks.map((t) => ({ type: 'Feature', geometry: { type: 'LineString', coordinates: t.coords }, properties: { role: 'model', tech: t.tech, name: t.name, group: t.group } })),
+    };
+  }
+  return null;
+}
+
 // ---------- decide ----------
 
 function build(prior, gulf, storms, ww) {
@@ -338,6 +412,9 @@ async function main() {
   const ww = await gatherAlerts(prior, storms.length > 0);
   // The map is a nice-to-have: if its service is down, keep the last map and carry on.
   const map = await gatherMap(gulf, storms[0]).catch((e) => { console.warn(`map layers unavailable: ${e.message}`); return null; });
+  const models = await gatherModels(gulf, storms[0]).catch((e) => { console.warn(`model guidance unavailable: ${e.message}`); return null; });
+  if (map && models) { map.features = [...models.features, ...map.features]; map.models = models.label; }
+  if (gulf && models?.invest) gulf.invest = models.invest;
   const status = build(prior, gulf, storms, ww);
   const changes = diff(prior, status);
   const changed = changes.length > 0;
@@ -355,4 +432,4 @@ async function main() {
   console.log(`${status.alertLevel.toUpperCase()} | changed=${changed} pushed=${pushed} | ${summary}`);
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch((e) => { console.error(e); process.exit(1); });

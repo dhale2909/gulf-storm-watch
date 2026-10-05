@@ -138,6 +138,13 @@ a{color:var(--accent)}
     <div id="map"></div>
     <div class="legend" id="map-legend"></div>
     <div class="map-note" id="map-note"></div>
+    <div class="foot">
+      <span>More model views:</span>
+      <a href="https://spaghettimodels.com/" target="_blank" rel="noopener">Mike's Weather Page</a>
+      <a href="https://www.tropicaltidbits.com/storminfo/" target="_blank" rel="noopener">Tropical Tidbits</a>
+      <a href="https://deepmind.google.com/science/weatherlab" target="_blank" rel="noopener">Google Weather Lab (AI ensemble)</a>
+      <a href="https://arctic.som.ou.edu/tburg/products/realtime/tropical/" target="_blank" rel="noopener">Tomer Burg model plots</a>
+    </div>
   </section>
 
   <div class="grid2">
@@ -197,8 +204,8 @@ a{color:var(--accent)}
     $("outlook").textContent=g.text||"No Gulf disturbance in the current NHC outlook.";
     $("src").textContent=g.source||"NHC outlook";
     var st=d.storms||[], s0=st[0];
-    $("sysstat").textContent=s0?s0.name:(g.area?"Disturbance":"None");
-    $("sysstatsub").textContent=s0?(s0.winds+" kt · "+s0.movement):(g.area?"Not designated; no NHC advisories yet":"No Gulf system flagged");
+    $("sysstat").textContent=s0?s0.name:(g.area?(g.invest||"Disturbance"):"None");
+    $("sysstatsub").textContent=s0?(s0.winds+" kt · "+s0.movement):(g.area?(g.invest?g.invest+"; no NHC advisories yet":"Not designated; no NHC advisories yet"):"No Gulf system flagged");
     $("storms").innerHTML=st.length?st.map(function(s){var k=catKey(s);return '<div class="storm"><div class="cat" data-k="'+k+'">'+k+'</div><div><div class="nm">'+esc(s.name)+'</div><dl>'+
       '<dt>Winds</dt><dd class="mono">'+esc(s.winds)+' kt</dd>'+
       '<dt>Position</dt><dd>'+esc(s.location)+'</dd><dt>Motion</dt><dd>'+esc(s.movement)+'</dd>'+
@@ -219,6 +226,8 @@ a{color:var(--accent)}
   var RISK={Low:"#e8c547",Medium:"#ef8f2b",High:"#d64545"};
   var WW={HWR:["#d6202a","Hurricane warning"],HWA:["#f08ad0","Hurricane watch"],TWR:["#2456d6","Tropical storm warning"],TWA:["#e6c800","Tropical storm watch"]};
   var WIND=[[96,"#b3261e","Major hurricane"],[64,"#d8631c","Hurricane"],[34,"#ef8f2b","Tropical storm"],[0,"#e8c547","Depression"]];
+  // [colour, weight, opacity, legend label] per model group; drawn under the official NHC layers.
+  var MODEL={ens:["#6f9fc4",1,.5,"GEFS ensemble members"],model:["#3f7fb5",1.6,.85,"Individual models"],consensus:["#8b5fbf",2.6,.95,"Consensus / ensemble mean"],google:["#2e9e5b",2.6,.95,"Google DeepMind AI"]};
   var windColor=function(kt){for(var i=0;i<WIND.length;i++) if(kt>=WIND[i][0]) return WIND[i][1]};
   var sw=function(c,t,line){return '<span><i'+(line?' class="ln" style="border-color:'+c+'"':' style="background:'+c+'"')+'></i>'+t+'</span>'};
   function initMap(){
@@ -236,9 +245,11 @@ a{color:var(--accent)}
     group.clearLayers();
     var fg=getComputedStyle(document.documentElement).getPropertyValue("--fg").trim()||"#13202b";
     var muted=getComputedStyle(document.documentElement).getPropertyValue("--muted").trim()||"#5b6b78";
-    var fs=(m&&m.features)||[], kinds={}, risk;
+    var fs=(m&&m.features)||[], kinds={}, mods={}, risk;
     fs.forEach(function(f){ var p=f.properties||{}, r=p.role, c=f.geometry.coordinates, l;
-      if(r==="area"){ risk=p.risk; l=L.geoJSON(f,{style:{color:RISK[p.risk]||RISK.Medium,weight:2,dashArray:"6 4",fillOpacity:.28}}).bindTooltip("Where NHC expects development: "+esc(p.prob7)+" within 7 days",{sticky:true}); }
+      if(r==="model"){ mods[p.group]=1; var ms=MODEL[p.group]||MODEL.model;
+        l=L.geoJSON(f,{style:{color:ms[0],weight:ms[1],opacity:ms[2]}}).bindTooltip(esc(p.name)+" ("+esc(p.tech)+")",{sticky:true}); }
+      else if(r==="area"){ risk=p.risk; l=L.geoJSON(f,{style:{color:RISK[p.risk]||RISK.Medium,weight:2,dashArray:"6 4",fillOpacity:.28}}).bindTooltip("Where NHC expects development: "+esc(p.prob7)+" within 7 days",{sticky:true}); }
       else if(r==="motion") l=L.geoJSON(f,{style:{color:RISK[risk]||RISK.Medium,weight:3}});
       else if(r==="origin") l=L.marker([c[1],c[0]],{icon:L.divIcon({className:"xmark",html:"&#10005;",iconSize:[20,20]})}).bindTooltip("Disturbance now: "+esc(p.prob2)+" in 48 hours, "+esc(p.prob7)+" in 7 days");
       else if(r==="cone") l=L.geoJSON(f,{style:{color:muted,weight:1.5,fillColor:muted,fillOpacity:.22}}).bindTooltip("Forecast cone: probable path of the storm center",{sticky:true});
@@ -252,15 +263,19 @@ a{color:var(--accent)}
     var b=L.latLngBounds([[24,-94],[31,-81]]); if(group.getLayers().length) b.extend(group.getBounds());
     map.fitBounds(b,{padding:[18,18]});
     var kind=(m&&m.kind)||"none";
-    $("map-title").textContent=kind==="storm"?"Forecast track: "+m.name:kind==="outlook"?"Development area":"Storm map";
+    var hasModels=Object.keys(mods).length>0;
+    var modelLegend=["model","consensus","google","ens"].map(function(k){return mods[k]?sw(MODEL[k][0],MODEL[k][3],1):""}).join("");
+    $("map-title").textContent=kind==="storm"?"Forecast track: "+m.name:kind==="outlook"?(hasModels?"Development area and model tracks":"Development area"):"Storm map";
     $("map-src").textContent=(m&&m.source)||"NHC";
     $("map-legend").innerHTML=kind==="storm"
-      ? WIND.slice().reverse().map(function(w){return sw(w[1],w[2])}).join("")+sw(fg,"Forecast track",1)+sw(muted,"Cone / past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")
-      : kind==="outlook" ? sw(RISK[risk]||RISK.Medium,"7-day development area")+'<span><b style="color:var(--landfall)">&#10005;</b> Disturbance now</span>' : "";
+      ? WIND.slice().reverse().map(function(w){return sw(w[1],w[2])}).join("")+sw(fg,"Forecast track",1)+sw(muted,"Cone / past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")+modelLegend
+      : kind==="outlook" ? sw(RISK[risk]||RISK.Medium,"7-day development area")+'<span><b style="color:var(--landfall)">&#10005;</b> Disturbance now</span>'+modelLegend : "";
     $("map-note").textContent=kind==="storm"
       ? "Dots are NHC forecast positions of the storm center with time and wind. The cone shows where the center will probably track; wind, surge and rain reach well outside it."
       : kind==="outlook" ? "NHC has not issued a forecast track yet. The shaded area is where it expects the system to develop over the next 7 days; the track, cone and any coastal watches appear here automatically once a depression forms."
       : "No Gulf system to map.";
+    if(hasModels) $("map-note").textContent+=" Thin coloured lines are raw computer-model runs ("+(m.models||"NHC model guidance")+"). They are not a forecast, they disagree with each other, and they shift from run to run; hover or tap a line for the model name.";
+    else if(kind==="outlook") $("map-note").textContent+=" Model tracks will be drawn here once NHC designates the system as an Invest and starts publishing guidance for it.";
   }
   window.renderMap=renderMap;
 
