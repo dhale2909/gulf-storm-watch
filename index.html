@@ -99,7 +99,9 @@ a{color:var(--accent)}
 .gbars .bar{height:10px;border-radius:3px;background:var(--line);overflow:hidden}
 .gbars .bar i{display:block;height:100%;background:#2e9e5b}
 .share{font:600 14px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:999px;border:1.5px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
-.share:hover{background:var(--accent);color:var(--accent-ink)}
+.share:hover,.share.on{background:var(--accent);color:var(--accent-ink)}
+.satbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#sat-img{display:block;width:100%;max-width:820px;margin:0 auto;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:var(--bg)}
 dialog{max-width:min(520px,calc(100vw - 32px));border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--fg);padding:22px 24px}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 dialog h2{margin-bottom:10px} dialog p{margin:10px 0} dialog ol{margin:10px 0;padding-left:22px;display:grid;gap:10px}
@@ -206,6 +208,26 @@ body.card .leaflet-control-container{display:none}
       <a href="https://www.tropicaltidbits.com/storminfo/" target="_blank" rel="noopener">Tropical Tidbits</a>
       <a href="https://deepmind.google.com/science/weatherlab" target="_blank" rel="noopener">Google Weather Lab (AI ensemble)</a>
       <a href="https://arctic.som.ou.edu/tburg/products/realtime/tropical/" target="_blank" rel="noopener">Tomer Burg model plots</a>
+    </div>
+  </section>
+
+  <section class="panel">
+    <header><h2>Satellite</h2><span class="tag" id="sat-time">GOES-East</span></header>
+    <div class="satbar">
+      <button class="share on" type="button" data-band="GEOCOLOR">GeoColor</button>
+      <button class="share" type="button" data-band="13">Infrared</button>
+      <button class="share" type="button" data-band="09">Water vapor</button>
+      <button class="share" type="button" id="sat-play" style="margin-left:auto">Play 6-hour loop</button>
+    </div>
+    <img id="sat-img" alt="Latest GOES-East satellite image of the Gulf">
+    <div class="map-note" id="sat-note"></div>
+    <div class="foot">
+      <span>More satellite and radar:</span>
+      <a href="https://www.star.nesdis.noaa.gov/GOES/sector.php?sat=G19&sector=gm" target="_blank" rel="noopener">NOAA Gulf loops</a>
+      <a href="https://www.tropicaltidbits.com/sat/" target="_blank" rel="noopener">Tropical Tidbits satellite</a>
+      <a href="https://zoom.earth/" target="_blank" rel="noopener">Zoom Earth</a>
+      <a href="https://tropic.ssec.wisc.edu/" target="_blank" rel="noopener">CIMSS shear and steering</a>
+      <a href="https://radar.weather.gov/" target="_blank" rel="noopener">NWS radar</a>
     </div>
   </section>
 
@@ -440,7 +462,46 @@ body.card .leaflet-control-container{display:none}
   }
   window.renderMap=renderMap;
 
+  // ----- satellite: NOAA GOES-East Gulf sector. Frames arrive every 5 minutes at predictable addresses,
+  // so the page works them out itself: latest still by default, a 6-hour loop on request. -----
+  var SATBASE="https://cdn.star.nesdis.noaa.gov/GOES19/ABI/SECTOR/ga/";
+  var SATNOTE={GEOCOLOR:"GeoColor: true colour by day, infrared blend at night. Look for low clouds starting to curl around a centre.",
+    "13":"Infrared: cloud-top temperature, day and night. Cold, bright bursts that persist near the centre mean the system is organising.",
+    "09":"Water vapor: moisture in the middle of the atmosphere. Dry air shows as dark orange; watch for the trough expected to steer the storm north."};
+  var satBand="GEOCOLOR", satTimer=null, satLatest=0;
+  var pad=function(n,w){n=String(n); while(n.length<w) n="0"+n; return n};
+  var satGrid=function(t){ var m=Math.floor(t/6e4); return (m-((m-1)%5+5)%5)*6e4; }; // frames are stamped :01, :06, :11 ...
+  var satUrl=function(t,size){ var d=new Date(t), y=d.getUTCFullYear(), doy=Math.round((Date.UTC(y,d.getUTCMonth(),d.getUTCDate())-Date.UTC(y,0,0))/864e5);
+    return SATBASE+satBand+"/"+y+pad(doy,3)+pad(d.getUTCHours(),2)+pad(d.getUTCMinutes(),2)+"_GOES19-ABI-ga-"+satBand+"-"+size+"x"+size+".jpg"; };
+  var satLabel=function(t){ $("sat-time").textContent="GOES-East \u00b7 "+new Date(t).toLocaleString(undefined,{weekday:"short",hour:"numeric",minute:"2-digit",timeZoneName:"short"}); };
+  function satStop(){ if(satTimer){ clearInterval(satTimer); satTimer=null; } $("sat-play").textContent="Play 6-hour loop"; }
+  function satStill(){
+    if(CARD||satTimer) return;
+    $("sat-note").textContent=SATNOTE[satBand];
+    var t=satGrid(Date.now()-8*6e4), tries=0, band=satBand, probe=new Image();
+    probe.onload=function(){ if(band!==satBand||satTimer) return; satLatest=t; $("sat-img").src=probe.src; satLabel(t); };
+    probe.onerror=function(){ if(++tries<8){ t-=5*6e4; probe.src=satUrl(t,1000); } else $("sat-note").textContent="Satellite image unavailable right now."; };
+    probe.src=satUrl(t,1000);
+  }
+  function satPlay(){
+    if(satTimer){ satStop(); satStill(); return; }
+    if(!satLatest) return;
+    var btn=$("sat-play"), frames=[], left=13, band=satBand;
+    btn.textContent="Loading\u2026";
+    for(var k=12;k>=0;k--) (function(t){ var im=new Image(), f={t:t,im:im,ok:false}; frames.push(f);
+      im.onload=function(){ f.ok=true; fin(); }; im.onerror=fin; im.src=satUrl(t,1000); })(satLatest-k*30*6e4);
+    function fin(){ if(--left>0||band!==satBand) return;
+      var ok=frames.filter(function(f){return f.ok}); if(ok.length<3){ btn.textContent="Play 6-hour loop"; return; }
+      var i=0, hold=0; btn.textContent="Stop loop";
+      satTimer=setInterval(function(){ if(i===ok.length-1&&hold++<3) return; hold=0; i=(i+1)%ok.length; $("sat-img").src=ok[i].im.src; satLabel(ok[i].t); },450); }
+  }
+  $("sat-play").addEventListener("click",satPlay);
+  Array.prototype.forEach.call(document.querySelectorAll(".satbar [data-band]"),function(b){ b.addEventListener("click",function(){
+    satStop(); satBand=b.getAttribute("data-band"); satLatest=0;
+    Array.prototype.forEach.call(document.querySelectorAll(".satbar [data-band]"),function(x){ x.classList.toggle("on",x===b); }); satStill(); }); });
+
   function load(){
+    satStill();
     var t="?t="+Date.now();
     // Read straight from the repository so a slow or failed site rebuild never leaves the reading stale;
     // fall back to the copy published with the page.
