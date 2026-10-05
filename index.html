@@ -11,7 +11,7 @@
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/main/card.png">
 <meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
+<meta property="og:image:height" content="1200">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -107,9 +107,9 @@ dialog .go{display:inline-block;font-weight:600;padding:6px 12px;border-radius:8
 #card{display:none}
 body.card{padding:0;overflow:hidden}
 body.card .wrap{display:none}
-body.card #card{display:flex;flex-direction:column;position:relative;width:1200px;height:630px;background:var(--bg)}
+body.card #card{display:flex;flex-direction:column;position:relative;width:1200px;height:1200px;background:var(--bg)}
 #card-map{flex:1;min-height:0;position:relative;overflow:hidden}
-body.card #map{width:1667px;height:631px;transform:scale(.72);transform-origin:0 0;border:0;border-radius:0}
+body.card #map{width:1200px;height:1024px;border:0;border-radius:0}
 #card #c-pill{position:absolute;right:28px;top:26px;z-index:600;font-size:46px;padding:8px 30px}
 #card .c-bar{height:176px;box-sizing:border-box;background:var(--bg);border-top:10px solid var(--lvl,var(--watch));padding:8px 34px 0;font-family:var(--display);white-space:nowrap;overflow:hidden}
 #c-l0{font:700 30px/36px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--lvl,var(--watch))}
@@ -118,11 +118,11 @@ body.card #map{width:1667px;height:631px;transform:scale(.72);transform-origin:0
 #c-l1 .nm{font-size:68px;line-height:1.05}
 #c-l2{font:500 34px/42px var(--body);color:#c3ced6}
 #c-l2:empty{display:none}
-.c-city{font:600 38px var(--body);color:#cfd8df;white-space:nowrap;text-shadow:0 0 4px #0d151c,0 0 4px #0d151c,0 0 8px #0d151c}
-.c-city i{display:inline-block;width:14px;height:14px;border-radius:50%;background:#93a3b0;margin:0 10px;vertical-align:middle}
+.c-city{font:600 32px var(--body);color:#cfd8df;white-space:nowrap;text-shadow:0 0 4px #0d151c,0 0 4px #0d151c,0 0 8px #0d151c}
+.c-city i{display:inline-block;width:11px;height:11px;border-radius:50%;background:#93a3b0;margin:0 9px;vertical-align:middle}
 .c-city .l{display:inline-block;transform:translateX(-100%)}
 
-body.card .xmark{font-size:72px;line-height:72px}
+body.card .xmark{font-size:56px;line-height:56px}
 body.card .leaflet-control-container{display:none}
 .logbox summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;cursor:pointer;list-style:none}
 .logbox summary::-webkit-details-marker{display:none}
@@ -133,7 +133,7 @@ body.card .leaflet-control-container{display:none}
 </style>
 </head>
 <body>
-<!-- Share preview card: index.html?card=1 renders only this, 1200x630, and the hourly check screenshots it to card.png. -->
+<!-- Share preview card: index.html?card=1 renders only this, 1200x1200, and the hourly check screenshots it to card.png. -->
 <div id="card">
   <div id="card-map"></div>
   <span class="pill" id="c-pill">Watch</span>
@@ -261,12 +261,12 @@ body.card .leaflet-control-container{display:none}
     if(/depression/.test(t)) return "TD"; if(/hurricane/.test(t)) return "H"+(s.category||1); if(/storm/.test(t)) return "TS"; return "PT"; };
 
   // Card mode (index.html?card=1): the share preview image. Default layers, local data, Central time.
-  var CARD=/[?&]card=1/.test(location.search), ready={}, K=CARD?3.3:1; // K: line weight multiplier for the card
+  var CARD=/[?&]card=1/.test(location.search), ready={}, K=CARD?2.6:1; // K: line weight multiplier for the card
   var cardKeys={};
   var done=function(k){ ready[k]=1; if(!(ready.s&&ready.m&&ready.e)) return;
     // The card's layout settles after the text is filled in; re-measure the map and refit before the screenshot.
     // The card always frames the whole Gulf at one fixed zoom, so its scale never jumps between checks.
-    if(CARD&&map){ map.invalidateSize(); map.setView([25.1,-89.5],6,{animate:false}); }
+    if(CARD&&map){ map.invalidateSize(); map.setView([25.6,-89.5],6,{animate:false}); }
     window.cardReady=true; };
   if(CARD){ document.body.classList.add("card"); $("card-map").appendChild($("map")); }
   var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
@@ -382,8 +382,8 @@ body.card .leaflet-control-container{display:none}
     L.tileLayer(esri+"Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Map: Esri, HERE, Garmin, &copy; OpenStreetMap contributors",maxZoom:10}).addTo(map);
     if(!CARD) L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
     // The card is viewed at thumbnail size, so it gets a few large city labels instead of the fine map text.
-    else [["Houston",29.76,-95.37,1],["New Orleans",29.95,-90.07,1],["Pensacola",30.42,-87.22],["Tampa",27.95,-82.46]].forEach(function(c){
-      L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city"+(c[3]?" left":""),html:c[3]?'<span class="l">'+c[0]+"<i></i></span>":"<i></i>"+c[0],iconSize:[0,0],iconAnchor:c[3]?[-17,24]:[17,24]})}).addTo(map); });
+    else [["Houston",29.76,-95.37,1],["New Orleans",29.95,-90.07,1],["Pensacola",30.42,-87.22],["Tampa",27.95,-82.46],["Canc\u00fan",21.16,-86.85]].forEach(function(c){
+      L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city"+(c[3]?" left":""),html:c[3]?'<span class="l">'+c[0]+"<i></i></span>":"<i></i>"+c[0],iconSize:[0,0],iconAnchor:c[3]?[-14,20]:[14,20]})}).addTo(map); });
     // European ensemble lines sit in their own pane under everything else, each with an on/off switch.
     map.createPane("ec").style.zIndex=350;
     // Every kind of line gets its own on/off switch in the layers button; choices are remembered on this device.
@@ -410,12 +410,12 @@ body.card .leaflet-control-container{display:none}
         l=L.geoJSON(f,{style:{color:ms[0],weight:ms[1]*K,opacity:ms[2]}}).bindTooltip(esc(p.name)+" ("+esc(p.tech)+")",{sticky:true}); }
       else if(r==="area"){ risk=p.risk; l=L.geoJSON(f,{style:{color:RISK[p.risk]||RISK.Medium,weight:2*K,dashArray:CARD?"14 10":"6 4",fillOpacity:.28}}).bindTooltip("Where NHC expects development: "+esc(p.prob7)+" within 7 days",{sticky:true}); }
       else if(r==="motion") l=L.geoJSON(f,{style:{color:RISK[risk]||RISK.Medium,weight:3*K}});
-      else if(r==="origin") l=L.marker([c[1],c[0]],{icon:L.divIcon({className:"xmark",html:"&#10005;",iconSize:CARD?[72,72]:[20,20]})}).bindTooltip("Disturbance now: "+esc(p.prob2)+" in 48 hours, "+esc(p.prob7)+" in 7 days");
+      else if(r==="origin") l=L.marker([c[1],c[0]],{icon:L.divIcon({className:"xmark",html:"&#10005;",iconSize:CARD?[56,56]:[20,20]})}).bindTooltip("Disturbance now: "+esc(p.prob2)+" in 48 hours, "+esc(p.prob7)+" in 7 days");
       else if(r==="cone") l=L.geoJSON(f,{style:{color:muted,weight:1.5*K,fillColor:muted,fillOpacity:.22}}).bindTooltip("Forecast cone: probable path of the storm center",{sticky:true});
       else if(r==="track") l=L.geoJSON(f,{style:{color:fg,weight:2.5*K}});
       else if(r==="past") l=L.geoJSON(f,{style:{color:muted,weight:2*K,dashArray:"3 5"}});
       else if(r==="ww"){ kinds[p.kind]=1; l=L.geoJSON(f,{style:{color:(WW[p.kind]||["#888"])[0],weight:6*K,lineCap:"butt"}}).bindTooltip((WW[p.kind]||[0,"Coastal alert"])[1],{sticky:true}); }
-      else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:(p.now?9:6)*(CARD?2.5:1),color:fg,weight:(p.now?2.5:1.5)*(CARD?2.5:1),fillColor:windColor(+p.wind||0),fillOpacity:1})
+      else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:(p.now?9:6)*(CARD?2:1),color:fg,weight:(p.now?2.5:1.5)*(CARD?2:1),fillColor:windColor(+p.wind||0),fillOpacity:1})
         .bindTooltip(esc(p.label)+" · "+esc(p.wind)+" kt",{permanent:!CARD,direction:"right",offset:[8,0],className:"pt"});
       if(l) (r==="model"?(modelGroups[p.group]||modelGroups.model):group).addLayer(l);
     });
