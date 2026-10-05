@@ -360,7 +360,7 @@ function build(prior, gulf, storms, ww) {
 
   return {
     updatedAt: NOW.toISOString(),
-    nextCheck: new Date(Math.floor(NOW.getTime() / 3600e3) * 3600e3 + (NOW.getUTCMinutes() < 7 ? 7 : 67) * 60e3).toISOString(),
+    nextCheck: new Date((Math.floor(NOW.getTime() / 3600e3) + 1) * 3600e3).toISOString(), // the outside timer fires on the hour
     alertLevel, headline,
     gulf: gulf || { area: '', formation48: null, formation7d: null, source: 'NHC outlook', text: storm ? 'NHC is issuing advisories on this system; see the storm panel.' : '' },
     storms: storms.map(({ landfall: _l, tropical: _t, bin: _b, ...s }) => s),
