@@ -12,6 +12,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: watch
@@ -65,3 +67,23 @@ jobs:
             git pull -q --rebase -X theirs || { git rebase --abort; sleep 5; }
           done
           exit 1
+
+  # Publish the refreshed card and data. Shares the "pages" queue with pages.yml so publishes never collide.
+  publish:
+    needs: check
+    if: ${{ !inputs.test_notify }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - uses: actions/deploy-pages@v4
