@@ -3,7 +3,7 @@
 // Reads data/status.json (prior state), writes data/status.json + data/log.json,
 // and pushes a notification through ntfy only when the picture changes.
 //
-// Env: NTFY_TOPIC (push target), PLAYS_JSON (optional {"watch":"...",...} action text
+// Env: NTFY_TOPIC (private push target), PUBLIC_NTFY_TOPIC (public feed: same changes, no play text), PLAYS_JSON (optional {"watch":"...",...} action text
 // added to notifications), PAGE_URL (link opened from the notification),
 // TEST_NOTIFY=1 (send a test push), FIXTURES=dir + NOW=iso (offline testing).
 
@@ -414,8 +414,7 @@ function diff(prior, cur) {
 
 // ---------- output ----------
 
-async function notify(title, message, level) {
-  const topic = process.env.NTFY_TOPIC;
+async function notify(title, message, level, topic = process.env.NTFY_TOPIC) {
   if (!topic) { console.log(`[no NTFY_TOPIC, would push] ${title}: ${message}`); return false; }
   const r = await fetch('https://ntfy.sh/', {
     method: 'POST',
@@ -482,6 +481,10 @@ async function main() {
     const play = plays[status.alertLevel] ? `\n\nPlay: ${plays[status.alertLevel]}` : '';
     const goog = status.google ? `\n\nGoogle AI ensemble (experimental, not a forecast): ${status.google.text}` : '';
     pushed = await notify(`Gulf Storm Watch: ${status.alertLevel.toUpperCase()}`, `${changes.join('. ')}.\n\n${status.headline}${goog}${play}`, status.alertLevel);
+    // Public subscribers get the same change, weather facts only.
+    if (process.env.PUBLIC_NTFY_TOPIC) {
+      await notify(`Daniel's Storm Page: ${status.alertLevel.toUpperCase()}`, `${changes.join('. ')}.\n\n${status.headline}`, status.alertLevel, process.env.PUBLIC_NTFY_TOPIC).catch((e) => console.warn(`public push failed: ${e.message}`));
+    }
   }
 
   const summary = changed ? changes.join('. ') + '.' : prior ? 'No change. ' + status.headline : 'Watch opened. ' + status.headline;

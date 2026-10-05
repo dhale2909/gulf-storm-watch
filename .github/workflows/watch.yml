@@ -41,6 +41,7 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           PLAYS_JSON: ${{ secrets.PLAYS_JSON }}
           PAGE_URL: ${{ vars.PAGE_URL }}
+          PUBLIC_NTFY_TOPIC: ${{ vars.PUBLIC_NTFY_TOPIC }}
           TEST_NOTIFY: ${{ inputs.test_notify && '1' || '' }}
       - name: Share preview image (optional)
         if: ${{ !inputs.test_notify }}
