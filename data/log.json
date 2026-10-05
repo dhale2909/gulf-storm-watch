@@ -1,5 +1,13 @@
 [
   {
+    "ts": "2026-10-05T18:45:11.651Z",
+    "changed": false,
+    "pushed": false,
+    "alertLevel": "watch",
+    "formation7d": 80,
+    "summary": "No change. NHC gives the Southwestern Gulf of America disturbance a 80% chance of forming within 7 days (60% within 48 hours). No advisories or forecast track yet."
+  },
+  {
     "ts": "2026-10-05T18:41:52.440Z",
     "changed": false,
     "pushed": false,
