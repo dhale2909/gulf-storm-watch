@@ -341,7 +341,9 @@ a{color:var(--accent)}
     get("data/map.json").then(renderMap).catch(function(){ renderMap(null); });
     get("data/log.json").then(renderLog).catch(function(){});
   }
-  load(); setInterval(load,10*60*1000);
+  load(); setInterval(load,2*60*1000);
+  // Also refresh the moment the page is brought back into view.
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden) load(); });
 })();
 </script>
 </body>
