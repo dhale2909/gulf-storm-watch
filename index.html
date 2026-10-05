@@ -304,8 +304,9 @@ body.card .leaflet-control-container{display:none}
   $("share").addEventListener("click",function(){
     // A fresh address per share so texting apps fetch a fresh preview card.
     var url=location.origin+location.pathname+"?u="+Date.now().toString(36), btn=this;
-    if(navigator.share) navigator.share({title:"Daniel's Storm Page",text:shareText,url:url}).catch(function(){});
-    else if(navigator.clipboard) navigator.clipboard.writeText(shareText+" "+url).then(function(){ btn.textContent="Copied"; setTimeout(function(){btn.textContent="Share"},1500); });
+    // Link only, no text: the preview card tells the story.
+    if(navigator.share) navigator.share({url:url}).catch(function(){});
+    else if(navigator.clipboard) navigator.clipboard.writeText(url).then(function(){ btn.textContent="Copied"; setTimeout(function(){btn.textContent="Share"},1500); });
   });
 
   function renderStatus(d){
