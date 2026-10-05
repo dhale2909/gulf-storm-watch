@@ -119,7 +119,8 @@ body.card #map{height:100%;border:0;border-radius:0}
 #c-l2:empty{display:none}
 .c-city{font:600 30px var(--body);color:#cfd8df;white-space:nowrap;text-shadow:0 0 4px #0d151c,0 0 4px #0d151c,0 0 8px #0d151c}
 .c-city i{display:inline-block;width:10px;height:10px;border-radius:50%;background:#93a3b0;margin:0 8px;vertical-align:middle}
-.c-city.left{transform:translateX(-100%)}
+.c-city .l{display:inline-block;transform:translateX(-100%)}
+body.card .leaflet-tile{width:257px!important;height:257px!important}
 body.card .xmark{font-size:52px;line-height:52px}
 body.card .leaflet-control-container{display:none}
 .logbox summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;cursor:pointer;list-style:none}
@@ -375,7 +376,7 @@ body.card .leaflet-control-container{display:none}
     if(!CARD) L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
     // The card is viewed at thumbnail size, so it gets a few large city labels instead of the fine map text.
     else [["Houston",29.76,-95.37],["New Orleans",29.95,-90.07,1],["Pensacola",30.42,-87.22],["Tampa",27.95,-82.46]].forEach(function(c){
-      L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city"+(c[3]?" left":""),html:c[3]?c[0]+"<i></i>":"<i></i>"+c[0],iconSize:[0,0],iconAnchor:c[3]?[-13,18]:[13,18]})}).addTo(map); });
+      L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city"+(c[3]?" left":""),html:c[3]?'<span class="l">'+c[0]+"<i></i></span>":"<i></i>"+c[0],iconSize:[0,0],iconAnchor:c[3]?[-13,18]:[13,18]})}).addTo(map); });
     // European ensemble lines sit in their own pane under everything else, each with an on/off switch.
     map.createPane("ec").style.zIndex=350;
     // Every kind of line gets its own on/off switch in the layers button; choices are remembered on this device.
