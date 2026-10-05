@@ -369,6 +369,7 @@ function build(prior, gulf, storms, ww) {
     internal: {
       failCount: 0,
       baseline7d: prior?.internal?.baseline7d ?? gulf?.formation7d ?? null,
+      baseline48: prior?.internal?.baseline48 ?? gulf?.formation48 ?? null,
       landfallHoldUntil: imminent ? new Date(Math.max(new Date(landfall.eta), NOW) + 48 * 3600e3).toISOString() : held ? hold : null,
       landfallState: imminent ? landfall.state : held ? prior.internal.landfallState : null,
     },
@@ -386,6 +387,15 @@ function diff(prior, cur) {
     const crossed = (a < 40) !== (b < 40) || (a < 60) !== (b < 60);
     if (crossed || (base != null && Math.abs(b - base) >= 20)) ch.push(`7-day formation odds ${base != null && !crossed ? base : a}% -> ${b}%`);
   }
+
+  // Same rule for the 48-hour number: crossing 40 or 60, or 20+ points since the last alert.
+  const a8 = prior.gulf?.formation48, b8 = cur.gulf?.formation48, base8 = prior.internal?.baseline48;
+  if (a8 != null && b8 != null) {
+    const crossed = (a8 < 40) !== (b8 < 40) || (a8 < 60) !== (b8 < 60);
+    if (crossed || (base8 != null && Math.abs(b8 - base8) >= 20)) ch.push(`48-hour formation odds ${base8 != null && !crossed ? base8 : a8}% -> ${b8}%`);
+  }
+
+  if (cur.gulf?.invest && cur.gulf.invest !== prior.gulf?.invest) ch.push(`NHC designated the system ${cur.gulf.invest}`);
 
   const ps = new Map((prior.storms || []).map((s) => [s.id, s]));
   const cs = new Map(cur.storms.map((s) => [s.id, s]));
@@ -419,7 +429,6 @@ function minorDiff(prior, cur) {
   const pg = prior.gulf || {}, cg = cur.gulf || {};
   if (pg.formation7d != null && cg.formation7d != null && pg.formation7d !== cg.formation7d) notes.push(`7-day odds ${pg.formation7d}% -> ${cg.formation7d}%`);
   if (pg.formation48 != null && cg.formation48 != null && pg.formation48 !== cg.formation48) notes.push(`48-hour odds ${pg.formation48}% -> ${cg.formation48}%`);
-  if (cg.invest && cg.invest !== pg.invest) notes.push(`NHC designated the system ${cg.invest}`);
   const ps = new Map((prior.storms || []).map((s) => [s.id, s]));
   for (const s of cur.storms) {
     const p = ps.get(s.id);
@@ -490,7 +499,7 @@ async function main() {
   status.google = await gatherGoogle(storms[0], models?.invest).catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return prior?.google ?? null; });
   const changes = diff(prior, status);
   const changed = changes.length > 0;
-  if (changed) status.internal.baseline7d = status.gulf.formation7d;
+  if (changed) { status.internal.baseline7d = status.gulf.formation7d; status.internal.baseline48 = status.gulf.formation48; }
 
   let pushed = false;
   if (changed) {
