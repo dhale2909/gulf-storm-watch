@@ -225,8 +225,9 @@ a{color:var(--accent)}
     if(map||!window.L) return;
     map=L.map("map",{scrollWheelZoom:false});
     var dark=window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches;
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/"+(dark?"dark_all":"light_all")+"/{z}/{x}/{y}{r}.png",
-      {attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',subdomains:"abcd",maxZoom:10}).addTo(map);
+    var esri="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_"+(dark?"Dark":"Light")+"_Gray_";
+    L.tileLayer(esri+"Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Map: Esri, HERE, Garmin, &copy; OpenStreetMap contributors",maxZoom:10}).addTo(map);
+    L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
     group=L.featureGroup().addTo(map);
     map.fitBounds([[18,-98],[31,-80]]);
   }
