@@ -265,9 +265,13 @@ a{color:var(--accent)}
 
   function load(){
     var t="?t="+Date.now();
-    fetch("data/status.json"+t).then(function(r){return r.json()}).then(renderStatus).catch(function(){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; });
-    fetch("data/map.json"+t).then(function(r){return r.json()}).then(renderMap).catch(function(){ renderMap(null); });
-    fetch("data/log.json"+t).then(function(r){return r.json()}).then(renderLog).catch(function(){});
+    // Read straight from the repository so a slow or failed site rebuild never leaves the reading stale;
+    // fall back to the copy published with the page.
+    var RAW="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/main/";
+    var get=function(f){return fetch(RAW+f+t).then(function(r){if(!r.ok) throw 0; return r.json()}).catch(function(){return fetch(f+t).then(function(r){return r.json()})})};
+    get("data/status.json").then(renderStatus).catch(function(){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; });
+    get("data/map.json").then(renderMap).catch(function(){ renderMap(null); });
+    get("data/log.json").then(renderLog).catch(function(){});
   }
   load(); setInterval(load,10*60*1000);
 })();
