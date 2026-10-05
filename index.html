@@ -132,7 +132,7 @@ a{color:var(--accent)}
     <div class="tile">
       <div class="eyebrow">Last check</div>
       <div class="val sm mono" id="last">—</div>
-      <div class="sub" id="next">Checks run every 3 hours</div>
+      <div class="sub" id="next">Checks run every hour</div>
     </div>
   </section>
 
@@ -208,7 +208,7 @@ a{color:var(--accent)}
     $("pill-text").textContent=LABEL[lvl];
     $("headline").textContent=d.headline||"";
     var age=(Date.now()-new Date(d.updatedAt).getTime())/36e5;
-    $("stale").hidden=!(age>7); $("stale").textContent="Last successful update was "+Math.round(age)+" hours ago; this reading may be out of date.";
+    $("stale").hidden=!(age>3); $("stale").textContent="Last successful update was "+Math.round(age)+" hours ago; this reading may be out of date.";
     var g=d.gulf||{}, p7=g.formation7d, p48=g.formation48;
     $("p7").textContent=p7==null?"—":p7; $("nd7").style.left=(p7==null?0:Math.max(0,Math.min(100,p7)))+"%";
     $("p48").textContent=p48==null?"—":p48; $("p48sub").textContent=g.area||"No Gulf disturbance in the outlook";
@@ -232,7 +232,7 @@ a{color:var(--accent)}
       var rows=STATES.map(function(s){return [s,G.coast[s]||0]}).concat([["Stays away",G.members-G.hits]]);
       $("goog-bars").innerHTML=rows.map(function(r){return '<b>'+r[0]+'</b><div class="bar"><i style="width:'+(100*r[1]/G.members)+'%"></i></div><span class="mono">'+r[1]+' of '+G.members+'</span>'}).join("");
     } else { $("goog-text").textContent="No data for this system yet. Google's ensemble only covers systems NHC has numbered."; $("goog-run").textContent="Experimental"; }
-    $("last").textContent=fmt(d.updatedAt); $("next").textContent=d.nextCheck?("Next check about "+fmt(d.nextCheck)):"Checks run every 3 hours";
+    $("last").textContent=fmt(d.updatedAt); $("next").textContent=d.nextCheck?("Next check about "+fmt(d.nextCheck)):"Checks run every hour";
   }
   function renderLog(rows){
     rows=rows.slice(0,40);

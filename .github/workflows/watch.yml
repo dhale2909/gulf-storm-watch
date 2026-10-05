@@ -2,7 +2,7 @@ name: Gulf Storm Watch
 
 on:
   schedule:
-    - cron: '7 */3 * * *' # every 3 hours (UTC), a few minutes after NHC issuance times
+    - cron: '7 * * * *' # hourly, a few minutes past the hour
   workflow_dispatch:
     inputs:
       test_notify:
