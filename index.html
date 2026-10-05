@@ -109,13 +109,14 @@ body.card{padding:0;overflow:hidden}
 body.card .wrap{display:none}
 body.card #card{display:flex;flex-direction:column;position:relative;width:1200px;height:630px;background:var(--bg)}
 #card-map{flex:1;min-height:0;position:relative;overflow:hidden}
-body.card #map{width:1667px;height:649px;transform:scale(.72);transform-origin:0 0;border:0;border-radius:0}
+body.card #map{width:1667px;height:631px;transform:scale(.72);transform-origin:0 0;border:0;border-radius:0}
 #card #c-pill{position:absolute;right:28px;top:26px;z-index:600;font-size:46px;padding:8px 30px}
-#card .c-bar{height:164px;box-sizing:border-box;background:var(--bg);border-top:10px solid var(--lvl,var(--watch));padding:14px 34px 20px;font-family:var(--display);white-space:nowrap;overflow:hidden}
-#c-l1{display:flex;align-items:baseline;gap:22px;font-weight:700;font-size:118px;line-height:1}
-#c-l1 span{font:500 46px var(--body);color:#c3ced6;margin-right:26px}
-#c-l1 .nm{font-size:84px}
-#c-l2{font:500 42px/1.2 var(--body);color:#c3ced6;margin-top:8px}
+#card .c-bar{height:176px;box-sizing:border-box;background:var(--bg);border-top:10px solid var(--lvl,var(--watch));padding:8px 34px 0;font-family:var(--display);white-space:nowrap;overflow:hidden}
+#c-l0{font:700 30px/36px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--lvl,var(--watch))}
+#c-l1{display:flex;align-items:baseline;gap:22px;font-weight:700;font-size:104px;line-height:1}
+#c-l1 span{font:500 44px var(--body);color:#c3ced6;margin-right:26px}
+#c-l1 .nm{font-size:68px;line-height:1.05}
+#c-l2{font:500 34px/42px var(--body);color:#c3ced6}
 #c-l2:empty{display:none}
 .c-city{font:600 38px var(--body);color:#cfd8df;white-space:nowrap;text-shadow:0 0 4px #0d151c,0 0 4px #0d151c,0 0 8px #0d151c}
 .c-city i{display:inline-block;width:14px;height:14px;border-radius:50%;background:#93a3b0;margin:0 10px;vertical-align:middle}
@@ -136,7 +137,7 @@ body.card .leaflet-control-container{display:none}
 <div id="card">
   <div id="card-map"></div>
   <span class="pill" id="c-pill">Watch</span>
-  <div class="c-bar"><div id="c-l1"></div><div id="c-l2"></div></div>
+  <div class="c-bar"><div id="c-l0"></div><div id="c-l1"></div><div id="c-l2"></div></div>
 </div>
 <dialog id="alerts-dlg">
   <h2>Get storm alerts on your phone</h2>
@@ -264,7 +265,8 @@ body.card .leaflet-control-container{display:none}
   var cardKeys={};
   var done=function(k){ ready[k]=1; if(!(ready.s&&ready.m&&ready.e)) return;
     // The card's layout settles after the text is filled in; re-measure the map and refit before the screenshot.
-    if(CARD&&map){ map.invalidateSize(); if(lastBounds) map.fitBounds(lastBounds,{padding:[20,20],animate:false}); }
+    // The card always frames the whole Gulf at one fixed zoom, so its scale never jumps between checks.
+    if(CARD&&map){ map.invalidateSize(); map.setView([25.1,-89.5],6,{animate:false}); }
     window.cardReady=true; };
   if(CARD){ document.body.classList.add("card"); $("card-map").appendChild($("map")); }
   var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
@@ -278,14 +280,18 @@ body.card .leaflet-control-container{display:none}
     var line=alerts?("Alerts: "+alerts+"."):"No coastal watches or warnings for AL, FL, MS or LA.";
     if(s0){
       var lf=d.landfall?(STATE_NAME[d.landfall.state]+" coast, about "+ctShort(d.landfall.eta)):"No US landfall in the forecast";
-      $("c-l1").innerHTML='<b class="nm">'+esc(s0.name)+" \u00b7 "+esc(s0.winds)+" kt</b>";
+      $("c-l0").textContent=s0.type+(s0.category?" \u00b7 Category "+s0.category:"");
+      var short=s0.name.indexOf(s0.type+" ")===0?s0.name.slice(s0.type.length+1):s0.name;
+      $("c-l1").innerHTML='<b class="nm">'+esc(short)+" \u00b7 "+esc(s0.winds)+" kt winds</b>";
       $("c-l2").textContent=lf+(alerts?" \u00b7 "+alerts:"");
       shareText=s0.name+": "+s0.winds+" kt. "+(d.landfall?("Forecast track reaches the "+d.landfall.state+" coast about "+ctShort(d.landfall.eta)+". "):"")+line;
     } else if(g.area){
+      $("c-l0").textContent=g.invest?(g.invest+" \u00b7 not yet a storm"):"Gulf disturbance \u00b7 not yet a storm";
       $("c-l1").innerHTML="<b>"+esc(g.formation7d)+"%</b><span>in 7 days</span><b>"+esc(g.formation48)+"%</b><span>in 48 hours</span>";
       $("c-l2").textContent=alerts;
       shareText="Gulf storm update: "+g.formation7d+"% chance of forming within 7 days ("+g.formation48+"% within 48 hours). "+line;
     } else {
+      $("c-l0").textContent="All clear";
       $("c-l1").innerHTML='<b class="nm">The Gulf is quiet</b>'; $("c-l2").textContent="No storms or disturbances";
       shareText="Gulf storm update: nothing brewing in the Gulf right now.";
     }
