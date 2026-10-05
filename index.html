@@ -4,7 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex">
-<title>Gulf Storm Watch</title>
+<title>Daniel's Storm Page</title>
+<meta property="og:title" content="Daniel's Storm Page">
+<meta property="og:description" content="Live Gulf storm tracking: NHC outlook, forecast track and model guidance, checked every hour.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/main/card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -94,19 +101,54 @@ a{color:var(--accent)}
 .gbars{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:13px}
 .gbars .bar{height:10px;border-radius:3px;background:var(--line);overflow:hidden}
 .gbars .bar i{display:block;height:100%;background:#2e9e5b}
+.share{font:600 14px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:7px 14px;border-radius:999px;border:1.5px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer}
+.share:hover{background:var(--accent);color:var(--accent-ink)}
+#card{display:none}
+body.card{padding:0;overflow:hidden}
+body.card .wrap{display:none}
+body.card #card{display:grid;grid-template-columns:440px 760px;width:1200px;height:630px;background:var(--panel)}
+#card .c-left{padding:34px 30px 26px 34px;display:flex;flex-direction:column;gap:18px;border-left:12px solid var(--lvl,var(--watch))}
+#card .c-eyebrow{font:500 16px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+#card .pill{font-size:19px;padding:7px 16px}
+#card .c-title{font:700 46px/1.05 var(--display)}
+#card .c-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#card .c-stat b{font:700 78px/1 var(--display);display:block;font-variant-numeric:tabular-nums}
+#card .c-stat span{font-size:18px;color:var(--muted)}
+#card .c-line{font-size:20px;line-height:1.35}
+#card .c-foot{margin-top:auto;font:400 14px var(--mono);color:var(--muted)}
+body.card #map{height:630px;border:0;border-radius:0}
+body.card .leaflet-control-container{display:none}
 .empty{color:var(--muted);font-style:italic}
 .foot{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);align-items:center}
 </style>
 </head>
 <body>
+<!-- Share preview card: index.html?card=1 renders only this, 1200x630, and the hourly check screenshots it to card.png. -->
+<div id="card">
+  <div class="c-left">
+    <div class="c-eyebrow">Daniel's Storm Page</div>
+    <div><span class="pill" id="c-pill">Watch</span></div>
+    <div class="c-title" id="c-title"></div>
+    <div class="c-stats">
+      <div class="c-stat"><b id="c-a"></b><span id="c-a-l"></span></div>
+      <div class="c-stat"><b id="c-b"></b><span id="c-b-l"></span></div>
+    </div>
+    <div class="c-line" id="c-line"></div>
+    <div class="c-foot" id="c-foot"></div>
+  </div>
+  <div id="card-map"></div>
+</div>
 <div class="wrap">
   <section class="band" id="band">
     <div class="band-top">
       <div>
         <div class="eyebrow">Southwestern Gulf system · AL · FL · MS · LA</div>
-        <h1>Gulf Storm Watch</h1>
+        <h1>Daniel's Storm Page</h1>
       </div>
-      <div class="pill"><span class="dot"></span><span id="pill-text">Loading</span></div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button class="share" id="share" type="button">Share</button>
+        <div class="pill"><span class="dot"></span><span id="pill-text">Loading</span></div>
+      </div>
     </div>
     <p class="headline" id="headline">Loading the latest check.</p>
     <div class="stale" id="stale" hidden></div>
@@ -205,7 +247,45 @@ a{color:var(--accent)}
   var catKey=function(s){ var t=(s.type||"").toLowerCase();
     if(/depression/.test(t)) return "TD"; if(/hurricane/.test(t)) return "H"+(s.category||1); if(/storm/.test(t)) return "TS"; return "PT"; };
 
+  // Card mode (index.html?card=1): the share preview image. Default layers, local data, Central time.
+  var CARD=/[?&]card=1/.test(location.search), ready={};
+  var done=function(k){ ready[k]=1; if(ready.s&&ready.m&&ready.e) window.cardReady=true; };
+  if(CARD){ document.body.classList.add("card"); $("card-map").appendChild($("map")); }
+  var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
+  var ctShort=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric"}); };
+  var shareText="";
+  function renderCard(d){
+    var lvl=LABEL[d.alertLevel]?d.alertLevel:"quiet", g=d.gulf||{}, s0=(d.storms||[])[0], ww=d.watchesWarnings||{};
+    $("card").style.setProperty("--lvl","var(--"+lvl+")"); $("c-pill").style.setProperty("--lvl","var(--"+lvl+")"); $("c-pill").textContent=LABEL[lvl];
+    var alerts=STATES.filter(function(s){return ww[s]&&ww[s].level}).map(function(s){return s+" "+ww[s].text}).join("; ");
+    var line=alerts?("Alerts: "+alerts+"."):"No coastal watches or warnings for AL, FL, MS or LA.";
+    if(s0){
+      $("c-title").textContent=s0.name;
+      $("c-a").textContent=s0.winds+" kt"; $("c-a-l").textContent=s0.category?("Category "+s0.category+" winds"):"top winds";
+      $("c-b").textContent=d.landfall?d.landfall.state:"\u2014"; $("c-b-l").textContent=d.landfall?("coast, about "+ctShort(d.landfall.eta)):"no US landfall in the forecast";
+      shareText=s0.name+": "+s0.winds+" kt. "+(d.landfall?("Forecast track reaches the "+d.landfall.state+" coast about "+ctShort(d.landfall.eta)+". "):"")+line;
+    } else if(g.area){
+      $("c-title").textContent="Gulf disturbance";
+      $("c-a").textContent=g.formation7d+"%"; $("c-a-l").textContent="chance it forms within 7 days";
+      $("c-b").textContent=g.formation48+"%"; $("c-b-l").textContent="within 48 hours";
+      shareText="Gulf storm update: "+g.formation7d+"% chance of forming within 7 days ("+g.formation48+"% within 48 hours). "+line;
+    } else {
+      $("c-title").textContent="The Gulf is quiet"; $("c-a").textContent="0"; $("c-a-l").textContent="Gulf systems"; $("c-b").textContent=""; $("c-b-l").textContent="";
+      shareText="Gulf storm update: nothing brewing in the Gulf right now.";
+    }
+    $("c-line").textContent=line;
+    $("c-foot").textContent="Updated "+ct(d.updatedAt)+" \u00b7 NHC and model data \u00b7 Map: Esri";
+    done("s");
+  }
+  $("share").addEventListener("click",function(){
+    // A fresh address per share so texting apps fetch a fresh preview card.
+    var url=location.origin+location.pathname+"?u="+Date.now().toString(36), btn=this;
+    if(navigator.share) navigator.share({title:"Daniel's Storm Page",text:shareText,url:url}).catch(function(){});
+    else if(navigator.clipboard) navigator.clipboard.writeText(shareText+" "+url).then(function(){ btn.textContent="Copied"; setTimeout(function(){btn.textContent="Share"},1500); });
+  });
+
   function renderStatus(d){
+    renderCard(d);
     var lvl=LABEL[d.alertLevel]?d.alertLevel:"quiet";
     $("band").style.setProperty("--lvl","var(--"+lvl+")");
     $("pill-text").textContent=LABEL[lvl];
@@ -280,7 +360,7 @@ a{color:var(--accent)}
     map.createPane("ec").style.zIndex=350;
     // Every kind of line gets its own on/off switch in the layers button; choices are remembered on this device.
     // Individual member lines start switched off to keep the map readable.
-    var off={ens:true,ecens_m:true,ecaie_m:true}; try{ off=JSON.parse(localStorage.getItem("gsw-layers-off-2"))||off; }catch(e){}
+    var off={ens:true,ecens_m:true,ecaie_m:true}; try{ if(!CARD) off=JSON.parse(localStorage.getItem("gsw-layers-off-2"))||off; }catch(e){}
     var overlays={}, names={};
     var add=function(key,label,g){ names[label]=key; overlays[label]=g; if(!off[key]) g.addTo(map); return g; };
     group=add("official","NHC official (area, track, cone, alerts)",L.featureGroup());
@@ -335,10 +415,10 @@ a{color:var(--accent)}
     // Read straight from the repository so a slow or failed site rebuild never leaves the reading stale;
     // fall back to the copy published with the page.
     var RAW="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/main/";
-    var get=function(f){return fetch(RAW+f+t).then(function(r){if(!r.ok) throw 0; return r.json()}).catch(function(){return fetch(f+t).then(function(r){return r.json()})})};
+    var get=function(f){return (CARD?Promise.reject():fetch(RAW+f+t)).then(function(r){if(!r.ok) throw 0; return r.json()}).catch(function(){return fetch(f+t).then(function(r){return r.json()})})};
     get("data/status.json").then(renderStatus).catch(function(){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; });
-    get("data/ecmwf.json").then(renderEC).catch(function(){ renderEC(null); });
-    get("data/map.json").then(renderMap).catch(function(){ renderMap(null); });
+    get("data/ecmwf.json").then(renderEC).catch(function(){ renderEC(null); }).then(function(){ done("e"); });
+    get("data/map.json").then(renderMap).catch(function(){ renderMap(null); }).then(function(){ done("m"); });
     get("data/log.json").then(renderLog).catch(function(){});
   }
   load(); setInterval(load,2*60*1000);
