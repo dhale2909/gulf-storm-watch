@@ -468,7 +468,7 @@ body.card .leaflet-control-container{display:none}
   var SATNOTE={GEOCOLOR:"GeoColor: true colour by day, infrared blend at night. Look for low clouds starting to curl around a centre.",
     "13":"Infrared: cloud-top temperature, day and night. Cold, bright bursts that persist near the centre mean the system is organising.",
     "09":"Water vapor: moisture in the middle of the atmosphere. Dry air shows as dark orange; watch for the trough expected to steer the storm north."};
-  var satBand="GEOCOLOR", satTimer=null, satLatest=0;
+  var satBand="GEOCOLOR", satTimer=null, satLatest=0, satLoading=false;
   var pad=function(n,w){n=String(n); while(n.length<w) n="0"+n; return n};
   var satGrid=function(t){ var m=Math.floor(t/6e4); return (m-((m-1)%5+5)%5)*6e4; }; // frames are stamped :01, :06, :11 ...
   var satUrl=function(t,size){ var d=new Date(t), y=d.getUTCFullYear(), doy=Math.round((Date.UTC(y,d.getUTCMonth(),d.getUTCDate())-Date.UTC(y,0,0))/864e5);
@@ -485,12 +485,14 @@ body.card .leaflet-control-container{display:none}
   }
   function satPlay(){
     if(satTimer){ satStop(); satStill(); return; }
-    if(!satLatest) return;
-    var btn=$("sat-play"), frames=[], left=13, band=satBand;
-    btn.textContent="Loading\u2026";
+    if(satLoading) return;
+    // Smaller frames on phones keep the loop to a few megabytes.
+    var btn=$("sat-play"), frames=[], left=13, band=satBand, size=window.innerWidth<700?500:1000;
+    if(!satLatest) satLatest=satGrid(Date.now()-15*6e4);
+    satLoading=true; btn.textContent="Loading\u2026";
     for(var k=12;k>=0;k--) (function(t){ var im=new Image(), f={t:t,im:im,ok:false}; frames.push(f);
-      im.onload=function(){ f.ok=true; fin(); }; im.onerror=fin; im.src=satUrl(t,1000); })(satLatest-k*30*6e4);
-    function fin(){ if(--left>0||band!==satBand) return;
+      im.onload=function(){ f.ok=true; fin(); }; im.onerror=fin; im.src=satUrl(t,size); })(satLatest-k*30*6e4);
+    function fin(){ if(--left>0) return; satLoading=false; if(band!==satBand) return;
       var ok=frames.filter(function(f){return f.ok}); if(ok.length<3){ btn.textContent="Play 6-hour loop"; return; }
       var i=0, hold=0; btn.textContent="Stop loop";
       satTimer=setInterval(function(){ if(i===ok.length-1&&hold++<3) return; hold=0; i=(i+1)%ok.length; $("sat-img").src=ok[i].im.src; satLabel(ok[i].t); },450); }
