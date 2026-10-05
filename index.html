@@ -243,7 +243,7 @@ a{color:var(--accent)}
     $("log").innerHTML=rows.length?rows.map(function(x){return '<div class="log-row"><span class="mono">'+fmt(x.ts)+'</span><span>'+esc(x.summary)+'</span><span class="chg" data-c="'+(x.changed?1:0)+'">'+(x.changed?(x.pushed?"CHANGE · PUSHED":"CHANGE"):"no change")+'</span></div>'}).join(""):'<div class="empty">No checks logged yet.</div>';
   }
   // ----- map: development area before formation; cone, track and coastal alerts after -----
-  var map, group;
+  var map, group, modelGroups={};
   var RISK={Low:"#e8c547",Medium:"#ef8f2b",High:"#d64545"};
   var WW={HWR:["#d6202a","Hurricane warning"],HWA:["#f08ad0","Hurricane watch"],TWR:["#2456d6","Tropical storm warning"],TWA:["#e6c800","Tropical storm watch"]};
   var WIND=[[96,"#b3261e","Major hurricane"],[64,"#d8631c","Hurricane"],[34,"#ef8f2b","Tropical storm"],[0,"#e8c547","Depression"]];
@@ -276,15 +276,21 @@ a{color:var(--accent)}
     L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
     // European ensemble lines sit in their own pane under everything else, each with an on/off switch.
     map.createPane("ec").style.zIndex=350;
-    var overlays={};
-    Object.keys(EC).forEach(function(k){ ecGroups[k]=L.layerGroup().addTo(map); overlays[EC[k][1]]=ecGroups[k]; });
+    // Every kind of line gets its own on/off switch in the layers button; choices are remembered on this device.
+    var off={}; try{ off=JSON.parse(localStorage.getItem("gsw-layers-off")||"{}"); }catch(e){}
+    var overlays={}, names={};
+    var add=function(key,label,g){ names[label]=key; overlays[label]=g; if(!off[key]) g.addTo(map); return g; };
+    group=add("official","NHC official (area, track, cone, alerts)",L.featureGroup());
+    ["model","consensus","google","ens"].forEach(function(k){ modelGroups[k]=add(k,MODEL[k][3],L.layerGroup()); });
+    Object.keys(EC).forEach(function(k){ ecGroups[k]=add(k,EC[k][1],L.layerGroup()); });
     L.control.layers(null,overlays,{collapsed:true}).addTo(map);
-    group=L.featureGroup().addTo(map);
+    var remember=function(e){ off[names[e.name]]=e.type==="overlayremove"; try{ localStorage.setItem("gsw-layers-off",JSON.stringify(off)); }catch(x){} };
+    map.on("overlayadd",remember); map.on("overlayremove",remember);
     map.fitBounds([[18,-98],[31,-80]]);
   }
   function renderMap(m){
     initMap(); if(!map) return;
-    group.clearLayers();
+    group.clearLayers(); Object.keys(modelGroups).forEach(function(k){modelGroups[k].clearLayers()});
     var fg=getComputedStyle(document.documentElement).getPropertyValue("--fg").trim()||"#13202b";
     var muted=getComputedStyle(document.documentElement).getPropertyValue("--muted").trim()||"#5b6b78";
     var fs=(m&&m.features)||[], kinds={}, mods={}, risk;
@@ -300,7 +306,7 @@ a{color:var(--accent)}
       else if(r==="ww"){ kinds[p.kind]=1; l=L.geoJSON(f,{style:{color:(WW[p.kind]||["#888"])[0],weight:6,lineCap:"butt"}}).bindTooltip((WW[p.kind]||[0,"Coastal alert"])[1],{sticky:true}); }
       else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:p.now?9:6,color:fg,weight:p.now?2.5:1.5,fillColor:windColor(+p.wind||0),fillOpacity:1})
         .bindTooltip(esc(p.label)+" · "+esc(p.wind)+" kt",{permanent:true,direction:"right",offset:[8,0],className:"pt"});
-      if(l) group.addLayer(l);
+      if(l) (r==="model"?(modelGroups[p.group]||modelGroups.model):group).addLayer(l);
     });
     var b=L.latLngBounds([[24,-94],[31,-81]]); if(group.getLayers().length) b.extend(group.getBounds());
     map.fitBounds(b,{padding:[18,18]});
@@ -316,7 +322,7 @@ a{color:var(--accent)}
       ? "Dots are NHC forecast positions of the storm center with time and wind. The cone shows where the center will probably track; wind, surge and rain reach well outside it."
       : kind==="outlook" ? "NHC has not issued a forecast track yet. The shaded area is where it expects the system to develop over the next 7 days; the track, cone and any coastal watches appear here automatically once a depression forms."
       : "No Gulf system to map.";
-    if(hasModels) $("map-note").textContent+=" Thin coloured lines are raw computer-model runs ("+(m.models||"NHC model guidance")+"). They are not a forecast, they disagree with each other, and they shift from run to run; hover or tap a line for the model name.";
+    if(hasModels) $("map-note").textContent+=" Thin coloured lines are raw computer-model runs ("+(m.models||"NHC model guidance")+"). They are not a forecast, they disagree with each other, and they shift from run to run; hover or tap a line for the model name. Switch each group on or off with the layers button on the map.";
     else if(kind==="outlook") $("map-note").textContent+=" Model tracks will be drawn here once NHC designates the system as an Invest and starts publishing guidance for it.";
   }
   window.renderMap=renderMap;
