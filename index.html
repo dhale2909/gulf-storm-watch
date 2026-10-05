@@ -123,6 +123,10 @@ body.card #map{height:630px;border:0;border-radius:0}
 #c-legend i{display:inline-block;width:22px;height:0;border-top:4px solid;margin-right:8px;vertical-align:middle}
 #c-legend i.box{height:12px;border:2px dashed;border-radius:3px}
 body.card .leaflet-control-container{display:none}
+.logbox summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;cursor:pointer;list-style:none}
+.logbox summary::-webkit-details-marker{display:none}
+.logbox summary h2{margin-right:auto}
+.logbox .toggle::after{content:"Show"} .logbox[open] .toggle::after{content:"Hide"}
 .empty{color:var(--muted);font-style:italic}
 .foot{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);align-items:center}
 </style>
@@ -237,10 +241,10 @@ body.card .leaflet-control-container{display:none}
     </section>
   </div>
 
-  <section class="panel">
-    <header><h2>Check log</h2><span id="logcount" style="color:var(--muted);font-size:13px"></span></header>
+  <details class="panel logbox">
+    <summary><h2>Check log</h2><span id="logcount" style="color:var(--muted);font-size:13px"></span><span class="tag toggle"></span></summary>
     <div id="log"><div class="empty">No checks logged yet.</div></div>
-  </section>
+  </details>
 
   <div class="foot">
     <span>Sources:</span>
