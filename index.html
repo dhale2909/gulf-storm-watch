@@ -257,7 +257,7 @@ a{color:var(--accent)}
     ens.forEach(function(e){ var c=EC[e.key]; if(!c||!ecGroups[e.key]) return;
       (e.features||[]).forEach(function(f){ var p=f.properties;
         if(p.role==="ecswath") ecGroups[e.key].addLayer(L.geoJSON(f,{pane:"ec",interactive:false,style:{stroke:false,fillColor:c[0],fillOpacity:p.level>=50?.22:.13}}));
-        else if(p.role==="ecmean") ecGroups[e.key].addLayer(L.geoJSON(f,{style:{color:c[0],weight:3.5,opacity:.95}}).bindTooltip(c[1]+": average of "+p.members+" members",{sticky:true}));
+        else if(p.role==="ecmean") ecGroups[e.key].addLayer(L.geoJSON(f,{style:{color:c[0],weight:3.5,opacity:.95}}).bindTooltip(c[1]+": typical path of "+p.members+" members",{sticky:true}));
         else ecGroups[e.key+"_m"].addLayer(L.geoJSON(f,{pane:"ec",style:{color:c[0],weight:1.2,opacity:.6}}).bindTooltip(c[1]+" member "+p.member+", peak "+p.peak+" kt",{sticky:true})); });
       if(!(e.features||[]).length) return;
       legend+=sw(c[0],c[1],1);
@@ -265,7 +265,7 @@ a{color:var(--accent)}
       sums.push(c[1]+", run "+fmt(e.run)+": "+e.developing+" members track a system through the Gulf; "+(e.hits?e.hits+" bring it to the Louisiana-to-Florida coast ("+by+"), typically around "+fmt(e.eta):"none bring it to the Louisiana-to-Florida coast")+"; "+e.hurricane+" reach hurricane strength.");
     });
     $("ec-legend").innerHTML=legend;
-    $("ec-sum").innerHTML=sums.length?sums.map(esc).join("<br>")+"<br>Thick line: the average of the members that develop the system. Shading: where at least a quarter (light) or half (darker) of them pass. These are raw model runs out to 7 days (6 days for the 1 AM and 1 PM runs of ECENS), not a forecast. The individual member lines are off by default; switch them on with the layers button on the map. Data: &copy; ECMWF open data, CC BY 4.0, filtered to Gulf tracks.":"";
+    $("ec-sum").innerHTML=sums.length?sums.map(esc).join("<br>")+"<br>Thick line: the typical (median) path of the members that develop the system, drawn only while most of them have a storm on the map. Shading: where at least a quarter (light) or half (darker) of them pass. These are raw model runs out to 7 days (6 days for the 1 AM and 1 PM runs of ECENS), not a forecast. The individual member lines are off by default; switch them on with the layers button on the map. Data: &copy; ECMWF open data, CC BY 4.0, filtered to Gulf tracks.":"";
   }
   var windColor=function(kt){for(var i=0;i<WIND.length;i++) if(kt>=WIND[i][0]) return WIND[i][1]};
   var sw=function(c,t,line){return '<span><i'+(line?' class="ln" style="border-color:'+c+'"':' style="background:'+c+'"')+'></i>'+t+'</span>'};
@@ -285,7 +285,7 @@ a{color:var(--accent)}
     var add=function(key,label,g){ names[label]=key; overlays[label]=g; if(!off[key]) g.addTo(map); return g; };
     group=add("official","NHC official (area, track, cone, alerts)",L.featureGroup());
     ["model","consensus","google","ens"].forEach(function(k){ modelGroups[k]=add(k,MODEL[k][3],L.layerGroup()); });
-    Object.keys(EC).forEach(function(k){ ecGroups[k]=add(k,EC[k][2]+": average and swath",L.layerGroup()); ecGroups[k+"_m"]=add(k+"_m",EC[k][2]+": all member lines",L.layerGroup()); });
+    Object.keys(EC).forEach(function(k){ ecGroups[k]=add(k,EC[k][2]+": typical path and swath",L.layerGroup()); ecGroups[k+"_m"]=add(k+"_m",EC[k][2]+": all member lines",L.layerGroup()); });
     L.control.layers(null,overlays,{collapsed:true}).addTo(map);
     var remember=function(e){ off[names[e.name]]=e.type==="overlayremove"; try{ localStorage.setItem("gsw-layers-off-2",JSON.stringify(off)); }catch(x){} };
     map.on("overlayadd",remember); map.on("overlayremove",remember);
