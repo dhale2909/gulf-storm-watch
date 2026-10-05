@@ -23,6 +23,9 @@ ENSEMBLES = [
     ("ecaie", "European AI ensemble (AIFS)", "aifs-ens/0p25/enfo", {0: 360, 6: 360, 12: 360, 18: 360}),
 ]
 MAX_HOURS = 168
+VERSION = 2  # bump to force a rebuild of data/ecmwf.json when its shape changes
+CELL = 0.25  # swath grid size, degrees
+REACH = 0.6  # a member "covers" grid cells within this many degrees of its track
 MISSING = 1e99
 KT = 1.94384
 NOW = datetime.now(timezone.utc)
@@ -121,6 +124,60 @@ def read_tracks(raw):
     return tracks
 
 
+def mean_track(gulf, members):
+    """Average member position at each forecast hour, wherever enough members have a storm at that hour."""
+    by_hour = {}
+    for t in gulf:
+        for hours, la, lo, _ in t["pts"]:
+            by_hour.setdefault(hours, {}).setdefault(t["member"], (la, lo))
+    need = max(5, 0.4 * members)
+    line = []
+    for hours in sorted(by_hour):
+        pos = list(by_hour[hours].values())
+        if len(pos) >= need:
+            line.append([round(sum(p[1] for p in pos) / len(pos), 1), round(sum(p[0] for p in pos) / len(pos), 1)])
+    if len(line) < 3:
+        return None
+    # Light smoothing: membership changes hour to hour, which makes the raw average wobble.
+    return [line[0]] + [[round((a[0] + b[0] + c[0]) / 3, 1), round((a[1] + b[1] + c[1]) / 3, 1)] for a, b, c in zip(line, line[1:], line[2:])] + [line[-1]]
+
+
+def swaths(gulf, members):
+    """Where the members go: grid cells crossed by at least 25% and 50% of them, as row-merged rectangles."""
+    cover = {}
+    for t in gulf:
+        pts = t["pts"]
+        for a, b in zip(pts, pts[1:]):
+            steps = max(1, int(max(abs(b[1] - a[1]), abs(b[2] - a[2])) / 0.1))
+            for k in range(steps + 1):
+                la, lo = a[1] + (b[1] - a[1]) * k / steps, a[2] + (b[2] - a[2]) * k / steps
+                r = int(REACH / CELL) + 1
+                ci, cj = int(lo // CELL), int(la // CELL)
+                for i in range(ci - r, ci + r + 1):
+                    for j in range(cj - r, cj + r + 1):
+                        if ((i + 0.5) * CELL - lo) ** 2 + ((j + 0.5) * CELL - la) ** 2 <= REACH ** 2:
+                            cover.setdefault((i, j), set()).add(t["member"])
+    out = []
+    for level in (25, 50):
+        rows = {}
+        for (i, j), who in cover.items():
+            if len(who) >= members * level / 100:
+                rows.setdefault(j, []).append(i)
+        rects = []
+        for j, cols in rows.items():
+            cols.sort()
+            start = prev = cols[0]
+            for i in cols[1:] + [None]:
+                if i is None or i != prev + 1:
+                    x0, x1, y0, y1 = start * CELL, (prev + 1) * CELL, j * CELL, (j + 1) * CELL
+                    rects.append([[[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]]])
+                    start = i
+                prev = i
+        if rects:
+            out.append((level, rects))
+    return out
+
+
 def summarize(key, label, stamp, tracks):
     init = datetime.strptime(stamp, "%Y%m%d%H").replace(tzinfo=timezone.utc)
     gulf = [t for t in tracks if any(in_gulf(la, lo) for _, la, lo, _ in t["pts"])]
@@ -141,6 +198,12 @@ def summarize(key, label, stamp, tracks):
         if hit:
             coast[coast_state(hit[2])] += 1
             etas.append(hit[0])
+    # Cleaner default view: one average line and a shaded swath; member lines stay available behind a switch.
+    mean = mean_track(gulf, len(seen))
+    if mean:
+        features.append({"type": "Feature", "geometry": {"type": "LineString", "coordinates": mean}, "properties": {"role": "ecmean", "ens": key, "members": len(seen)}})
+    for level, rects in swaths(gulf, len(seen)):
+        features.append({"type": "Feature", "geometry": {"type": "MultiPolygon", "coordinates": rects}, "properties": {"role": "ecswath", "ens": key, "level": level}})
     return {
         "key": key, "label": label, "run": init.isoformat().replace("+00:00", "Z"),
         "developing": len(seen), "hits": len(etas), "coast": coast,
@@ -154,6 +217,8 @@ def main():
     try:
         prior = json.load(open(OUT))
     except Exception:
+        prior = {"ensembles": []}
+    if prior.get("version") != VERSION:
         prior = {"ensembles": []}
     old = {e["key"]: e for e in prior.get("ensembles", [])}
     out, changed = [], False
@@ -174,7 +239,7 @@ def main():
                 out.append(old[key])
     if changed:
         os.makedirs("data", exist_ok=True)
-        json.dump({"updatedAt": NOW.isoformat().replace("+00:00", "Z"), "ensembles": out}, open(OUT, "w"), separators=(",", ":"))
+        json.dump({"version": VERSION, "updatedAt": NOW.isoformat().replace("+00:00", "Z"), "ensembles": out}, open(OUT, "w"), separators=(",", ":"))
     for e in out:
         print(f"{e['key']}: run {e['run']}, {e['developing']} members with a Gulf track, {e['hits']} reach the coast {e['coast']}, {e['hurricane']} hurricane")
 
