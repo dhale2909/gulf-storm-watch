@@ -127,7 +127,7 @@ async function gatherStorms() {
     const type = TYPES[s.classification] || 'Post-Tropical Cyclone';
     const hit = path.find(coastHit) || null;
     out.push({
-      id: s.id, name: `${type} ${s.name}`, type, winds,
+      id: s.id, bin: s.binNumber, name: `${type} ${s.name}`, type, winds,
       category: s.classification === 'HU' ? category(winds) : 0,
       tropical: s.classification in TYPES,
       location: `${here.lat.toFixed(1)}N ${here.lonW.toFixed(1)}W` + (inGulf(here) ? (here.lat < 22 && here.lonW >= 90 ? ', Bay of Campeche' : ', Gulf') : ', approaching the Gulf'),
@@ -156,6 +156,50 @@ async function gatherAlerts(prior, gulfStorm) {
     }
   }
   return ww;
+}
+
+// Map layers from NOAA's tropical map service, as one GeoJSON collection tagged by role.
+// Storm stage: cone, forecast track and points, past track, coastal watch/warning lines.
+// Disturbance stage: NHC's 7-day development area, current location, and motion arrow.
+const MAPSRV = 'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer';
+
+async function layer(id, name) {
+  const j = await get(`map-${name}.json`, `${MAPSRV}/${id}/query?where=1%3D1&outFields=*&f=geojson&geometryPrecision=2`, true);
+  if (!j || !Array.isArray(j.features)) throw new Error(`map layer ${name} malformed`);
+  return j.features.filter((f) => f.geometry);
+}
+
+const flat = (c) => (typeof c[0] === 'number' ? [c] : c.flatMap(flat));
+const touchesGulf = (f) => flat(f.geometry.coordinates).some(([lon, lat]) => inGulf({ lat, lonW: -lon }));
+const feat = (f, role, props = {}) => ({ type: 'Feature', geometry: f.geometry, properties: { role, ...props } });
+
+async function gatherMap(gulf, storm) {
+  const features = [];
+  if (storm && /^AT[1-5]$/.test(storm.bin || '')) {
+    const base = 4 + 26 * (+storm.bin[2] - 1);
+    const [pts, track, cone, ww, past] = await Promise.all([
+      layer(base + 2, 'points'), layer(base + 3, 'track'), layer(base + 4, 'cone'), layer(base + 5, 'ww'), layer(base + 8, 'past'),
+    ]);
+    const adv = pts[0]?.properties.advisnum;
+    past.forEach((f) => features.push(feat(f, 'past')));
+    cone.forEach((f) => features.push(feat(f, 'cone')));
+    track.forEach((f) => features.push(feat(f, 'track')));
+    ww.filter((f) => f.properties.advisnum === adv).forEach((f) => features.push(feat(f, 'ww', { kind: f.properties.tcww })));
+    pts.forEach((f) => features.push(feat(f, 'point', {
+      label: `${f.properties.datelbl} ${f.properties.timezone || ''}`.trim(), wind: f.properties.maxwind,
+      type: f.properties.tcdvlp, cat: f.properties.ssnum, now: f.properties.tau === 0,
+    })));
+    return { kind: 'storm', name: storm.name, source: `NHC advisory ${adv ?? ''}`.trim(), features };
+  }
+  if (gulf) {
+    const [areas, pts, motion] = await Promise.all([layer(3, 'areas'), layer(2, 'origins'), layer(398, 'motion')]);
+    const atl = (f) => /atl/i.test(f.properties.basin || '') && touchesGulf(f); // never Pacific areas
+    areas.filter(atl).forEach((f) => features.push(feat(f, 'area', { prob7: f.properties.prob7day, risk: f.properties.risk7day })));
+    motion.filter(atl).forEach((f) => features.push(feat(f, 'motion')));
+    pts.filter(atl).forEach((f) => features.push(feat(f, 'origin', { prob7: f.properties.prob7day, prob2: f.properties.prob2day })));
+    return { kind: 'outlook', name: gulf.area, source: gulf.source, features };
+  }
+  return { kind: 'none', name: '', source: '', features };
 }
 
 // ---------- decide ----------
@@ -190,7 +234,7 @@ function build(prior, gulf, storms, ww) {
     nextCheck: new Date(Math.ceil((NOW.getTime() + 60e3) / (3 * 3600e3)) * 3 * 3600e3).toISOString(),
     alertLevel, headline,
     gulf: gulf || { area: '', formation48: null, formation7d: null, source: 'NHC outlook', text: storm ? 'NHC is issuing advisories on this system; see the storm panel.' : '' },
-    storms: storms.map(({ landfall: _l, tropical: _t, ...s }) => s),
+    storms: storms.map(({ landfall: _l, tropical: _t, bin: _b, ...s }) => s),
     watchesWarnings: ww,
     landfall,
     internal: {
@@ -261,11 +305,12 @@ async function notify(title, message, level) {
 
 const readJSON = async (p, fallback) => { try { return JSON.parse(await readFile(p, 'utf8')); } catch { return fallback; } };
 
-async function save(status, entry) {
+async function save(status, entry, map) {
   await mkdir('data', { recursive: true });
   const log = await readJSON('data/log.json', []);
   log.unshift(entry);
   await writeFile('data/status.json', JSON.stringify(status, null, 2) + '\n');
+  if (map) await writeFile('data/map.json', JSON.stringify({ updatedAt: status.updatedAt, ...map }) + '\n');
   await writeFile('data/log.json', JSON.stringify(log.slice(0, LOG_MAX), null, 2) + '\n');
 }
 
@@ -291,6 +336,8 @@ async function main() {
   }
 
   const ww = await gatherAlerts(prior, storms.length > 0);
+  // The map is a nice-to-have: if its service is down, keep the last map and carry on.
+  const map = await gatherMap(gulf, storms[0]).catch((e) => { console.warn(`map layers unavailable: ${e.message}`); return null; });
   const status = build(prior, gulf, storms, ww);
   const changes = diff(prior, status);
   const changed = changes.length > 0;
@@ -304,7 +351,7 @@ async function main() {
   }
 
   const summary = changed ? changes.join('. ') + '.' : prior ? 'No change. ' + status.headline : 'Watch opened. ' + status.headline;
-  await save(status, { ts: NOW.toISOString(), changed, pushed, alertLevel: status.alertLevel, formation7d: status.gulf.formation7d, summary });
+  await save(status, { ts: NOW.toISOString(), changed, pushed, alertLevel: status.alertLevel, formation7d: status.gulf.formation7d, summary }, map);
   console.log(`${status.alertLevel.toUpperCase()} | changed=${changed} pushed=${pushed} | ${summary}`);
 }
 
