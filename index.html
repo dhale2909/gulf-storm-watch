@@ -91,6 +91,9 @@ a{color:var(--accent)}
 .leaflet-tooltip.pt{font:500 11px var(--mono);padding:1px 5px;background:var(--panel);color:var(--fg);border:1px solid var(--line);box-shadow:none}
 .leaflet-tooltip.pt:before{display:none}
 .xmark{font:700 20px/20px var(--display);color:var(--landfall);text-align:center;text-shadow:0 0 3px var(--panel),0 0 3px var(--panel)}
+.gbars{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:13px}
+.gbars .bar{height:10px;border-radius:3px;background:var(--line);overflow:hidden}
+.gbars .bar i{display:block;height:100%;background:#2e9e5b}
 .empty{color:var(--muted);font-style:italic}
 .foot{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);align-items:center}
 </style>
@@ -158,11 +161,19 @@ a{color:var(--accent)}
     </section>
   </div>
 
-  <section class="panel">
-    <header><h2>Coastal watches and warnings</h2><span class="tag">NWS</span></header>
-    <div class="coast" id="coast"></div>
-    <div id="coast-note" style="font-size:13px;color:var(--muted)"></div>
-  </section>
+  <div class="grid2">
+    <section class="panel">
+      <header><h2>Coastal watches and warnings</h2><span class="tag">NWS</span></header>
+      <div class="coast" id="coast"></div>
+      <div id="coast-note" style="font-size:13px;color:var(--muted)"></div>
+    </section>
+    <section class="panel">
+      <header><h2>Google AI ensemble</h2><span class="tag" id="goog-run">Experimental</span></header>
+      <div id="goog-text" class="empty">No data for this system yet. Google's ensemble only covers systems NHC has numbered.</div>
+      <div class="gbars" id="goog-bars" hidden></div>
+      <div style="font-size:11.5px;color:var(--muted)">Summary computed from Google Weather Lab. &copy; 2024-6 Google LLC, whose machine learning models were used to create the experimental data made available under the following licence terms <a href="https://storage.googleapis.com/weathernext-public/terms-of-use.pdf" target="_blank" rel="noopener">https://storage.googleapis.com/weathernext-public/terms-of-use.pdf</a>. This data is intended for experimental modelling only and is not intended, validated, or approved for real world use.</div>
+    </section>
+  </div>
 
   <section class="panel">
     <header><h2>Check log</h2><span id="logcount" style="color:var(--muted);font-size:13px"></span></header>
@@ -214,6 +225,13 @@ a{color:var(--accent)}
     $("coast").innerHTML=STATES.map(function(s){var v=ww[s]||{}; var c=v.level==="warning"?"var(--landfall)":v.level==="watch"?"var(--threat)":"var(--line)";
       return '<div class="st" style="--stc:'+c+'"><b>'+s+'</b><span>'+esc(v.text||"Clear")+'</span></div>'}).join("");
     $("coast-note").textContent=STATES.some(function(s){return ww[s]&&ww[s].level})?"Tropical watches or warnings are in effect; see state tiles.":"No tropical watches or warnings in effect for the four states.";
+    var G=d.google;
+    $("goog-text").classList.toggle("empty",!G); $("goog-bars").hidden=!G;
+    if(G){
+      $("goog-text").textContent=G.text; $("goog-run").textContent="Run "+fmt(G.run);
+      var rows=STATES.map(function(s){return [s,G.coast[s]||0]}).concat([["Stays away",G.members-G.hits]]);
+      $("goog-bars").innerHTML=rows.map(function(r){return '<b>'+r[0]+'</b><div class="bar"><i style="width:'+(100*r[1]/G.members)+'%"></i></div><span class="mono">'+r[1]+' of '+G.members+'</span>'}).join("");
+    } else { $("goog-text").textContent="No data for this system yet. Google's ensemble only covers systems NHC has numbered."; $("goog-run").textContent="Experimental"; }
     $("last").textContent=fmt(d.updatedAt); $("next").textContent=d.nextCheck?("Next check about "+fmt(d.nextCheck)):"Checks run every 3 hours";
   }
   function renderLog(rows){

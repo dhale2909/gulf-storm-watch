@@ -276,6 +276,61 @@ async function gatherModels(gulf, storm) {
   return null;
 }
 
+// Google DeepMind Weather Lab 50-member ensemble. Used under Google's Real-Time Weather Forecasting
+// Experimental Data Terms of Use (accepted by the owner): the raw tracks stay inside this run and only
+// an aggregate summary (member counts, typical timing) is saved or published, with Google's citation.
+const WEATHERLAB = 'https://deepmind.google.com/science/weatherlab/download/cyclones/FNV3/ensemble/paired/csv/';
+
+export function summarizeGoogle(csv, ids, initISO) {
+  const lines = csv.split('\n').filter((l) => l && !l.startsWith('#'));
+  const head = lines.shift().split(',');
+  const col = Object.fromEntries(['track_id', 'sample', 'valid_time', 'lat', 'lon', 'maximum_sustained_wind_speed_knots'].map((k) => [k, head.indexOf(k)]));
+  if (Object.values(col).some((i) => i < 0)) throw new Error('Weather Lab CSV columns changed');
+  const members = new Map();
+  for (const l of lines) {
+    const c = l.split(',');
+    if (!ids.includes(c[col.track_id])) continue;
+    let lon = +c[col.lon]; if (lon > 180) lon -= 360;
+    const t = new Date(c[col.valid_time].replace(' ', 'T') + 'Z');
+    if (!members.has(c[col.sample])) members.set(c[col.sample], []);
+    members.get(c[col.sample]).push({ t, lat: +c[col.lat], lonW: -lon, wind: +c[col.maximum_sustained_wind_speed_knots] || 0 });
+  }
+  if (!members.size) return null;
+  const coast = { LA: 0, MS: 0, AL: 0, FL: 0 }, etas = [], peaks = [];
+  for (const pts of members.values()) {
+    pts.sort((a, b) => a.t - b.t);
+    const ahead = pts.filter((p) => p.t >= NOW.getTime() - 6 * 3600e3);
+    const i = ahead.findIndex(coastHit);
+    if (i >= 0) { coast[coastState(ahead[i])]++; etas.push(ahead[i].t.getTime()); }
+    peaks.push(Math.max(0, ...(i >= 0 ? ahead.slice(0, i + 1) : ahead).map((p) => p.wind)));
+  }
+  const n = members.size, hits = etas.length;
+  const median = (a) => a.sort((x, y) => x - y)[Math.floor(a.length / 2)];
+  const hurricane = peaks.filter((w) => w >= 64).length, major = peaks.filter((w) => w >= 96).length;
+  const eta = hits ? new Date(median(etas)).toISOString() : null;
+  const byState = STATES.filter((s) => coast[s]).sort((a, b) => coast[b] - coast[a]).map((s) => `${s} ${coast[s]}`).join(', ');
+  return {
+    run: initISO, members: n, hits, coast, eta, hurricane, major, peakMedianKt: Math.round(median(peaks)),
+    text: (hits ? `${hits} of ${n} ensemble members bring the center to the Louisiana-to-Florida coast (${byState}), typically around ${fmtCT(eta)}.` : `None of the ${n} ensemble members bring the center to the Louisiana-to-Florida coast.`) +
+      ` ${hurricane} of ${n} reach hurricane strength${major ? ` (${major} major)` : ''}; typical peak ${Math.round(median(peaks))} kt.`,
+  };
+}
+
+async function gatherGoogle(storm, invest) {
+  const yr = NOW.getUTCFullYear();
+  const ids = [storm && storm.id.toUpperCase(), invest && `AL${invest.replace(/\D/g, '')}${yr}`].filter(Boolean);
+  if (!ids.length) return null;
+  // Runs start every 6 hours and are posted several hours later; take the newest one available.
+  for (let k = 0; k < 5; k++) {
+    const init = new Date(Math.floor(NOW.getTime() / (6 * 3600e3) - k) * 6 * 3600e3);
+    const stamp = init.toISOString().slice(0, 13).replace(/-/g, '_') + '_00';
+    let csv;
+    try { csv = await get('google.csv', `${WEATHERLAB}FNV3_${stamp}_paired.csv`); } catch (e) { if (FIX) throw e; continue; }
+    return summarizeGoogle(csv, ids, init.toISOString());
+  }
+  return null;
+}
+
 // ---------- decide ----------
 
 function build(prior, gulf, storms, ww) {
@@ -416,6 +471,7 @@ async function main() {
   if (map && models) { map.features = [...models.features, ...map.features]; map.models = models.label; }
   if (gulf && models?.invest) gulf.invest = models.invest;
   const status = build(prior, gulf, storms, ww);
+  status.google = await gatherGoogle(storms[0], models?.invest).catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return prior?.google ?? null; });
   const changes = diff(prior, status);
   const changed = changes.length > 0;
   if (changed) status.internal.baseline7d = status.gulf.formation7d;
@@ -424,7 +480,8 @@ async function main() {
   if (changed) {
     const plays = (() => { try { return JSON.parse(process.env.PLAYS_JSON || '{}'); } catch { return {}; } })();
     const play = plays[status.alertLevel] ? `\n\nPlay: ${plays[status.alertLevel]}` : '';
-    pushed = await notify(`Gulf Storm Watch: ${status.alertLevel.toUpperCase()}`, `${changes.join('. ')}.\n\n${status.headline}${play}`, status.alertLevel);
+    const goog = status.google ? `\n\nGoogle AI ensemble (experimental, not a forecast): ${status.google.text}` : '';
+    pushed = await notify(`Gulf Storm Watch: ${status.alertLevel.toUpperCase()}`, `${changes.join('. ')}.\n\n${status.headline}${goog}${play}`, status.alertLevel);
   }
 
   const summary = changed ? changes.join('. ') + '.' : prior ? 'No change. ' + status.headline : 'Watch opened. ' + status.headline;
