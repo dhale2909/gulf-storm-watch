@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Gulf Storm Watch</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a bulletin board for one storm. Alert band on top, four readouts, then outlook / the storm / coast, log at the bottom. */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --fg:#13202b; --muted:#5b6b78; --line:#d6dde3;
+  --accent:#0f5e8c; --accent-ink:#ffffff;
+  --quiet:#2f8f5b; --watch:#c99a06; --threat:#d8631c; --landfall:#b3261e;
+  --lo:#e8c547; --md:#ef8f2b; --hi:#d64545;
+  --display:"Barlow Semi Condensed","Arial Narrow",sans-serif;
+  --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono","SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root{
+  --bg:#0d151c; --panel:#141f28; --fg:#e6edf2; --muted:#93a3b0; --line:#273641;
+  --accent:#5fb3e6; --accent-ink:#0d151c;
+  --quiet:#4fbf7f; --watch:#e6b62a; --threat:#f0833a; --landfall:#f05b52;
+  --lo:#d9b53a; --md:#f09a3e; --hi:#f06060; color-scheme:dark } }
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;padding:0 16px 32px}
+.wrap{max-width:1080px;margin:0 auto;display:grid;gap:20px}
+h1,h2{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(28px,5vw,40px);font-weight:700;letter-spacing:.01em}
+h2{font-size:20px;font-weight:600}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+a{color:var(--accent)}
+
+.band{border-left:6px solid var(--lvl,var(--muted));background:var(--panel);border-radius:0 10px 10px 0;padding:18px 20px;display:grid;gap:10px;margin-top:20px}
+.band-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.pill{display:inline-flex;align-items:center;gap:8px;font-family:var(--display);font-weight:700;font-size:15px;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:999px;color:var(--accent-ink);background:var(--lvl,var(--muted))}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.pill .dot{animation:none}}
+.headline{font-size:clamp(18px,2.6vw,22px);font-weight:500;max-width:70ch;margin:0}
+.stale{color:var(--landfall);font-size:13px;font-weight:600}
+
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;min-width:0;align-content:start}
+.tile .val{font-family:var(--display);font-size:34px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.tile .val.sm{font-size:22px;padding-top:6px}
+.tile .sub{font-size:12.5px;color:var(--muted)}
+.gauge{height:8px;border-radius:4px;background:linear-gradient(90deg,var(--lo) 0 40%,var(--md) 40% 60%,var(--hi) 60% 100%);position:relative;margin-top:4px}
+.gauge .nd{position:absolute;top:-4px;width:3px;height:16px;background:var(--fg);border-radius:2px;transform:translateX(-50%);left:0;transition:left .5s ease}
+.gauge-ticks{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:var(--muted)}
+
+.grid2{display:grid;grid-template-columns:3fr 2fr;gap:20px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:grid;gap:12px;align-content:start;min-width:0}
+.panel header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.outlook-text{max-width:68ch}
+.tag{font-family:var(--mono);font-size:11px;padding:2px 7px;border:1px solid var(--line);border-radius:4px}
+
+.storms{display:grid;gap:10px}
+.storm{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;padding:12px;border:1px solid var(--line);border-radius:8px}
+.cat{font-family:var(--display);font-weight:700;font-size:22px;line-height:1;width:54px;height:54px;border-radius:8px;display:grid;place-items:center;color:var(--accent-ink);background:var(--muted)}
+.cat[data-k="TD"]{background:var(--lo);color:#13202b}.cat[data-k="TS"]{background:var(--md);color:#13202b}
+.cat[data-k="H1"],.cat[data-k="H2"]{background:var(--threat)}.cat[data-k="H3"],.cat[data-k="H4"],.cat[data-k="H5"]{background:var(--landfall)}
+.storm .nm{font-family:var(--display);font-weight:600;font-size:18px}
+.storm dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:13px}
+.storm dt{color:var(--muted)}.storm dd{margin:0}
+
+.coast{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.coast{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.st{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:4px;border-top:4px solid var(--stc,var(--line))}
+.st b{font-family:var(--display);font-size:18px;font-weight:700}
+.st span{font-size:12px;color:var(--muted)}
+
+.log-row{display:grid;grid-template-columns:150px 1fr auto;gap:12px;padding:9px 0;border-top:1px solid var(--line);align-items:baseline;font-size:13.5px}
+.log-row:first-child{border-top:0}
+@media (max-width:600px){.log-row{grid-template-columns:1fr auto}.log-row .mono{grid-column:1/-1}}
+.chg{font-family:var(--mono);font-size:11px;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.chg[data-c="1"]{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
+
+.empty{color:var(--muted);font-style:italic}
+.foot{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);align-items:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="band" id="band">
+    <div class="band-top">
+      <div>
+        <div class="eyebrow">Southwestern Gulf system · AL · FL · MS · LA</div>
+        <h1>Gulf Storm Watch</h1>
+      </div>
+      <div class="pill"><span class="dot"></span><span id="pill-text">Loading</span></div>
+    </div>
+    <p class="headline" id="headline">Loading the latest check.</p>
+    <div class="stale" id="stale" hidden></div>
+  </section>
+
+  <section class="tiles">
+    <div class="tile">
+      <div class="eyebrow">7-day formation</div>
+      <div class="val"><span id="p7">—</span><span style="font-size:18px">%</span></div>
+      <div class="gauge"><div class="nd" id="nd7"></div></div>
+      <div class="gauge-ticks"><span>0</span><span>low</span><span>40</span><span>med</span><span>60</span><span>high</span><span>100</span></div>
+    </div>
+    <div class="tile">
+      <div class="eyebrow">48-hour formation</div>
+      <div class="val"><span id="p48">—</span><span style="font-size:18px">%</span></div>
+      <div class="sub" id="p48sub"></div>
+    </div>
+    <div class="tile">
+      <div class="eyebrow">System status</div>
+      <div class="val sm" id="sysstat">—</div>
+      <div class="sub" id="sysstatsub"></div>
+    </div>
+    <div class="tile">
+      <div class="eyebrow">Last check</div>
+      <div class="val sm mono" id="last">—</div>
+      <div class="sub" id="next">Checks run every 3 hours</div>
+    </div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel">
+      <header><h2>Gulf outlook</h2><span class="tag" id="src">NHC outlook</span></header>
+      <div class="outlook-text" id="outlook"></div>
+    </section>
+    <section class="panel">
+      <header><h2>The storm</h2></header>
+      <div class="storms" id="storms"></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <header><h2>Coastal watches and warnings</h2><span class="tag">NWS</span></header>
+    <div class="coast" id="coast"></div>
+    <div id="coast-note" style="font-size:13px;color:var(--muted)"></div>
+  </section>
+
+  <section class="panel">
+    <header><h2>Check log</h2><span id="logcount" style="color:var(--muted);font-size:13px"></span></header>
+    <div id="log"><div class="empty">No checks logged yet.</div></div>
+  </section>
+
+  <div class="foot">
+    <span>Sources:</span>
+    <a href="https://www.nhc.noaa.gov/gtwo.php" target="_blank" rel="noopener">NHC 7-day outlook</a>
+    <a href="https://www.nhc.noaa.gov/" target="_blank" rel="noopener">NHC advisories</a>
+    <a href="https://www.weather.gov/mob/" target="_blank" rel="noopener">NWS Mobile</a>
+    <a href="https://www.weather.gov/lix/" target="_blank" rel="noopener">NWS New Orleans</a>
+    <a href="https://www.weather.gov/tae/" target="_blank" rel="noopener">NWS Tallahassee</a>
+    <span>Automated summary; landfall place and time are approximate. Follow official NHC and NWS products for decisions.</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var LABEL={quiet:"Quiet",watch:"Watch",threat:"Threat",landfall:"Landfall"};
+  var STATES=["AL","FL","MS","LA"];
+  var fmt=function(iso){ if(!iso) return "—"; var d=new Date(iso); if(isNaN(d)) return iso;
+    return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"}); };
+  var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+  var catKey=function(s){ var t=(s.type||"").toLowerCase();
+    if(/depression/.test(t)) return "TD"; if(/hurricane/.test(t)) return "H"+(s.category||1); if(/storm/.test(t)) return "TS"; return "PT"; };
+
+  function renderStatus(d){
+    var lvl=LABEL[d.alertLevel]?d.alertLevel:"quiet";
+    $("band").style.setProperty("--lvl","var(--"+lvl+")");
+    $("pill-text").textContent=LABEL[lvl];
+    $("headline").textContent=d.headline||"";
+    var age=(Date.now()-new Date(d.updatedAt).getTime())/36e5;
+    $("stale").hidden=!(age>7); $("stale").textContent="Last successful update was "+Math.round(age)+" hours ago; this reading may be out of date.";
+    var g=d.gulf||{}, p7=g.formation7d, p48=g.formation48;
+    $("p7").textContent=p7==null?"—":p7; $("nd7").style.left=(p7==null?0:Math.max(0,Math.min(100,p7)))+"%";
+    $("p48").textContent=p48==null?"—":p48; $("p48sub").textContent=g.area||"No Gulf disturbance in the outlook";
+    $("outlook").textContent=g.text||"No Gulf disturbance in the current NHC outlook.";
+    $("src").textContent=g.source||"NHC outlook";
+    var st=d.storms||[], s0=st[0];
+    $("sysstat").textContent=s0?s0.name:(g.area?"Disturbance":"None");
+    $("sysstatsub").textContent=s0?(s0.winds+" kt · "+s0.movement):(g.area?"Not designated; no NHC advisories yet":"No Gulf system flagged");
+    $("storms").innerHTML=st.length?st.map(function(s){var k=catKey(s);return '<div class="storm"><div class="cat" data-k="'+k+'">'+k+'</div><div><div class="nm">'+esc(s.name)+'</div><dl>'+
+      '<dt>Winds</dt><dd class="mono">'+esc(s.winds)+' kt</dd>'+
+      '<dt>Position</dt><dd>'+esc(s.location)+'</dd><dt>Motion</dt><dd>'+esc(s.movement)+'</dd>'+
+      '<dt>Track</dt><dd>'+esc(s.gulfRisk)+'</dd></dl></div></div>'}).join(""):'<div class="empty">Not yet a depression. No NHC advisories or forecast track.</div>';
+    var ww=d.watchesWarnings||{};
+    $("coast").innerHTML=STATES.map(function(s){var v=ww[s]||{}; var c=v.level==="warning"?"var(--landfall)":v.level==="watch"?"var(--threat)":"var(--line)";
+      return '<div class="st" style="--stc:'+c+'"><b>'+s+'</b><span>'+esc(v.text||"Clear")+'</span></div>'}).join("");
+    $("coast-note").textContent=STATES.some(function(s){return ww[s]&&ww[s].level})?"Tropical watches or warnings are in effect; see state tiles.":"No tropical watches or warnings in effect for the four states.";
+    $("last").textContent=fmt(d.updatedAt); $("next").textContent=d.nextCheck?("Next check about "+fmt(d.nextCheck)):"Checks run every 3 hours";
+  }
+  function renderLog(rows){
+    rows=rows.slice(0,40);
+    $("logcount").textContent=rows.length?rows.length+" recent checks":"";
+    $("log").innerHTML=rows.length?rows.map(function(x){return '<div class="log-row"><span class="mono">'+fmt(x.ts)+'</span><span>'+esc(x.summary)+'</span><span class="chg" data-c="'+(x.changed?1:0)+'">'+(x.changed?(x.pushed?"CHANGE · PUSHED":"CHANGE"):"no change")+'</span></div>'}).join(""):'<div class="empty">No checks logged yet.</div>';
+  }
+  function load(){
+    var t="?t="+Date.now();
+    fetch("data/status.json"+t).then(function(r){return r.json()}).then(renderStatus).catch(function(){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; });
+    fetch("data/log.json"+t).then(function(r){return r.json()}).then(renderLog).catch(function(){});
+  }
+  load(); setInterval(load,10*60*1000);
+})();
+</script>
+</body>
+</html>
