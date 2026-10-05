@@ -253,6 +253,26 @@ export function parseAdeck(text) {
   return { init, origin, tracks };
 }
 
+// Where the system has been: NHC's "best track" file, which starts when the Invest is designated
+// (usually back-dated a day or so) and gains a position every 6 hours.
+export function parseBestTrack(text) {
+  const seen = new Map();
+  for (const line of text.split('\n')) {
+    const c = line.split(',').map((x) => x.trim());
+    const la = /^(\d+)([NS])$/.exec(c[6] || ''), lo = /^(\d+)([EW])$/.exec(c[7] || '');
+    if (!/^\d{10}$/.test(c[2] || '') || !la || !lo) continue;
+    seen.set(c[2], { t: new Date(cycleMs(c[2])).toISOString(), lat: (+la[1] / 10) * (la[2] === 'S' ? -1 : 1), lon: (+lo[1] / 10) * (lo[2] === 'W' ? -1 : 1), wind: +c[8] || 0 });
+  }
+  return [...seen.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)).map(([, p]) => p);
+}
+
+async function gatherHistory(file) {
+  const pts = parseBestTrack(await get(`btk-${file}`, `https://ftp.nhc.noaa.gov/atcf/btk/b${file.slice(1).replace('.gz', '')}`));
+  const features = pts.map((p) => ({ type: 'Feature', geometry: { type: 'Point', coordinates: [p.lon, p.lat] }, properties: { role: 'pastpt', t: p.t, wind: p.wind } }));
+  if (pts.length > 1) features.unshift({ type: 'Feature', geometry: { type: 'LineString', coordinates: pts.map((p) => [p.lon, p.lat]) }, properties: { role: 'past' } });
+  return { features, winds: pts.length ? pts[pts.length - 1].wind : null };
+}
+
 async function gatherModels(gulf, storm) {
   let files = [];
   if (storm) files = [`a${storm.id}.dat.gz`];
@@ -267,9 +287,11 @@ async function gatherModels(gulf, storm) {
     if (!d || !d.tracks.length || NOW - cycleMs(d.init) > 24 * 3600e3) continue;
     if (!storm && !(d.origin && inGulf(d.origin))) continue;
     const invest = storm ? null : `Invest ${f.slice(3, 5)}L`;
+    // NHC's own past-track layer takes over once advisories start; before that, draw it from the best-track file.
+    const history = storm ? { features: [], winds: null } : await gatherHistory(f).catch((e) => { console.warn(`past track unavailable: ${e.message}`); return { features: [], winds: null }; });
     const run = new Date(cycleMs(d.init)).toLocaleString('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric' }) + ' CT';
     return {
-      invest, label: `${d.tracks.length} model tracks, latest run ${run}`,
+      invest, winds: history.winds, history: history.features, label: `${d.tracks.length} model tracks, latest run ${run}`,
       features: d.tracks.map((t) => ({ type: 'Feature', geometry: { type: 'LineString', coordinates: t.coords }, properties: { role: 'model', tech: t.tech, name: t.name, group: t.group } })),
     };
   }
@@ -492,8 +514,8 @@ async function main() {
   // The map is a nice-to-have: if its service is down, keep the last map and carry on.
   const map = await gatherMap(gulf, storms[0]).catch((e) => { console.warn(`map layers unavailable: ${e.message}`); return null; });
   const models = await gatherModels(gulf, storms[0]).catch((e) => { console.warn(`model guidance unavailable: ${e.message}`); return undefined; });
-  if (map && models) { map.features = [...models.features, ...map.features]; map.models = models.label; }
-  if (gulf && models?.invest) gulf.invest = models.invest;
+  if (map && models) { map.features = [...models.features, ...map.features, ...(models.history || [])]; map.models = models.label; }
+  if (gulf && models?.invest) { gulf.invest = models.invest; if (models.winds) gulf.winds = models.winds; }
   else if (gulf && models === undefined && prior?.gulf?.invest) gulf.invest = prior.gulf.invest; // guidance fetch failed: keep the known Invest number
   const status = build(prior, gulf, storms, ww);
   status.google = await gatherGoogle(storms[0], models?.invest).catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return prior?.google ?? null; });

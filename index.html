@@ -347,7 +347,7 @@ body.card .leaflet-control-container{display:none}
     $("src").textContent=g.source||"NHC outlook";
     var st=d.storms||[], s0=st[0];
     $("sysstat").textContent=s0?s0.name:(g.area?(g.invest||"Disturbance"):"None");
-    $("sysstatsub").textContent=s0?(s0.winds+" kt · "+s0.movement):(g.area?(g.invest?g.invest+"; no NHC advisories yet":"Not designated; no NHC advisories yet"):"No Gulf system flagged");
+    $("sysstatsub").textContent=s0?(s0.winds+" kt · "+s0.movement):(g.area?(g.invest?(g.winds?g.winds+" kt winds; ":"")+"no NHC advisories yet":"Not designated; no NHC advisories yet"):"No Gulf system flagged");
     $("storms").innerHTML=st.length?st.map(function(s){var k=catKey(s);return '<div class="storm"><div class="cat" data-k="'+k+'">'+k+'</div><div><div class="nm">'+esc(s.name)+'</div><dl>'+
       '<dt>Winds</dt><dd class="mono">'+esc(s.winds)+' kt</dd>'+
       '<dt>Position</dt><dd>'+esc(s.location)+'</dd><dt>Motion</dt><dd>'+esc(s.movement)+'</dd>'+
@@ -428,7 +428,7 @@ body.card .leaflet-control-container{display:none}
     group.clearLayers(); Object.keys(modelGroups).forEach(function(k){modelGroups[k].clearLayers()});
     var fg=getComputedStyle(document.documentElement).getPropertyValue("--fg").trim()||"#13202b";
     var muted=getComputedStyle(document.documentElement).getPropertyValue("--muted").trim()||"#5b6b78";
-    var fs=(m&&m.features)||[], kinds={}, mods={}, risk;
+    var fs=(m&&m.features)||[], kinds={}, mods={}, risk, hasPast=false;
     fs.forEach(function(f){ var p=f.properties||{}, r=p.role, c=f.geometry.coordinates, l;
       if(r==="model"){ mods[p.group]=1; var ms=MODEL[p.group]||MODEL.model;
         l=L.geoJSON(f,{style:{color:ms[0],weight:ms[1]*K,opacity:ms[2]}}).bindTooltip(esc(p.name)+" ("+esc(p.tech)+")",{sticky:true}); }
@@ -437,7 +437,8 @@ body.card .leaflet-control-container{display:none}
       else if(r==="origin") l=L.marker([c[1],c[0]],{icon:L.divIcon({className:"xmark",html:"&#10005;",iconSize:CARD?[56,56]:[20,20]})}).bindTooltip("Disturbance now: "+esc(p.prob2)+" in 48 hours, "+esc(p.prob7)+" in 7 days");
       else if(r==="cone") l=L.geoJSON(f,{style:{color:muted,weight:1.5*K,fillColor:muted,fillOpacity:.22}}).bindTooltip("Forecast cone: probable path of the storm center",{sticky:true});
       else if(r==="track") l=L.geoJSON(f,{style:{color:fg,weight:2.5*K}});
-      else if(r==="past") l=L.geoJSON(f,{style:{color:muted,weight:2*K,dashArray:"3 5"}});
+      else if(r==="past"){ hasPast=true; l=L.geoJSON(f,{style:{color:fg,weight:1.6*K,opacity:.85,dashArray:CARD?"2 12":"1 6",lineCap:"round"}}); }
+      else if(r==="pastpt"){ hasPast=true; l=L.circleMarker([c[1],c[0]],{radius:2.6*(CARD?2:1),color:fg,weight:1,fillColor:fg,fillOpacity:.9}).bindTooltip("Was here "+fmt(p.t)+" \u00b7 "+esc(p.wind)+" kt"); }
       else if(r==="ww"){ kinds[p.kind]=1; l=L.geoJSON(f,{style:{color:(WW[p.kind]||["#888"])[0],weight:6*K,lineCap:"butt"}}).bindTooltip((WW[p.kind]||[0,"Coastal alert"])[1],{sticky:true}); }
       else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:(p.now?9:6)*(CARD?2:1),color:fg,weight:(p.now?2.5:1.5)*(CARD?2:1),fillColor:windColor(+p.wind||0),fillOpacity:1})
         .bindTooltip(esc(p.label)+" · "+esc(p.wind)+" kt",{permanent:!CARD,direction:"right",offset:[8,0],className:"pt"});
@@ -452,7 +453,7 @@ body.card .leaflet-control-container{display:none}
     $("map-src").textContent=(m&&m.source)||"NHC";
     $("map-legend").innerHTML=kind==="storm"
       ? WIND.slice().reverse().map(function(w){return sw(w[1],w[2])}).join("")+sw(fg,"Forecast track",1)+sw(muted,"Cone / past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")+modelLegend
-      : kind==="outlook" ? sw(RISK[risk]||RISK.Medium,"7-day development area")+'<span><b style="color:var(--landfall)">&#10005;</b> Disturbance now</span>'+modelLegend : "";
+      : kind==="outlook" ? sw(RISK[risk]||RISK.Medium,"7-day development area")+'<span><b style="color:var(--landfall)">&#10005;</b> Disturbance now</span>'+(hasPast?sw(fg,"Where it has been",1):"")+modelLegend : "";
     $("map-note").textContent=kind==="storm"
       ? "Dots are NHC forecast positions of the storm center with time and wind. The cone shows where the center will probably track; wind, surge and rain reach well outside it."
       : kind==="outlook" ? "NHC has not issued a forecast track yet. The shaded area is where it expects the system to develop over the next 7 days; the track, cone and any coastal watches appear here automatically once a depression forms."
