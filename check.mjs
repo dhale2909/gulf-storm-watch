@@ -360,7 +360,7 @@ function build(prior, gulf, storms, ww) {
 
   return {
     updatedAt: NOW.toISOString(),
-    nextCheck: new Date((Math.floor(NOW.getTime() / 3600e3) + 1) * 3600e3).toISOString(), // the outside timer fires on the hour
+    nextCheck: new Date((Math.floor(NOW.getTime() / 1800e3) + 1) * 1800e3).toISOString(), // GitHub checks on the hour, the Mac backup on the half hour
     alertLevel, headline,
     gulf: gulf || { area: '', formation48: null, formation7d: null, source: 'NHC outlook', text: storm ? 'NHC is issuing advisories on this system; see the storm panel.' : '' },
     storms: storms.map(({ landfall: _l, tropical: _t, bin: _b, ...s }) => s),

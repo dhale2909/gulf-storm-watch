@@ -188,7 +188,7 @@ body.card .leaflet-control-container{display:none}
     <div class="tile">
       <div class="eyebrow">Last check</div>
       <div class="val sm mono" id="last">—</div>
-      <div class="sub" id="next">Checks run every hour</div>
+      <div class="sub" id="next">Checks run every 30 minutes</div>
     </div>
   </section>
 
@@ -341,7 +341,8 @@ body.card .leaflet-control-container{display:none}
       var rows=STATES.map(function(s){return [s,G.coast[s]||0]}).concat([["Stays away",G.members-G.hits]]);
       $("goog-bars").innerHTML=rows.map(function(r){return '<b>'+r[0]+'</b><div class="bar"><i style="width:'+(100*r[1]/G.members)+'%"></i></div><span class="mono">'+r[1]+' of '+G.members+'</span>'}).join("");
     } else { $("goog-text").textContent="No data for this system yet. Google's ensemble only covers systems NHC has numbered."; $("goog-run").textContent="Experimental"; }
-    $("last").textContent=fmt(d.updatedAt); $("next").textContent=d.nextCheck?("Next check about "+fmt(d.nextCheck)):"Checks run every hour";
+    $("last").textContent=fmt(d.updatedAt); var due=d.nextCheck?new Date(d.nextCheck).getTime():0, lateMin=Math.round((Date.now()-due)/6e4);
+    $("next").textContent=!due?"Checks run every 30 minutes":lateMin>10?("Check due "+fmt(d.nextCheck)+" is running late ("+lateMin+" min)"):("Next check about "+fmt(d.nextCheck));
   }
   function renderLog(rows){
     rows=rows.slice(0,40);
