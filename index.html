@@ -117,6 +117,10 @@ body.card #card{display:grid;grid-template-columns:440px 760px;width:1200px;heig
 #card .c-line{font-size:20px;line-height:1.35}
 #card .c-foot{margin-top:auto;font:400 14px var(--mono);color:var(--muted)}
 body.card #map{height:630px;border:0;border-radius:0}
+#card-map{position:relative}
+#c-legend{position:absolute;right:14px;bottom:14px;z-index:500;display:flex;flex-direction:column;gap:5px;padding:10px 14px;border-radius:8px;background:rgba(13,21,28,.82);color:#e6edf2;font:500 15px var(--body)}
+#c-legend i{display:inline-block;width:22px;height:0;border-top:4px solid;margin-right:8px;vertical-align:middle}
+#c-legend i.box{height:12px;border:2px dashed;border-radius:3px}
 body.card .leaflet-control-container{display:none}
 .empty{color:var(--muted);font-style:italic}
 .foot{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);align-items:center}
@@ -136,7 +140,7 @@ body.card .leaflet-control-container{display:none}
     <div class="c-line" id="c-line"></div>
     <div class="c-foot" id="c-foot"></div>
   </div>
-  <div id="card-map"></div>
+  <div id="card-map"><div id="c-legend"></div></div>
 </div>
 <div class="wrap">
   <section class="band" id="band">
@@ -249,7 +253,13 @@ body.card .leaflet-control-container{display:none}
 
   // Card mode (index.html?card=1): the share preview image. Default layers, local data, Central time.
   var CARD=/[?&]card=1/.test(location.search), ready={};
-  var done=function(k){ ready[k]=1; if(ready.s&&ready.m&&ready.e) window.cardReady=true; };
+  var cardKeys={};
+  var done=function(k){ ready[k]=1; if(!(ready.s&&ready.m&&ready.e)) return;
+    var L2=[]; if(cardKeys.storm) L2.push('<span><i style="border-color:#e6edf2"></i>NHC forecast track and cone</span>');
+    if(cardKeys.outlook) L2.push('<span><i class="box" style="border-color:#d64545"></i>NHC development area</span>');
+    if(cardKeys.ecens) L2.push('<span><i style="border-color:'+EC.ecens[0]+'"></i>European model, typical path</span>');
+    if(cardKeys.ecaie) L2.push('<span><i style="border-color:'+EC.ecaie[0]+'"></i>European AI model, typical path</span>');
+    $("c-legend").innerHTML=L2.join(""); $("c-legend").hidden=!L2.length; window.cardReady=true; };
   if(CARD){ document.body.classList.add("card"); $("card-map").appendChild($("map")); }
   var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
   var ctShort=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric"}); };
@@ -340,6 +350,7 @@ body.card .leaflet-control-container{display:none}
         else if(p.role==="ecmean") ecGroups[e.key].addLayer(L.geoJSON(f,{style:{color:c[0],weight:3.5,opacity:.95}}).bindTooltip(c[1]+": typical path of "+p.members+" members",{sticky:true}));
         else ecGroups[e.key+"_m"].addLayer(L.geoJSON(f,{pane:"ec",style:{color:c[0],weight:1.2,opacity:.6}}).bindTooltip(c[1]+" member "+p.member+", peak "+p.peak+" kt",{sticky:true})); });
       if(!(e.features||[]).length) return;
+      cardKeys[e.key]=1;
       legend+=sw(c[0],c[1],1);
       var by=STATES.filter(function(s){return e.coast[s]}).sort(function(a,b){return e.coast[b]-e.coast[a]}).map(function(s){return s+" "+e.coast[s]}).join(", ");
       sums.push(c[1]+", run "+fmt(e.run)+": "+e.developing+" members track a system through the Gulf; "+(e.hits?e.hits+" bring it to the Louisiana-to-Florida coast ("+by+"), typically around "+fmt(e.eta):"none bring it to the Louisiana-to-Florida coast")+"; "+e.hurricane+" reach hurricane strength.");
@@ -393,7 +404,7 @@ body.card .leaflet-control-container{display:none}
     });
     var b=L.latLngBounds([[24,-94],[31,-81]]); if(group.getLayers().length) b.extend(group.getBounds());
     map.fitBounds(b,{padding:[18,18]});
-    var kind=(m&&m.kind)||"none";
+    var kind=(m&&m.kind)||"none"; cardKeys.storm=kind==="storm"; cardKeys.outlook=kind==="outlook";
     var hasModels=Object.keys(mods).length>0;
     var modelLegend=["model","consensus","google","ens"].map(function(k){return mods[k]?sw(MODEL[k][0],MODEL[k][3],1):""}).join("");
     $("map-title").textContent=kind==="storm"?"Forecast track: "+m.name:kind==="outlook"?(hasModels?"Development area and model tracks":"Development area"):"Storm map";
