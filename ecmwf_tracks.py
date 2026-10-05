@@ -28,10 +28,11 @@ KT = 1.94384
 NOW = datetime.now(timezone.utc)
 
 
-# Same rough boxes as check.mjs.
+# Rough boxes, as in check.mjs.
 def in_gulf(lat, lon):
+    # Starts at 83W, not 81W, so Caribbean or Atlantic systems that only brush Florida are left out.
     w = -lon
-    return (21.5 <= lat <= 31 and 81 <= w <= 98) or (18 <= lat < 21.5 and 90 <= w <= 98)
+    return (21.5 <= lat <= 31 and 83 <= w <= 98) or (18 <= lat < 21.5 and 90 <= w <= 98)
 
 
 def coast_hit(lat, lon):
