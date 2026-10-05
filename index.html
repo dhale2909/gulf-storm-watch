@@ -111,8 +111,8 @@ body.card #card{display:flex;flex-direction:column;position:relative;width:1200p
 #card-map{position:absolute;inset:0;overflow:hidden}
 body.card #map{width:1200px;height:900px;border:0;border-radius:0}
 #card #c-pill{position:absolute;right:28px;top:40px;z-index:600;font-size:46px;padding:8px 30px}
-#card .c-bar{position:absolute;left:0;right:0;top:0;z-index:550;height:176px;box-sizing:border-box;background:rgba(13,21,28,.88);border-bottom:10px solid var(--lvl,var(--watch));padding:8px 34px 0;font-family:var(--display);white-space:nowrap;overflow:hidden}
-#c-l0{font:700 30px/36px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--lvl,var(--watch))}
+#card .c-bar{position:absolute;left:0;right:0;top:0;z-index:550;height:176px;box-sizing:border-box;background:rgba(13,21,28,.88);border-bottom:10px solid var(--lvl,var(--watch));padding:12px 34px 0;font-family:var(--display);white-space:nowrap;overflow:hidden}
+#c-l0{font:700 32px/40px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--lvl,var(--watch))}
 #c-l1{display:flex;align-items:baseline;gap:22px;font-weight:700;font-size:104px;line-height:1}
 #c-l1 span{font:500 44px var(--body);color:#c3ced6;margin-right:26px}
 #c-l1 .nm{font-size:68px;line-height:1.05}
@@ -137,7 +137,7 @@ body.card .leaflet-control-container{display:none}
 <div id="card">
   <div id="card-map"></div>
   <span class="pill" id="c-pill">Watch</span>
-  <div class="c-bar"><div id="c-l0"></div><div id="c-l1"></div><div id="c-l2"></div></div>
+  <div class="c-bar"><div id="c-l1"></div><div id="c-l0"></div><div id="c-l2"></div></div>
 </div>
 <dialog id="alerts-dlg">
   <h2>Get storm alerts on your phone</h2>
@@ -286,7 +286,7 @@ body.card .leaflet-control-container{display:none}
       $("c-l2").textContent=lf+(alerts?" \u00b7 "+alerts:"");
       shareText=s0.name+": "+s0.winds+" kt. "+(d.landfall?("Forecast track reaches the "+d.landfall.state+" coast about "+ctShort(d.landfall.eta)+". "):"")+line;
     } else if(g.area){
-      $("c-l0").textContent=g.invest?(g.invest+" \u00b7 not yet a storm"):"Gulf disturbance \u00b7 not yet a storm";
+      $("c-l0").textContent=g.invest||"Gulf disturbance";
       $("c-l1").innerHTML="<b>"+esc(g.formation7d)+"%</b><span>in 7 days</span><b>"+esc(g.formation48)+"%</b><span>in 48 hours</span>";
       $("c-l2").textContent=alerts;
       shareText="Gulf storm update: "+g.formation7d+"% chance of forming within 7 days ("+g.formation48+"% within 48 hours). "+line;
