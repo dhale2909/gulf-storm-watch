@@ -111,14 +111,15 @@ body.card #card{display:flex;flex-direction:column;position:relative;width:1200p
 #card-map{flex:1;min-height:0;position:relative}
 body.card #map{height:100%;border:0;border-radius:0}
 #card #c-pill{position:absolute;left:28px;top:26px;z-index:600;font-size:46px;padding:8px 30px}
-#card .c-bar{background:var(--bg);border-top:10px solid var(--lvl,var(--watch));padding:14px 34px 20px;font-family:var(--display);white-space:nowrap;overflow:hidden}
+#card .c-bar{height:164px;box-sizing:border-box;background:var(--bg);border-top:10px solid var(--lvl,var(--watch));padding:14px 34px 20px;font-family:var(--display);white-space:nowrap;overflow:hidden}
 #c-l1{display:flex;align-items:baseline;gap:22px;font-weight:700;font-size:118px;line-height:1}
 #c-l1 span{font:500 46px var(--body);color:#c3ced6;margin-right:26px}
 #c-l1 .nm{font-size:84px}
 #c-l2{font:500 42px/1.2 var(--body);color:#c3ced6;margin-top:8px}
 #c-l2:empty{display:none}
 .c-city{font:600 30px var(--body);color:#cfd8df;white-space:nowrap;text-shadow:0 0 4px #0d151c,0 0 4px #0d151c,0 0 8px #0d151c}
-.c-city::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:#93a3b0;margin-right:8px;vertical-align:middle}
+.c-city i{display:inline-block;width:10px;height:10px;border-radius:50%;background:#93a3b0;margin:0 8px;vertical-align:middle}
+.c-city.left{transform:translateX(-100%)}
 body.card .xmark{font-size:52px;line-height:52px}
 body.card .leaflet-control-container{display:none}
 .logbox summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;cursor:pointer;list-style:none}
@@ -260,7 +261,10 @@ body.card .leaflet-control-container{display:none}
   // Card mode (index.html?card=1): the share preview image. Default layers, local data, Central time.
   var CARD=/[?&]card=1/.test(location.search), ready={}, K=CARD?2.4:1; // K: line weight multiplier for the card
   var cardKeys={};
-  var done=function(k){ ready[k]=1; if(ready.s&&ready.m&&ready.e) window.cardReady=true; };
+  var done=function(k){ ready[k]=1; if(!(ready.s&&ready.m&&ready.e)) return;
+    // The card's layout settles after the text is filled in; re-measure the map and refit before the screenshot.
+    if(CARD&&map){ map.invalidateSize(); if(lastBounds) map.fitBounds(lastBounds,{padding:[24,24],animate:false}); }
+    window.cardReady=true; };
   if(CARD){ document.body.classList.add("card"); $("card-map").appendChild($("map")); }
   var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
   var ctShort=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric"}); };
@@ -336,7 +340,7 @@ body.card .leaflet-control-container{display:none}
     $("log").innerHTML=rows.length?rows.map(function(x){return '<div class="log-row"><span class="mono">'+fmt(x.ts)+'</span><span>'+esc(x.summary)+'</span><span class="chg" data-c="'+(x.changed?1:0)+'">'+(x.changed?(x.pushed?"CHANGE · PUSHED":"CHANGE"):"no change")+'</span></div>'}).join(""):'<div class="empty">No checks logged yet.</div>';
   }
   // ----- map: development area before formation; cone, track and coastal alerts after -----
-  var map, group, modelGroups={};
+  var map, group, modelGroups={}, lastBounds;
   var RISK={Low:"#e8c547",Medium:"#ef8f2b",High:"#d64545"};
   var WW={HWR:["#d6202a","Hurricane warning"],HWA:["#f08ad0","Hurricane watch"],TWR:["#2456d6","Tropical storm warning"],TWA:["#e6c800","Tropical storm watch"]};
   var WIND=[[96,"#b3261e","Major hurricane"],[64,"#d8631c","Hurricane"],[34,"#ef8f2b","Tropical storm"],[0,"#e8c547","Depression"]];
@@ -365,13 +369,13 @@ body.card .leaflet-control-container{display:none}
   var sw=function(c,t,line){return '<span><i'+(line?' class="ln" style="border-color:'+c+'"':' style="background:'+c+'"')+'></i>'+t+'</span>'};
   function initMap(){
     if(map||!window.L) return;
-    map=L.map("map",{scrollWheelZoom:false});
+    map=L.map("map",{scrollWheelZoom:false,zoomSnap:CARD?0.1:1});
     var esri="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_";
     L.tileLayer(esri+"Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Map: Esri, HERE, Garmin, &copy; OpenStreetMap contributors",maxZoom:10}).addTo(map);
     if(!CARD) L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
     // The card is viewed at thumbnail size, so it gets a few large city labels instead of the fine map text.
-    else [["Houston",29.76,-95.37],["New Orleans",29.95,-90.07],["Pensacola",30.42,-87.22],["Tampa",27.95,-82.46]].forEach(function(c){
-      L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city",html:c[0],iconSize:[0,0],iconAnchor:[5,18]})}).addTo(map); });
+    else [["Houston",29.76,-95.37],["New Orleans",29.95,-90.07,1],["Pensacola",30.42,-87.22],["Tampa",27.95,-82.46]].forEach(function(c){
+      L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city"+(c[3]?" left":""),html:c[3]?c[0]+"<i></i>":"<i></i>"+c[0],iconSize:[0,0],iconAnchor:c[3]?[-13,18]:[13,18]})}).addTo(map); });
     // European ensemble lines sit in their own pane under everything else, each with an on/off switch.
     map.createPane("ec").style.zIndex=350;
     // Every kind of line gets its own on/off switch in the layers button; choices are remembered on this device.
@@ -408,7 +412,7 @@ body.card .leaflet-control-container{display:none}
       if(l) (r==="model"?(modelGroups[p.group]||modelGroups.model):group).addLayer(l);
     });
     var b=L.latLngBounds([[24,-94],[31,-81]]); if(group.getLayers().length) b.extend(group.getBounds());
-    map.fitBounds(b,{padding:[18,18]});
+    lastBounds=b; map.fitBounds(b,{padding:[18,18]});
     var kind=(m&&m.kind)||"none"; cardKeys.storm=kind==="storm"; cardKeys.outlook=kind==="outlook";
     var hasModels=Object.keys(mods).length>0;
     var modelLegend=["model","consensus","google","ens"].map(function(k){return mods[k]?sw(MODEL[k][0],MODEL[k][3],1):""}).join("");
