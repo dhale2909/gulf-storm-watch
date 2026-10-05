@@ -446,7 +446,7 @@ async function notify(title, message, level, topic = process.env.NTFY_TOPIC) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       topic, title, message,
-      priority: { landfall: 5, threat: 4 }[level] || 3,
+      priority: level === 'landfall' ? 5 : 4, // high priority throughout: default-priority pushes were not reliably announced on iPhone
       tags: [{ landfall: 'rotating_light', threat: 'warning', watch: 'cyclone' }[level] || 'white_check_mark'],
       ...(process.env.PAGE_URL ? { click: process.env.PAGE_URL } : {}),
     }),
