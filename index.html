@@ -104,6 +104,9 @@ a{color:var(--accent)}
 .wl{display:inline-block;font:700 11px/1 var(--mono);padding:3px 6px;border-radius:999px;background:#0f1a24;color:#fff;border:1.5px solid #fff;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(0,0,0,.5)}
 .wl.hu{background:#b3261e}
 .wl.lg{transform:none;margin-right:6px;vertical-align:middle}
+.credit{display:flex;justify-content:center;padding:18px 0 28px}
+.credit a{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;text-decoration:none;opacity:.8}
+.credit a:hover{opacity:1}.credit img{height:24px;width:auto}
 .leaflet-tooltip.pt{font:500 12px var(--body);padding:3px 8px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;box-shadow:none}
 .leaflet-tooltip.pt:before{display:none}
 .xmark{font:700 20px/20px var(--display);color:var(--landfall);text-align:center;text-shadow:0 0 3px var(--panel),0 0 3px var(--panel)}
@@ -313,6 +316,7 @@ body.card .leaflet-control-container{display:none}
     <a href="https://www.weather.gov/tae/" target="_blank" rel="noopener">NWS Tallahassee</a>
     <span>Automated summary; landfall place and time are approximate. Follow official NHC and NWS products for decisions.</span>
   </div>
+  <div class="credit"><a href="https://commandcurve.com/?utm_source=storm-page&amp;utm_medium=built-by&amp;utm_campaign=site-credit" target="_blank" rel="noopener" aria-label="Built by Command Curve (opens in a new tab)"><span>Built by</span><img src="commandcurve-mark.png" alt="Command Curve" width="220" height="112" loading="lazy"></a></div>
 </div>
 
 <script>
@@ -382,6 +386,7 @@ body.card .leaflet-control-container{display:none}
   }
   // ----- browser notifications: this device registers with the subscriber service; the hourly check sends to it -----
   var PUSH_API="https://storm-page-push.daniel-48f.workers.dev";
+  var hit=function(e){ try{ navigator.sendBeacon(PUSH_API+"/hit", e); }catch(x){} }; // a count per event per day, nothing else
   var VAPID_PUBLIC="BNbw4rWNN4JtPg4hBoEUyy5aKS0KDOB6IN_1-EMfXGFumWS99_SOzOi5BDlAArQUIomdfb811-0E-9i4BNh9iL0";
   var IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
   var STANDALONE=window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;
@@ -423,7 +428,8 @@ body.card .leaflet-control-container{display:none}
   $("push-on").addEventListener("click",pushEnable); $("push-off").addEventListener("click",pushDisable);
   // A link ending in ?alerts=1 (the invite text) opens the Get alerts steps straight away.
   if(/[?&]alerts=1/.test(location.search)&&!CARD) setTimeout(function(){ $("alerts").click(); },600);
-  $("alerts").addEventListener("click",function(){
+  document.querySelectorAll('a[href^="ntfy://"]').forEach(function(a){ a.addEventListener("click",function(){ hit("ntfy-tap"); }); });
+  $("alerts").addEventListener("click",function(){ hit("alerts-open");
     var on=false; try{ on=localStorage.getItem("gsw-push")==="1"; }catch(e){}
     if(IOS&&!STANDALONE) $("push-ios").hidden=false;
     pushState(on); pmsg(on?"Alerts are on for this device.":"");
@@ -431,7 +437,7 @@ body.card .leaflet-control-container{display:none}
     // If this device thinks it is subscribed, make sure the browser still agrees.
     if(on&&pushOK) navigator.serviceWorker.getRegistration("sw.js").then(function(reg){ return reg&&reg.pushManager.getSubscription(); }).then(function(sub){ if(!sub){ pushState(false); pmsg("Alerts were switched off by the browser. Turn them on again."); } }).catch(function(){});
   });
-  $("share").addEventListener("click",function(){
+  $("share").addEventListener("click",function(){ hit("share");
     // A fresh address per share so texting apps fetch a fresh preview card.
     var url=location.origin+location.pathname+"?u="+Date.now().toString(36), btn=this;
     // Link only, no text: the preview card tells the story.

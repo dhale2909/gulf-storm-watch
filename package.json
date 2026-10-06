@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "stats": "node scripts/stats.mjs"
   },
   "dependencies": {
     "web-push": "^3.6.7"

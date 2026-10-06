@@ -59,10 +59,26 @@ function serialised(key, fn) {
   return run;
 }
 
+// ---- usage counts: one number per event per day (no identity, no addresses). Visits are counted by Cloudflare ----
+// Web Analytics on the page; these cover what that cannot see: alert sign-ups and taps.
+const EVENTS = ['alerts-open', 'share', 'ntfy-tap', 'subscribe', 'unsubscribe', 'test'];
+async function count(env, e) {
+  if (!EVENTS.includes(e)) return;
+  const k = `stat:${e}:${new Date().toISOString().slice(0, 10)}`;
+  try { await env.SUBS.put(k, String((+(await env.SUBS.get(k)) || 0) + 1), { expirationTtl: 400 * 86400 }); } catch {} // best effort; a lost count is fine
+}
+
 export default {
   async fetch(req, env) {
     const url = new URL(req.url);
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
+
+    // The page reports a tap (sendBeacon, plain text body: the event name).
+    if (req.method === 'POST' && url.pathname === '/hit') {
+      const e = (await req.text()).slice(0, 32).trim();
+      await count(env, e);
+      return new Response(null, { status: 204, headers: cors });
+    }
 
     // A registered device asks for its own test push; at most one every 5 minutes per device.
     if (req.method === 'POST' && url.pathname === '/test') {
@@ -75,6 +91,7 @@ export default {
       return serialised(key, async () => {
         if (await env.SUBS.get(`test:${key}`)) return json({ error: 'try again in a few minutes' }, 429);
         await env.SUBS.put(`test:${key}`, '1', { expirationTtl: 300 });
+        await count(env, 'test');
         try {
           const status = await sendTest(body.endpoint, env);
           return json({ ok: status >= 200 && status < 300, status }, status >= 200 && status < 300 ? 200 : 502);
@@ -89,11 +106,13 @@ export default {
       const sub = await readJSON(req);
       if (!sub || !validEndpoint(sub.endpoint)) return json({ error: 'bad subscription' }, 400);
       const key = await keyFor(sub.endpoint);
-      if (url.pathname === '/unsubscribe') { await env.SUBS.delete(key); return json({ ok: true }); }
+      if (url.pathname === '/unsubscribe') { await env.SUBS.delete(key); await count(env, 'unsubscribe'); return json({ ok: true }); }
       // p256dh is a 65-byte P-256 public key, auth a 16-byte secret, both base64url.
       if (!sub.keys || !b64len(sub.keys.p256dh, 65) || !b64len(sub.keys.auth, 16)) return json({ error: 'bad keys' }, 400);
       // Keep the subscription in metadata so a single list() call returns everything.
-      await env.SUBS.put(key, '1', { metadata: { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth }, added: Date.now() } });
+      const existing = await env.SUBS.getWithMetadata(key);
+      await env.SUBS.put(key, '1', { metadata: { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth }, added: existing?.metadata?.added || Date.now() } });
+      if (!existing?.metadata) await count(env, 'subscribe');
       return json({ ok: true }, 201);
     }
 
@@ -108,6 +127,20 @@ export default {
         cursor = page.list_complete ? null : page.cursor;
       } while (cursor);
       return json(out);
+    }
+    // Owner's usage report: registered devices (with the day each was added) and the event counts by day.
+    if (req.method === 'GET' && url.pathname === '/stats') {
+      const devices = [], counts = {};
+      let cursor;
+      do {
+        const page = await env.SUBS.list({ cursor, prefix: '' });
+        for (const k of page.keys) {
+          if (k.metadata?.endpoint) devices.push({ added: new Date(k.metadata.added || 0).toISOString().slice(0, 10), service: new URL(k.metadata.endpoint).hostname });
+          else if (k.name.startsWith('stat:')) { const [, e, day] = k.name.split(':'); (counts[day] ||= {})[e] = +(await env.SUBS.get(k.name)) || 0; }
+        }
+        cursor = page.list_complete ? null : page.cursor;
+      } while (cursor);
+      return json({ devices: devices.length, byService: devices.reduce((m, d) => ({ ...m, [d.service]: (m[d.service] || 0) + 1 }), {}), addedByDay: devices.reduce((m, d) => ({ ...m, [d.added]: (m[d.added] || 0) + 1 }), {}), counts });
     }
     if (req.method === 'POST' && url.pathname === '/prune') {
       const body = await readJSON(req);
