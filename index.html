@@ -54,6 +54,7 @@ a{color:var(--accent)}
 .stale{color:var(--landfall);font-size:13px;font-weight:600}
 
 .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tiles[data-stage="form"] .stage-storm,.tiles[data-stage="storm"] .stage-form{display:none}
 @media (max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .tile{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px;min-width:0;align-content:start}
 .tile .val{font-family:var(--display);font-size:34px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
@@ -120,8 +121,8 @@ body.card .wrap{display:none}
 body.card #card{display:flex;flex-direction:column;position:relative;width:1200px;height:900px;background:var(--bg)}
 #card-map{position:absolute;inset:0;overflow:hidden}
 body.card #map{width:1200px;height:900px;border:0;border-radius:0}
-#card #c-pill{position:absolute;right:28px;top:40px;z-index:600;font-size:46px;padding:8px 30px}
-#card .c-bar{position:absolute;left:0;right:0;top:0;z-index:550;height:176px;box-sizing:border-box;background:rgba(13,21,28,.88);border-bottom:10px solid var(--lvl,var(--watch));padding:12px 250px 0 34px;font-family:var(--display);white-space:nowrap;overflow:hidden}
+#card #c-pill{position:absolute;right:28px;top:40px;z-index:600;font-size:40px;padding:8px 26px}
+#card .c-bar{position:absolute;left:0;right:0;top:0;z-index:550;height:176px;box-sizing:border-box;background:rgba(13,21,28,.88);border-bottom:10px solid var(--lvl,var(--watch));padding:12px 300px 0 34px;font-family:var(--display);white-space:nowrap;overflow:hidden}
 #c-l0{font:700 32px/40px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--lvl,var(--watch))}
 #c-l1{display:flex;align-items:baseline;gap:18px;font-weight:700;font-size:92px;line-height:1}
 #c-l1 span{font:500 .46em var(--body);color:#c3ced6;margin-right:22px}
@@ -181,19 +182,34 @@ body.card .leaflet-control-container{display:none}
     <div class="stale" id="stale" hidden></div>
   </section>
 
-  <section class="tiles">
-    <div class="tile">
+  <section class="tiles" id="tiles">
+    <div class="tile stage-storm">
+      <div class="eyebrow">Storm</div>
+      <div class="val sm" id="st-type">—</div>
+      <div class="sub" id="st-type-sub"></div>
+    </div>
+    <div class="tile stage-storm">
+      <div class="eyebrow">Sustained winds</div>
+      <div class="val"><span id="st-wind">—</span><span style="font-size:18px"> kt</span></div>
+      <div class="sub" id="st-wind-sub"></div>
+    </div>
+    <div class="tile stage-storm">
+      <div class="eyebrow">Landfall</div>
+      <div class="val sm" id="st-lf">—</div>
+      <div class="sub" id="st-lf-sub"></div>
+    </div>
+    <div class="tile stage-form">
       <div class="eyebrow">7-day formation</div>
       <div class="val"><span id="p7">—</span><span style="font-size:18px">%</span></div>
       <div class="gauge"><div class="nd" id="nd7"></div></div>
       <div class="gauge-ticks"><span>0</span><span>low</span><span>40</span><span>med</span><span>60</span><span>high</span><span>100</span></div>
     </div>
-    <div class="tile">
+    <div class="tile stage-form">
       <div class="eyebrow">48-hour formation</div>
       <div class="val"><span id="p48">—</span><span style="font-size:18px">%</span></div>
       <div class="sub" id="p48sub"></div>
     </div>
-    <div class="tile">
+    <div class="tile stage-form">
       <div class="eyebrow">System status</div>
       <div class="val sm" id="sysstat">—</div>
       <div class="sub" id="sysstatsub"></div>
@@ -203,6 +219,12 @@ body.card .leaflet-control-container{display:none}
       <div class="val sm mono" id="last">—</div>
       <div class="sub" id="next">Checks run every 30 minutes</div>
     </div>
+  </section>
+
+  <section class="panel">
+    <header><h2>Coastal watches and warnings</h2><span class="tag">NWS</span></header>
+    <div class="coast" id="coast"></div>
+    <div id="coast-note" style="font-size:13px;color:var(--muted)"></div>
   </section>
 
   <section class="panel">
@@ -253,19 +275,13 @@ body.card .leaflet-control-container{display:none}
     </section>
   </div>
 
-  <div class="grid2">
-    <section class="panel">
-      <header><h2>Coastal watches and warnings</h2><span class="tag">NWS</span></header>
-      <div class="coast" id="coast"></div>
-      <div id="coast-note" style="font-size:13px;color:var(--muted)"></div>
-    </section>
-    <section class="panel">
-      <header><h2>Google AI ensemble</h2><span class="tag" id="goog-run">Experimental</span></header>
+  <section class="panel">
+    <header><h2>Google AI ensemble</h2><span class="tag" id="goog-run">Experimental</span></header>
       <div id="goog-text" class="empty">No data for this system yet. Google's ensemble only covers systems NHC has numbered.</div>
       <div class="gbars" id="goog-bars" hidden></div>
       <div style="font-size:11.5px;color:var(--muted)">Summary computed from Google Weather Lab. &copy; 2024-6 Google LLC, whose machine learning models were used to create the experimental data made available under the following licence terms <a href="https://storage.googleapis.com/weathernext-public/terms-of-use.pdf" target="_blank" rel="noopener">https://storage.googleapis.com/weathernext-public/terms-of-use.pdf</a>. This data is intended for experimental modelling only and is not intended, validated, or approved for real world use.</div>
     </section>
-  </div>
+  
 
   <details class="panel logbox">
     <summary><h2>Check log</h2><span id="logcount" style="color:var(--muted);font-size:13px"></span><span class="tag toggle"></span></summary>
@@ -286,7 +302,7 @@ body.card .leaflet-control-container{display:none}
 <script>
 (function(){
   var $=function(id){return document.getElementById(id)};
-  var LABEL={quiet:"Quiet",watch:"Watch",threat:"Threat",landfall:"Landfall"};
+  var LABEL={quiet:"Quiet",watch:"Monitoring",threat:"Threat",landfall:"Landfall"};
   var levelLabel=function(d){ return d.alertLevel==="landfall"&&!d.landfallOccurred?"Landfall expected":LABEL[d.alertLevel]||"Quiet"; };
   var STATES=["AL","FL","MS","LA"];
   var fmt=function(iso){ if(!iso) return "—"; var d=new Date(iso); if(isNaN(d)) return iso;
@@ -339,7 +355,7 @@ body.card .leaflet-control-container{display:none}
     }
     // Shrink long lines (long storm names, several alerts) until they fit the card width.
     ["c-l1","c-l2"].forEach(function(id){ var el=$(id), size=parseFloat(getComputedStyle(el.querySelector(".nm")||el).fontSize);
-      var t=el.querySelector(".nm")||el; while(CARD&&el.scrollWidth>916&&size>24){ size-=2; t.style.fontSize=size+"px"; } });
+      var t=el.querySelector(".nm")||el; while(CARD&&el.scrollWidth>866&&size>24){ size-=2; t.style.fontSize=size+"px"; } });
     done("s");
   }
   // ----- browser notifications: this device registers with the subscriber service; the hourly check sends to it -----
@@ -417,6 +433,14 @@ body.card .leaflet-control-container{display:none}
     $("outlook").textContent=g.text||"No Gulf disturbance in the current NHC outlook.";
     $("src").textContent=g.source||"NHC outlook";
     var st=d.storms||[], s0=st[0];
+    $("tiles").setAttribute("data-stage",s0?"storm":"form");
+    if(s0){
+      $("st-type").textContent=s0.type+(s0.category?" \u00b7 Cat "+s0.category:"");
+      $("st-type-sub").textContent=s0.name+(s0.advisory?" \u00b7 "+s0.advisory+(s0.advisoryAt?" ("+fmt(s0.advisoryAt)+")":""):"");
+      $("st-wind").textContent=s0.winds; $("st-wind-sub").textContent="Moving "+s0.movement+" \u00b7 "+s0.location;
+      $("st-lf").textContent=d.landfallOccurred?("Made landfall: "+d.landfallOccurred.state):d.landfall?("Expected: "+d.landfall.state):(s0.forecastStale?"Forecast unavailable":"None forecast");
+      $("st-lf-sub").textContent=d.landfallOccurred?("about "+fmt(d.landfallOccurred.at)):d.landfall?("about "+fmt(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"showing the last known reading":"Track stays off the AL\u2013FL coast through the forecast period");
+    }
     $("sysstat").textContent=s0?s0.name:(g.area?(g.invest||"Disturbance"):"None");
     $("sysstatsub").textContent=s0?(s0.winds+" kt · "+s0.movement):(g.area?(g.invest?(g.winds?g.winds+" kt winds; ":"")+"no NHC advisories yet":"Not designated; no NHC advisories yet"):"No Gulf system flagged");
     $("storms").innerHTML=st.length?st.map(function(s){var k=catKey(s);return '<div class="storm"><div class="cat" data-k="'+k+'">'+k+'</div><div><div class="nm">'+esc(s.name)+'</div><dl>'+
@@ -425,8 +449,9 @@ body.card .leaflet-control-container{display:none}
       '<dt>Track</dt><dd>'+esc(s.gulfRisk)+'</dd>'+(s.advisory?'<dt>Source</dt><dd>'+esc(s.advisory)+'</dd>':'')+'</dl></div></div>'}).join(""):'<div class="empty">Not yet a depression. No NHC advisories or forecast track.</div>';
     var ww=d.watchesWarnings||{};
     $("coast").innerHTML=STATES.map(function(s){var v=ww[s]||{}; var c=v.level==="warning"?"var(--landfall)":v.level==="watch"?"var(--threat)":"var(--line)";
-      return '<div class="st" style="--stc:'+c+'"><b>'+s+'</b><span>'+esc(v.text||"Clear")+'</span></div>'}).join("");
-    $("coast-note").textContent=STATES.some(function(s){return ww[s]&&ww[s].level})?"Tropical watches or warnings are in effect; see state tiles.":"No tropical watches or warnings in effect for the four states.";
+      return '<div class="st" style="--stc:'+c+'"><b>'+s+'</b><span>'+esc(v.text||"No tropical watch or warning reported")+'</span><a href="https://alerts.weather.gov/search?area='+s+'" target="_blank" rel="noopener" style="font-size:12px">Official NWS alerts</a></div>'}).join("");
+    var unavail=(ww.unavailable||[]);
+    $("coast-note").textContent=(STATES.some(function(s){return ww[s]&&ww[s].level})?"Tropical watches or warnings are in effect; tap a state for the official product. ":"No tropical watch or warning reported for the four states. ")+(unavail.length?"NWS could not be reached for "+unavail.join(", ")+"; showing the previous reading.":"");
     var G=d.google;
     $("goog-text").classList.toggle("empty",!G); $("goog-bars").hidden=!G;
     if(G){

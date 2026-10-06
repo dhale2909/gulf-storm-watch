@@ -17,6 +17,7 @@ const NOW = process.env.NOW ? new Date(process.env.NOW) : new Date();
 const STATES = ['AL', 'FL', 'MS', 'LA'];
 const LOG_MAX = 150;
 const TROPICAL_EVENTS = /^(Tropical Storm|Hurricane|Storm Surge) (Watch|Warning)$/;
+const LEVEL_LABEL = { quiet: 'QUIET', watch: 'MONITORING', threat: 'THREAT', landfall: 'LANDFALL' }; // "watch" stays the internal name; it is never an official NHC watch
 const TYPES = {
   TD: 'Tropical Depression', TS: 'Tropical Storm', HU: 'Hurricane',
   STD: 'Subtropical Depression', STS: 'Subtropical Storm', PTC: 'Potential Tropical Cyclone',
@@ -176,6 +177,7 @@ export async function gatherStorms(prior) {
       location: loc,
       movement: Number.isFinite(+s.movementSpeed) && +s.movementSpeed > 0 ? `${compass(+s.movementDir)} at ${s.movementSpeed} kt` : 'Stationary',
       advisory: s.forecastAdvisory?.advNum ? `NHC advisory ${s.forecastAdvisory.advNum}` : '',
+      advisoryAt: s.forecastAdvisory?.issuance || s.lastUpdate || null,
       landfall,
       ashore: here && ashore(here) ? { state: coastState(here), t: here.t } : null,
       pos: here ? { lat: here.lat, lonW: here.lonW } : prev?.pos || null,
@@ -467,7 +469,7 @@ export function build(prior, gulf, storms, ww) {
 export function diff(prior, cur) {
   const ch = [];
   if (!prior) return ch;
-  if (prior.alertLevel !== cur.alertLevel) ch.push(`Alert level ${prior.alertLevel.toUpperCase()} -> ${cur.alertLevel.toUpperCase()}`);
+  if (prior.alertLevel !== cur.alertLevel) ch.push(`Alert level ${LEVEL_LABEL[prior.alertLevel] || prior.alertLevel} -> ${LEVEL_LABEL[cur.alertLevel] || cur.alertLevel}`);
 
   const a = prior.gulf?.formation7d, b = cur.gulf?.formation7d, base = prior.internal?.baseline7d;
   if (a != null && b != null) {
@@ -702,9 +704,9 @@ async function main() {
     const goog = status.google ? `\n\nGoogle AI ensemble (experimental, not a forecast): ${status.google.text}` : '';
     const msg = {
       level: status.alertLevel,
-      privateTitle: `Gulf Storm Watch: ${status.alertLevel.toUpperCase()}`, privateBody: `${changes.join('. ')}.\n\n${status.headline}${goog}${play}`,
+      privateTitle: `Gulf Storm Watch: ${LEVEL_LABEL[status.alertLevel]}`, privateBody: `${changes.join('. ')}.\n\n${status.headline}${goog}${play}`,
       // Public subscribers get the same change, weather facts only: browser notifications and the public ntfy feed.
-      publicTitle: `Daniel's Storm Page: ${status.alertLevel.toUpperCase()}`, publicBody: `${changes.join('. ')}.\n\n${status.headline}`,
+      publicTitle: `Daniel's Storm Page: ${LEVEL_LABEL[status.alertLevel]}`, publicBody: `${changes.join('. ')}.\n\n${status.headline}`,
     };
     delivery = await deliver(msg);
     pushed = delivery.private === true;
