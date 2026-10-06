@@ -153,7 +153,7 @@ body.card .leaflet-control-container{display:none}
   <h2>Get storm alerts on this device</h2>
   <p>Free, no app and no account. You hear from it only when the picture changes: a storm forms or strengthens, formation odds jump, a watch or warning is posted for AL, FL, MS or LA, or the forecast landfall shifts.</p>
   <div id="push-ios" class="sub" hidden><b>iPhone and iPad:</b> first add this page to your Home Screen: tap the Share button, then <b>Add to Home Screen</b>. Open it from the Home Screen and tap the button below there. Apple only allows notifications from pages on the Home Screen.</div>
-  <p><button class="share go" id="push-on" type="button">Turn on notifications</button> <button class="share" id="push-off" type="button" hidden>Turn off</button></p>
+  <p><button class="share go" id="push-on" type="button">Turn on notifications</button> <button class="share" id="push-test" type="button" hidden>Send me a test</button> <button class="share" id="push-off" type="button" hidden>Turn off</button></p>
   <p class="sub" id="push-msg"></p>
   <details><summary class="sub">Prefer the ntfy app instead?</summary>
     <ol class="sub">
@@ -350,7 +350,18 @@ body.card .leaflet-control-container{display:none}
   var pushOK=("serviceWorker" in navigator)&&("PushManager" in window)&&("Notification" in window);
   var b64=function(s){ s=(s+"=".repeat((4-s.length%4)%4)).replace(/-/g,"+").replace(/_/g,"/"); var r=atob(s), a=new Uint8Array(r.length); for(var i=0;i<r.length;i++) a[i]=r.charCodeAt(i); return a; };
   var pmsg=function(t){ $("push-msg").textContent=t; };
-  function pushState(on){ $("push-on").hidden=on; $("push-off").hidden=!on; try{ localStorage.setItem("gsw-push",on?"1":""); }catch(e){} }
+  function pushState(on){ $("push-on").hidden=on; $("push-off").hidden=!on; $("push-test").hidden=!on; try{ localStorage.setItem("gsw-push",on?"1":""); }catch(e){} }
+  async function pushTest(){
+    var btn=$("push-test"); btn.disabled=true; pmsg("Sending a test to this device\u2026");
+    try{ var reg=await navigator.serviceWorker.getRegistration("sw.js"); var sub=reg&&await reg.pushManager.getSubscription();
+      if(!sub) throw new Error("this device is not subscribed");
+      var r=await fetch(PUSH_API+"/test",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({endpoint:sub.endpoint})});
+      var j=await r.json().catch(function(){return {}});
+      pmsg(r.ok?"Test sent. It should appear on this device within a few seconds.":(r.status===429?"A test was sent recently; wait a few minutes and try again.":"Couldn't send a test ("+(j.error||r.status)+")."));
+    }catch(e){ pmsg("Couldn't send a test ("+(e&&e.message||e)+")."); }
+    btn.disabled=false;
+  }
+  $("push-test").addEventListener("click",pushTest);
   async function pushEnable(){
     if(!pushOK){ pmsg("This browser can't show notifications. Use the ntfy option below instead."); return; }
     if(IOS&&!STANDALONE){ $("push-ios").hidden=false; pmsg("Add the page to your Home Screen first (steps above), then tap this button from there."); return; }

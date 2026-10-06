@@ -5,3 +5,7 @@ compatibility_date = "2026-01-01"
 [[kv_namespaces]]
 binding = "SUBS"
 id = "13ecca541a1244c286e062887e543afe"
+
+[vars]
+PAGE_URL = "https://dhale2909.github.io/gulf-storm-watch/"
+VAPID_PUBLIC_KEY = "BNbw4rWNN4JtPg4hBoEUyy5aKS0KDOB6IN_1-EMfXGFumWS99_SOzOi5BDlAArQUIomdfb811-0E-9i4BNh9iL0"

@@ -4,6 +4,8 @@ self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 self.addEventListener('push', (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }
+  // A push with no payload is the "Send me a test" ping from the subscriber service.
+  if (!e.data) d = { title: "Daniel's Storm Page: test", body: 'Test notification. Storm alerts will reach this device.' };
   e.waitUntil(self.registration.showNotification(d.title || "Daniel's Storm Page", {
     body: d.body || 'The Gulf storm picture has changed.', icon: 'icon-192.png', badge: 'icon-192.png',
     tag: 'storm-alert', renotify: true, data: { url: d.url || './' },
