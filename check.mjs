@@ -679,7 +679,9 @@ async function main() {
     const base = models.history?.length ? map.features.filter((f) => f.properties.role !== 'origin') : map.features;
     // Storm stage: NOAA's own past-track layer wins; the best-track file fills in until that layer is published.
     const hasPast = map.features.some((f) => f.properties.role === 'past');
-    const hist = map.kind === 'storm' && hasPast ? [] : (models.history || []).map((f) => (map.kind === 'storm' && f.properties.role === 'pastpt' ? { ...f, properties: { ...f.properties, now: false } } : f));
+    const hist = (models.history || [])
+      .filter((f) => !(map.kind === 'storm' && hasPast && f.properties.role === 'past')) // NOAA's trail line replaces ours; the dots stay
+      .map((f) => (map.kind === 'storm' && f.properties.role === 'pastpt' ? { ...f, properties: { ...f.properties, now: false } } : f));
     map.features = [...models.features, ...base, ...hist];
     map.models = models.label;
   }
@@ -705,7 +707,7 @@ async function main() {
   // The Google summary is tied to the system it was computed for; a carried-over summary is kept only for the same system.
   const systemKey = status.tracked?.invest || status.tracked?.stormId || null; // stable across the Invest -> storm upgrade
   const carryGoogle = () => (prior?.google && prior.google.system === systemKey && NOW.getTime() - new Date(prior.google.computedAt || prior.google.run).getTime() < 12 * 3600e3 ? prior.google : null);
-  status.google = await gatherGoogle(storms[0], models?.invest)
+  status.google = await gatherGoogle(storms[0], models?.invest || prevTracked?.invest || gulf?.investHint)
     .then((g) => (g ? { ...g, system: systemKey, computedAt: NOW.toISOString() } : carryGoogle())) // no fresh file this check: keep a recent summary for the same system
     .catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return carryGoogle(); });
   const changes = diff(prior, status);

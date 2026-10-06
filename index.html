@@ -99,7 +99,7 @@ a{color:var(--accent)}
 .legend i{display:inline-block;width:18px;height:10px;border-radius:2px;margin-right:6px;vertical-align:baseline}
 .legend i.ln{height:0;border-top:3px solid;border-radius:0;vertical-align:middle}
 .map-note{font-size:13px;color:var(--muted);max-width:80ch}
-.leaflet-tooltip.pt{font:500 11px var(--mono);padding:1px 5px;background:var(--panel);color:var(--fg);border:1px solid var(--line);box-shadow:none}
+.leaflet-tooltip.pt{font:500 12px var(--body);padding:3px 8px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;box-shadow:none}
 .leaflet-tooltip.pt:before{display:none}
 .xmark{font:700 20px/20px var(--display);color:var(--landfall);text-align:center;text-shadow:0 0 3px var(--panel),0 0 3px var(--panel)}
 .gbars{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;font-size:13px}
@@ -324,6 +324,9 @@ body.card .leaflet-control-container{display:none}
   var ctShort=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric"}); };
   var shareText="";
   var STATE_NAME={AL:"Alabama",FL:"Florida",MS:"Mississippi",LA:"Louisiana"};
+  // NHC numbers depressions in words ("Nine"); show digits. Named storms keep their names.
+  var NUMS={One:1,Two:2,Three:3,Four:4,Five:5,Six:6,Seven:7,Eight:8,Nine:9,Ten:10,Eleven:11,Twelve:12,Thirteen:13,Fourteen:14,Fifteen:15,Sixteen:16,Seventeen:17,Eighteen:18,Nineteen:19,Twenty:20,"Twenty-One":21,"Twenty-Two":22,"Twenty-Three":23,"Twenty-Four":24,"Twenty-Five":25};
+  var stormName=function(s){ var n=s.name||""; var last=n.split(" ").pop(); return NUMS[last]?n.replace(new RegExp(last+"$"),NUMS[last]):n; };
   var asOf=function(d){ var g=d.gulf||{}; var m=/(\d{1,2})(\d{2}) (AM|PM) (\w+)/.exec(g.source||""); return m?("NHC "+m[1]+":"+m[2]+" "+m[3]+" "+m[4]):("as of "+ctShort(d.updatedAt)); };
   function renderCard(d){
     var lvl=LABEL[d.alertLevel]?d.alertLevel:"quiet", g=d.gulf||{}, s0=(d.storms||[])[0], ww=d.watchesWarnings||{};
@@ -335,7 +338,7 @@ body.card .leaflet-control-container{display:none}
       var lf=d.landfallOccurred?("Made landfall in "+(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+" about "+ctShort(d.landfallOccurred.at)):d.landfall?("Landfall expected: "+STATE_NAME[d.landfall.state]+" coast, about "+ctShort(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"Latest forecast unavailable":"No landfall on the AL\u2013FL coast in the forecast");
       $("c-l0").textContent=s0.type+(s0.category?" \u00b7 Category "+s0.category:"")+" \u00b7 "+(s0.advisory||asOf(d));
       var short=s0.name.indexOf(s0.type+" ")===0?s0.name.slice(s0.type.length+1):s0.name;
-      $("c-l1").innerHTML='<b class="nm">'+esc(short)+" \u00b7 "+esc(s0.winds)+" kt winds</b>";
+      $("c-l1").innerHTML='<b class="nm">'+esc(stormName({name:short}))+" \u00b7 "+esc(s0.winds)+" kt winds</b>";
       $("c-l2").textContent=lf+(alerts?" \u00b7 "+alerts:"");
       shareText=s0.name+": "+s0.winds+" kt. "+(d.landfall?("Forecast track reaches the "+d.landfall.state+" coast about "+ctShort(d.landfall.eta)+". "):"")+line;
     } else if(held){
@@ -435,8 +438,8 @@ body.card .leaflet-control-container{display:none}
     var st=d.storms||[], s0=st[0];
     $("tiles").setAttribute("data-stage",s0?"storm":"form");
     if(s0){
-      $("st-type").textContent=s0.type+(s0.category?" \u00b7 Cat "+s0.category:"");
-      $("st-type-sub").textContent=s0.name+(s0.advisory?" \u00b7 "+s0.advisory+(s0.advisoryAt?" ("+fmt(s0.advisoryAt)+")":""):"");
+      $("st-type").textContent=stormName(s0)+(s0.category?" \u00b7 Cat "+s0.category:"");
+      $("st-type-sub").textContent=(s0.advisory||"NHC advisory")+(s0.advisoryAt?" \u00b7 "+fmt(s0.advisoryAt):"");
       $("st-wind").textContent=s0.winds; $("st-wind-sub").textContent="Moving "+s0.movement+" \u00b7 "+s0.location;
       $("st-lf").textContent=d.landfallOccurred?("Made landfall: "+d.landfallOccurred.state):d.landfall?("Expected: "+d.landfall.state):(s0.forecastStale?"Forecast unavailable":"None forecast");
       $("st-lf-sub").textContent=d.landfallOccurred?("about "+fmt(d.landfallOccurred.at)):d.landfall?("about "+fmt(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"showing the last known reading":"Track stays off the AL\u2013FL coast through the forecast period");
@@ -532,14 +535,14 @@ body.card .leaflet-control-container{display:none}
       else if(r==="area"){ risk=p.risk; l=L.geoJSON(f,{style:{color:RISK[p.risk]||RISK.Medium,weight:2*K,dashArray:CARD?"14 10":"6 4",fillOpacity:.28}}).bindTooltip("Where NHC expects development: "+esc(p.prob7)+" within 7 days",{sticky:true}); }
       else if(r==="motion") l=L.geoJSON(f,{style:{color:RISK[risk]||RISK.Medium,weight:3*K}});
       else if(r==="origin") l=L.marker([c[1],c[0]],{icon:L.divIcon({className:"xmark",html:"&#10005;",iconSize:CARD?[56,56]:[20,20]})}).bindTooltip("Disturbance now: "+esc(p.prob2)+" in 48 hours, "+esc(p.prob7)+" in 7 days");
-      else if(r==="cone") l=L.geoJSON(f,{style:{color:muted,weight:1.5*K,fillColor:muted,fillOpacity:.22}}).bindTooltip("Forecast cone: probable path of the storm center",{sticky:true});
-      else if(r==="track") l=L.geoJSON(f,{style:{color:fg,weight:2.5*K}});
+      else if(r==="cone") l=L.geoJSON(f,{style:{color:"#cfd8df",weight:1.2*K,fillColor:"#cfd8df",fillOpacity:.18,dashArray:CARD?"":"4 4"}}).bindTooltip("Forecast cone: probable path of the storm center",{sticky:true});
+      else if(r==="track") l=L.geoJSON(f,{style:{color:"#fff",weight:3*K,opacity:.95}});
       else if(r==="past"){ hasPast=true; l=L.geoJSON(f,{style:{color:fg,weight:1.6*K,opacity:.85,dashArray:CARD?"2 12":"1 6",lineCap:"round"}}); }
       else if(r==="pastpt"&&p.now){ hasNow=true; l=L.circleMarker([c[1],c[0]],{radius:7*(CARD?2:1),color:"#fff",weight:2*(CARD?2:1),fillColor:"#f05b52",fillOpacity:1}).bindTooltip("Position at "+fmt(p.t)+" \u00b7 "+esc(p.wind)+" kt winds"); }
       else if(r==="pastpt"){ hasPast=true; l=L.circleMarker([c[1],c[0]],{radius:2.6*(CARD?2:1),color:fg,weight:1,fillColor:fg,fillOpacity:.9}).bindTooltip("Was here "+fmt(p.t)+" \u00b7 "+esc(p.wind)+" kt"); }
       else if(r==="ww"){ kinds[p.kind]=1; l=L.geoJSON(f,{style:{color:(WW[p.kind]||["#888"])[0],weight:6*K,lineCap:"butt"}}).bindTooltip((WW[p.kind]||[0,"Coastal alert"])[1],{sticky:true}); }
-      else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:(p.now?9:6)*(CARD?2:1),color:fg,weight:(p.now?2.5:1.5)*(CARD?2:1),fillColor:windColor(+p.wind||0),fillOpacity:1})
-        .bindTooltip(esc(p.label)+" · "+esc(p.wind)+" kt",{permanent:!CARD,direction:"right",offset:[8,0],className:"pt"});
+      else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:(p.now?9:6.5)*(CARD?2:1),color:"#fff",weight:(p.now?3:2)*(CARD?2:1),fillColor:windColor(+p.wind||0),fillOpacity:1})
+        .bindTooltip((p.now?"Now":esc(p.label))+(p.wind!=null?" \u00b7 "+esc(p.wind)+" kt":"")+(p.type?" \u00b7 "+esc(p.type):""),{direction:"top",offset:[0,-8],className:"pt"});
       if(l) (r==="model"?(modelGroups[p.group]||modelGroups.model):group).addLayer(l);
     });
     var b=L.latLngBounds([[24,-94],[31,-81]]); if(group.getLayers().length) b.extend(group.getBounds());
