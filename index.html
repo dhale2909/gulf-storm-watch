@@ -336,12 +336,12 @@ body.card .leaflet-control-container{display:none}
     var alerts=STATES.filter(function(s){return ww[s]&&ww[s].level}).map(function(s){return s+" "+ww[s].text}).join("; ");
     var line=alerts?("Alerts: "+alerts+"."):"No coastal watches or warnings for AL, FL, MS or LA.";
     if(s0){
-      var lf=d.landfallOccurred?("Made landfall in "+(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+" about "+ctShort(d.landfallOccurred.at)):d.landfall?("Landfall expected: "+STATE_NAME[d.landfall.state]+" coast, about "+ctShort(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"Latest forecast unavailable":"No landfall on the AL\u2013FL coast in the forecast");
+      var lf=d.landfallOccurred?("Made landfall in "+(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+" about "+ctShort(d.landfallOccurred.at)):d.landfall?("Landfall expected near "+(d.landfall.near||STATE_NAME[d.landfall.state]+" coast")+", about "+ctShort(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"Latest forecast unavailable":"No landfall on the AL\u2013FL coast in the forecast");
       $("c-l0").textContent=s0.type+(s0.category?" \u00b7 Category "+s0.category:"")+" \u00b7 "+(s0.advisory||asOf(d));
       var short=s0.name.indexOf(s0.type+" ")===0?s0.name.slice(s0.type.length+1):s0.name;
       $("c-l1").innerHTML='<b class="nm">'+esc(stormName({name:short}))+" \u00b7 "+esc(mph(s0.winds))+" mph winds</b>";
       $("c-l2").textContent=lf+(alerts?" \u00b7 "+alerts:"");
-      shareText=s0.name+": "+mph(s0.winds)+" mph. "+(d.landfall?("Forecast track reaches the "+d.landfall.state+" coast about "+ctShort(d.landfall.eta)+". "):"")+line;
+      shareText=s0.name+": "+mph(s0.winds)+" mph. "+(d.landfall?("Forecast track reaches the coast near "+(d.landfall.near||d.landfall.state)+" about "+ctShort(d.landfall.eta)+". "):"")+line;
     } else if(held){
       $("c-l0").textContent="Landfall \u00b7 last 48 hours \u00b7 "+asOf(d);
       $("c-l1").innerHTML='<b class="nm">Made landfall in '+esc(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+'</b>';
@@ -442,8 +442,8 @@ body.card .leaflet-control-container{display:none}
       $("st-type").textContent=stormName(s0)+(s0.category?" \u00b7 Cat "+s0.category:"");
       $("st-type-sub").textContent=(s0.advisory||"NHC advisory")+(s0.advisoryAt?" \u00b7 "+fmt(s0.advisoryAt):"");
       $("st-wind").textContent=mph(s0.winds); $("st-wind-sub").textContent=s0.winds+" kt \u00b7 moving "+s0.movement+" \u00b7 "+s0.location;
-      $("st-lf").textContent=d.landfallOccurred?("Made landfall: "+d.landfallOccurred.state):d.landfall?("Expected: "+d.landfall.state):(s0.forecastStale?"Forecast unavailable":"None forecast");
-      $("st-lf-sub").textContent=d.landfallOccurred?("about "+fmt(d.landfallOccurred.at)):d.landfall?("about "+fmt(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"showing the last known reading":"Track stays off the AL\u2013FL coast through the forecast period");
+      $("st-lf").textContent=d.landfallOccurred?("Made landfall: "+d.landfallOccurred.state):d.landfall?("Near "+(d.landfall.near||STATE_NAME[d.landfall.state])):(s0.forecastStale?"Forecast unavailable":"None forecast");
+      $("st-lf-sub").textContent=d.landfallOccurred?("about "+fmt(d.landfallOccurred.at)):d.landfall?("expected about "+fmt(d.landfall.eta)+" (approximate)"+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"showing the last known reading":"Track stays off the AL\u2013FL coast through the forecast period");
     }
     $("sysstat").textContent=s0?s0.name:(g.area?(g.invest||"Disturbance"):"None");
     $("sysstatsub").textContent=s0?(mph(s0.winds)+" mph · "+s0.movement):(g.area?(g.invest?(g.winds?mph(g.winds)+" mph winds; ":"")+"no NHC advisories yet":"Not designated; no NHC advisories yet"):"No Gulf system flagged");

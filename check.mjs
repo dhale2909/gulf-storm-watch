@@ -135,6 +135,18 @@ const ashore = (p) => coastHit(p) && (
   (p.lat < 28.5 && p.lonW <= 82.0));
 
 const mph = (kt) => Math.round((+kt || 0) * 1.15078 / 5) * 5; // NHC public advisories round mph to the nearest 5
+// Nearest coastal town to a landfall point, for a more specific "near ..." than the state alone.
+const TOWNS = [
+  ['Galveston, TX', 29.30, 94.80], ['Cameron, LA', 29.80, 93.33], ['Morgan City, LA', 29.70, 91.21], ['Grand Isle, LA', 29.24, 90.00],
+  ['Venice, LA', 29.28, 89.35], ['New Orleans, LA', 29.95, 90.07], ['Bay St. Louis, MS', 30.31, 89.33], ['Gulfport, MS', 30.37, 89.09],
+  ['Biloxi, MS', 30.40, 88.89], ['Pascagoula, MS', 30.37, 88.56], ['Dauphin Island, AL', 30.25, 88.11], ['Mobile, AL', 30.69, 88.04],
+  ['Gulf Shores, AL', 30.25, 87.70], ['Orange Beach, AL', 30.29, 87.57], ['Pensacola, FL', 30.42, 87.22], ['Navarre, FL', 30.40, 86.86],
+  ['Destin, FL', 30.39, 86.50], ['Panama City, FL', 30.16, 85.66], ['Port St. Joe, FL', 29.81, 85.30], ['Apalachicola, FL', 29.73, 84.98],
+  ['St. Marks, FL', 30.16, 84.21], ['Steinhatchee, FL', 29.67, 83.39], ['Cedar Key, FL', 29.14, 83.04], ['Crystal River, FL', 28.90, 82.59],
+  ['Tarpon Springs, FL', 28.15, 82.76], ['Tampa, FL', 27.95, 82.46], ['St. Petersburg, FL', 27.77, 82.64], ['Sarasota, FL', 27.34, 82.53],
+  ['Fort Myers, FL', 26.64, 81.87], ['Naples, FL', 26.14, 81.80], ['Marco Island, FL', 25.94, 81.72], ['Key West, FL', 24.56, 81.78],
+];
+const nearestTown = (p) => TOWNS.map(([name, lat, lonW]) => [name, Math.hypot(lat - p.lat, (lonW - p.lonW) * Math.cos(p.lat * Math.PI / 180))]).sort((a, b) => a[1] - b[1])[0][0];
 const category = (kt) => (kt >= 137 ? 5 : kt >= 113 ? 4 : kt >= 96 ? 3 : kt >= 83 ? 2 : kt >= 64 ? 1 : 0);
 const compass = (deg) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round(deg / 22.5) % 16];
 const fmtCT = (iso) => new Date(iso).toLocaleString('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric' }) + ' CT';
@@ -169,7 +181,7 @@ export async function gatherStorms(prior) {
     const type = known ? TYPES[s.classification] : (/^(PC|EX|LO|DB|WV|SD|SS)$/.test(s.classification || '') ? 'Post-Tropical Cyclone' : 'Tropical Cyclone');
     if (!known && type === 'Tropical Cyclone') console.warn(`storm ${s.id}: unknown classification "${s.classification}"; treated as tropical`);
     const hit = forecastStale ? null : path.find(coastHit) || null;
-    const landfall = forecastStale ? priorLandfallFor(s.id) : hit && { state: coastState(hit), eta: hit.t };
+    const landfall = forecastStale ? priorLandfallFor(s.id) : hit && { state: coastState(hit), eta: hit.t, near: nearestTown(hit) };
     const loc = here ? `${here.lat.toFixed(1)}N ${here.lonW.toFixed(1)}W` + (inGulf(here) ? (here.lat < 22 && here.lonW >= 90 ? ', Bay of Campeche' : ', Gulf') : ', approaching the Gulf') : `${prev?.location || 'position unavailable'} (last known)`;
     out.push({
       id: s.id, bin: s.binNumber, name: `${type} ${s.name}`, type, winds,
@@ -186,7 +198,7 @@ export async function gatherStorms(prior) {
       forecastStale,
       gulfRisk: forecastStale
         ? (prev?.gulfRisk ? `${prev.gulfRisk.replace(/ \(latest forecast advisory unavailable\)$/, '')} (latest forecast advisory unavailable)` : 'Forecast advisory unavailable')
-        : hit ? `Forecast track reaches the ${coastState(hit)} coast around ${fmtCT(hit.t)} (approximate)`
+        : hit ? `Forecast track reaches the coast near ${nearestTown(hit)} around ${fmtCT(hit.t)} (approximate)`
         : track.length ? 'Forecast track stays off the AL/FL/MS/LA coast through the forecast period' : 'No forecast track in the latest advisory',
     });
   }
@@ -523,11 +535,11 @@ export function diff(prior, cur) {
   if (cur.landfallOccurred && !prior.landfallOccurred) ch.push(`Landfall in ${cur.landfallOccurred.state} around ${fmtCT(cur.landfallOccurred.at)}`);
 
   const pl = prior.landfall, cl = cur.landfall;
-  if (cl && !pl) ch.push(`Forecast track now reaches the ${cl.state} coast around ${fmtCT(cl.eta)}`);
+  if (cl && !pl) ch.push(`Forecast track now reaches the coast near ${cl.near || cl.state} around ${fmtCT(cl.eta)}`);
   else if (pl && !cl && cur.storms.length && !cur.storms[0].forecastStale) ch.push('Forecast track no longer reaches the AL/FL/MS/LA coast');
   else if (pl && cl) {
-    if (pl.state !== cl.state) ch.push(`Forecast landfall shifted ${pl.state} -> ${cl.state} (${fmtCT(cl.eta)})`);
-    else if (Math.abs(new Date(pl.eta) - new Date(cl.eta)) >= 12 * 3600e3) ch.push(`Forecast ${cl.state} landfall timing moved to ${fmtCT(cl.eta)}`);
+    if (pl.state !== cl.state) ch.push(`Forecast landfall shifted ${pl.state} -> ${cl.state}, near ${cl.near || cl.state} (${fmtCT(cl.eta)})`);
+    else if (Math.abs(new Date(pl.eta) - new Date(cl.eta)) >= 12 * 3600e3) ch.push(`Forecast ${cl.state} landfall (near ${cl.near || cl.state}) timing moved to ${fmtCT(cl.eta)}`);
   }
   return ch;
 }
@@ -697,7 +709,7 @@ async function main() {
     : null;
   // Other Gulf systems: listed, and announced once if they become a coastal threat. They never replace the tracked one.
   status.others = [
-    ...storms.slice(1).map((o) => ({ id: o.id, name: o.name, threat: !!(o.tropical && o.landfall), detail: o.landfall ? `is forecast to reach the ${o.landfall.state} coast around ${fmtCT(o.landfall.eta)}` : `is in the Gulf (${mph(o.winds)} mph)` })),
+    ...storms.slice(1).map((o) => ({ id: o.id, name: o.name, threat: !!(o.tropical && o.landfall), detail: o.landfall ? `is forecast to reach the coast near ${o.landfall.near || o.landfall.state} around ${fmtCT(o.landfall.eta)}` : `is in the Gulf (${mph(o.winds)} mph)` })),
     ...otherEntries.map((e) => ({ id: e.investHint || e.area, name: e.investHint ? `${e.investHint} (${e.area})` : e.area, threat: false, detail: `${e.formation7d}% chance of forming within 7 days` })),
   ];
   status.internal.othersAlerted = [...new Set([...(prior?.internal?.othersAlerted || []), ...status.others.filter((o) => o.threat).map((o) => o.id)])];
