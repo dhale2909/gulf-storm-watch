@@ -687,8 +687,10 @@ async function main() {
   if (!outlookOK || !stormsOK) { status.updatedAt = prior?.updatedAt || status.updatedAt; } // not a fully fresh reading
   // The Google summary is tied to the system it was computed for; a carried-over summary is kept only for the same system.
   const systemKey = status.tracked?.invest || status.tracked?.stormId || null; // stable across the Invest -> storm upgrade
-  status.google = await gatherGoogle(storms[0], models?.invest).then((g) => (g ? { ...g, system: systemKey, computedAt: NOW.toISOString() } : null))
-    .catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return prior?.google && prior.google.system === systemKey ? prior.google : null; });
+  const carryGoogle = () => (prior?.google && prior.google.system === systemKey && NOW.getTime() - new Date(prior.google.computedAt || prior.google.run).getTime() < 12 * 3600e3 ? prior.google : null);
+  status.google = await gatherGoogle(storms[0], models?.invest)
+    .then((g) => (g ? { ...g, system: systemKey, computedAt: NOW.toISOString() } : carryGoogle())) // no fresh file this check: keep a recent summary for the same system
+    .catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return carryGoogle(); });
   const changes = diff(prior, status);
   const changed = changes.length > 0;
   if (changed) { status.internal.baseline7d = status.gulf.formation7d; status.internal.baseline48 = status.gulf.formation48; }
