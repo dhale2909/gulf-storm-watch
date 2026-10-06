@@ -364,6 +364,8 @@ body.card .leaflet-control-container{display:none}
     pushState(false); pmsg("Alerts are off for this device.");
   }
   $("push-on").addEventListener("click",pushEnable); $("push-off").addEventListener("click",pushDisable);
+  // A link ending in ?alerts=1 (the invite text) opens the Get alerts steps straight away.
+  if(/[?&]alerts=1/.test(location.search)&&!CARD) setTimeout(function(){ $("alerts").click(); },600);
   $("alerts").addEventListener("click",function(){
     var on=false; try{ on=localStorage.getItem("gsw-push")==="1"; }catch(e){}
     if(IOS&&!STANDALONE) $("push-ios").hidden=false;
