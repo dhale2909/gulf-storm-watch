@@ -127,6 +127,10 @@ const coastHit = (p) =>
   (p.lat >= 24.3 && p.lat < 28.5 && p.lonW >= 80.8 && p.lonW <= 83.3); // FL west coast / Keys
 
 const coastState = (p) => (p.lonW > 89.5 ? 'LA' : p.lonW > 88.4 ? 'MS' : p.lonW > 87.5 ? 'AL' : 'FL');
+// Observed landfall: the center is at or inland of the coastline (rough per-stretch latitudes; "about").
+const ashore = (p) => coastHit(p) && (
+  (p.lat >= 28.5 && p.lat >= (p.lonW > 89.5 ? 29.5 : p.lonW > 87.5 ? 30.3 : p.lonW > 84 ? 30.1 : 29.0)) ||
+  (p.lat < 28.5 && p.lonW <= 82.0));
 
 const category = (kt) => (kt >= 137 ? 5 : kt >= 113 ? 4 : kt >= 96 ? 3 : kt >= 83 ? 2 : kt >= 64 ? 1 : 0);
 const compass = (deg) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round(deg / 22.5) % 16];
@@ -172,6 +176,7 @@ export async function gatherStorms(prior) {
       movement: Number.isFinite(+s.movementSpeed) && +s.movementSpeed > 0 ? `${compass(+s.movementDir)} at ${s.movementSpeed} kt` : 'Stationary',
       advisory: s.forecastAdvisory?.advNum ? `NHC advisory ${s.forecastAdvisory.advNum}` : '',
       landfall,
+      ashore: here && ashore(here) ? { state: coastState(here), t: here.t } : null,
       forecastStale,
       gulfRisk: forecastStale
         ? (prev?.gulfRisk ? `${prev.gulfRisk.replace(/ \(latest forecast advisory unavailable\)$/, '')} (latest forecast advisory unavailable)` : 'Forecast advisory unavailable')
@@ -407,9 +412,13 @@ export function build(prior, gulf, storms, ww) {
   const storm = storms[0] || null;
   const anyAlert = STATES.some((s) => ww[s].level);
   const landfall = storm?.landfall || null;
-  const hold = prior?.internal?.landfallHoldUntil;
-  const imminent = landfall && new Date(landfall.eta).getTime() - NOW.getTime() <= 24 * 3600e3;
-  const held = hold && new Date(hold) > NOW;
+  // Expected: the forecast puts the center on the coast within 24 hours. Occurred: the center has been observed
+  // on or past the coastline; that starts the 48-hour "landfall" hold (an expectation alone does not).
+  const imminent = !!(landfall && new Date(landfall.eta).getTime() - NOW.getTime() <= 24 * 3600e3);
+  const priorOcc = prior?.internal?.landfallAt && NOW.getTime() - new Date(prior.internal.landfallAt).getTime() < 48 * 3600e3
+    ? { state: prior.internal.landfallState, at: prior.internal.landfallAt } : null;
+  const occurred = priorOcc || (storm?.ashore ? { state: storm.ashore.state, at: NOW.toISOString() } : null);
+  const held = !!occurred;
 
   let alertLevel = 'quiet';
   if (gulf || storm) alertLevel = 'watch';
@@ -418,9 +427,10 @@ export function build(prior, gulf, storms, ww) {
 
   let headline;
   if (storm) {
-    headline = `${storm.name}: ${storm.winds} kt${storm.category ? ` (Category ${storm.category})` : ''}, ${storm.location}, moving ${storm.movement}. ${storm.gulfRisk}.`;
+    headline = (occurred ? `${storm.name} made landfall in ${occurred.state} around ${fmtCT(occurred.at)}. ` : '') +
+      `${storm.name}: ${storm.winds} kt${storm.category ? ` (Category ${storm.category})` : ''}, ${storm.location}, moving ${storm.movement}. ${storm.gulfRisk}.`;
   } else if (held) {
-    headline = `Landfall on the ${prior.internal.landfallState || 'Gulf'} coast within the last 48 hours; the system is no longer an active NHC storm.`;
+    headline = `Made landfall in ${occurred.state} around ${fmtCT(occurred.at)}; the system is no longer an active NHC storm.`;
   } else if (gulf) {
     headline = `NHC gives the ${gulf.area} disturbance a ${gulf.formation7d}% chance of forming within 7 days (${gulf.formation48}% within 48 hours). No advisories or forecast track yet.`;
   } else {
@@ -434,15 +444,17 @@ export function build(prior, gulf, storms, ww) {
     nextCheck: new Date((Math.floor(NOW.getTime() / 1800e3) + 1) * 1800e3).toISOString(), // GitHub checks on the hour, the Mac backup on the half hour
     alertLevel, headline,
     gulf: gulf || { area: '', formation48: null, formation7d: null, source: 'NHC outlook', text: storm ? 'NHC is issuing advisories on this system; see the storm panel.' : '' },
-    storms: storms.map(({ landfall: _l, tropical: _t, bin: _b, ...s }) => s), // forecastStale stays, so the page and diff can see it
+    storms: storms.map(({ landfall: _l, tropical: _t, bin: _b, ashore: _a, ...s }) => s), // forecastStale stays, so the page and diff can see it
     watchesWarnings: ww,
-    landfall,
+    landfall, // forecast landfall (expected)
+    landfallOccurred: occurred,
     internal: {
       failCount: 0,
       baseline7d: prior?.internal?.baseline7d ?? gulf?.formation7d ?? null,
       baseline48: prior?.internal?.baseline48 ?? gulf?.formation48 ?? null,
-      landfallHoldUntil: imminent ? new Date(Math.max(new Date(landfall.eta), NOW) + 48 * 3600e3).toISOString() : held ? hold : null,
-      landfallState: imminent ? landfall.state : held ? prior.internal.landfallState : null,
+      landfallAt: occurred?.at || null,
+      landfallHoldUntil: occurred ? new Date(new Date(occurred.at).getTime() + 48 * 3600e3).toISOString() : null,
+      landfallState: occurred?.state || (imminent ? landfall.state : null),
     },
   };
 }
@@ -484,6 +496,8 @@ export function diff(prior, cur) {
     if (x !== y) ch.push(y ? `${st}: tropical ${y} posted (${cx.text})` : `${st}: tropical ${x} dropped`);
     else if (y && (px.text || '') !== (cx.text || '')) ch.push(`${st}: alerts now ${cx.text} (was ${px.text})`);
   }
+
+  if (cur.landfallOccurred && !prior.landfallOccurred) ch.push(`Landfall in ${cur.landfallOccurred.state} around ${fmtCT(cur.landfallOccurred.at)}`);
 
   const pl = prior.landfall, cl = cur.landfall;
   if (cl && !pl) ch.push(`Forecast track now reaches the ${cl.state} coast around ${fmtCT(cl.eta)}`);
@@ -604,6 +618,19 @@ async function main() {
   if (!outlookOK) gulf = prior?.gulf?.area ? { ...prior.gulf, stale: true } : null;
   if (!stormsOK) storms = (prior?.storms || []).map((p, k) => ({ ...p, forecastStale: true, landfall: k === 0 ? prior.landfall : null, tropical: !/Post-Tropical/.test(p.type) }));
 
+  // A tracked system that vanishes from both NHC feeds at once is more often a publication gap (outlook dropped
+  // before the first advisory appears, or the reverse) than a real all-clear. Hold the previous reading for one
+  // check; accept the disappearance only if it is still missing on the next one.
+  const tracked = !!(prior && (prior.gulf?.area || prior.storms?.length));
+  const nowEmpty = !gulf && storms.length === 0;
+  const vanishedBefore = prior?.internal?.vanishedChecks || 0;
+  const holding = tracked && nowEmpty && outlookOK && stormsOK && vanishedBefore < 1;
+  if (holding) {
+    console.warn('system missing from NHC feeds; holding the previous reading for one check to confirm');
+    gulf = prior.gulf?.area ? { ...prior.gulf, stale: true } : null;
+    storms = (prior.storms || []).map((p, k) => ({ ...p, forecastStale: true, landfall: k === 0 ? prior.landfall : null, tropical: !/Post-Tropical/.test(p.type) }));
+  }
+
   const ww = await gatherAlerts(prior, storms.length > 0);
   // The map is a nice-to-have: if its service is down, keep the last map and carry on.
   const map = await gatherMap(gulf, storms[0]).catch((e) => { console.warn(`map layers unavailable: ${e.message}`); return null; });
@@ -620,6 +647,7 @@ async function main() {
   if (gulf) delete gulf.investHint;
   const status = build(prior, gulf, storms, ww);
   status.internal.failCount = failCount;
+  status.internal.vanishedChecks = holding ? vanishedBefore + 1 : 0;
   status.sources = { outlook: outlookOK ? 'ok' : 'unavailable', storms: stormsOK ? 'ok' : 'unavailable', alerts: ww.unavailable ? `unavailable for ${ww.unavailable.join(', ')}` : 'ok', map: map ? 'ok' : 'unavailable' };
   if (!outlookOK || !stormsOK) { status.updatedAt = prior?.updatedAt || status.updatedAt; } // not a fully fresh reading
   status.google = await gatherGoogle(storms[0], models?.invest).catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return prior?.google ?? null; });
@@ -658,7 +686,7 @@ async function main() {
   const summary = changed ? changes.join('. ') + '.'
     : minor.length ? `Update, below the alert threshold: ${minor.join('. ')}.`
     : prior ? 'No change. ' + status.headline : 'Watch opened. ' + status.headline;
-  await save(status, { ts: NOW.toISOString(), changed, pushed, delivery, updated: minor.length > 0, alertLevel: status.alertLevel, formation7d: status.gulf.formation7d, summary: (outlookOK && stormsOK ? '' : `(${!outlookOK ? 'outlook' : 'storm feed'} unavailable; previous values carried) `) + summary }, map);
+  await save(status, { ts: NOW.toISOString(), changed, pushed, delivery, updated: minor.length > 0, alertLevel: status.alertLevel, formation7d: status.gulf.formation7d, summary: (holding ? '(system missing from NHC feeds; holding the previous reading for one check to confirm) ' : outlookOK && stormsOK ? '' : `(${!outlookOK ? 'outlook' : 'storm feed'} unavailable; previous values carried) `) + summary }, map);
   console.log(`${status.alertLevel.toUpperCase()} | changed=${changed} pushed=${pushed} | ${summary}`);
 }
 

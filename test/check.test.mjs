@@ -142,3 +142,40 @@ test('B6: a private-channel exception does not stop the public send or the save'
   assert.deepEqual(d.internal.pending.failed, ['private']);
   delete process.env.NTFY_TOPIC; delete process.env.PUBLIC_NTFY_TOPIC;
 });
+
+// ---- P1 (approved): hold a disappearance for one check; landfall expected vs occurred ----
+test('P1: a tracked system missing from both NHC feeds is held for one check, then accepted', async () => {
+  const prior = state();
+  const dir = await mkdtemp(path.join(tmpdir(), 'gsw-')); process.chdir(dir); calls = [];
+  await import('node:fs/promises').then((fs) => fs.mkdir('data', { recursive: true }));
+  await writeFile('data/status.json', JSON.stringify(prior));
+  const quietTWO = pre('Tropical cyclone formation is not expected during the next 7 days.');
+  responses[TWO] = quietTWO; responses[FEED] = { activeStorms: [] };
+  for (const s of ['AL', 'FL', 'MS', 'LA']) responses[alertsURL(s)] = { features: [] };
+  responses['https://ntfy.sh/'] = { id: 'x' };
+  await m.main();
+  let d = JSON.parse(await readFile('data/status.json', 'utf8'));
+  assert.equal(d.alertLevel, 'watch', 'first disappearance is held'); assert.equal(d.internal.vanishedChecks, 1); assert.equal(d.gulf.stale, true);
+  responses[TWO] = quietTWO; responses[FEED] = { activeStorms: [] };
+  await m.main();
+  d = JSON.parse(await readFile('data/status.json', 'utf8'));
+  assert.equal(d.alertLevel, 'quiet', 'second consecutive disappearance is accepted'); assert.equal(d.internal.vanishedChecks, 0);
+});
+test('P1: landfall expected (forecast within 24 h) is not a 48-hour hold; an observed landfall is', () => {
+  const prior = state({ alertLevel: 'threat' });
+  const expected = [{ id: 'al012026', name: 'Tropical Storm Test', type: 'Tropical Storm', winds: 50, tropical: true, location: 'x', movement: 'x', gulfRisk: 'x', landfall: { state: 'LA', eta: '2026-10-09T06:00:00Z' }, ashore: null }];
+  let d = m.build(prior, null, expected, ww());
+  assert.equal(d.alertLevel, 'landfall'); assert.equal(d.landfallOccurred, null); assert.equal(d.internal.landfallHoldUntil, null, 'no hold from an expectation');
+  // forecast shifts away before landfall: back to threat, nothing held
+  const shifted = [{ ...expected[0], landfall: { state: 'LA', eta: '2026-10-11T06:00:00Z' } }];
+  d = m.build(d, null, shifted, ww());
+  assert.equal(d.alertLevel, 'threat');
+  // center observed ashore in Louisiana: occurred, hold for 48 h, and it is a change
+  const ashore = [{ ...expected[0], landfall: null, ashore: { state: 'LA', t: '2026-10-08T15:00:00Z' } }];
+  const e = m.build(d, null, ashore, ww());
+  assert.equal(e.alertLevel, 'landfall'); assert.equal(e.landfallOccurred.state, 'LA'); assert.equal(e.internal.landfallHoldUntil, '2026-10-10T15:00:00.000Z');
+  assert.match(m.diff(d, e).join(' | '), /Landfall in LA/);
+  // storm gone from the feed afterwards: the hold keeps the level and the headline says it made landfall
+  const f = m.build(e, null, [], ww());
+  assert.equal(f.alertLevel, 'landfall'); assert.match(f.headline, /Made landfall in LA/);
+});

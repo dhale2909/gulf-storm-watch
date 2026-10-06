@@ -287,6 +287,7 @@ body.card .leaflet-control-container{display:none}
 (function(){
   var $=function(id){return document.getElementById(id)};
   var LABEL={quiet:"Quiet",watch:"Watch",threat:"Threat",landfall:"Landfall"};
+  var levelLabel=function(d){ return d.alertLevel==="landfall"&&!d.landfallOccurred?"Landfall expected":LABEL[d.alertLevel]||"Quiet"; };
   var STATES=["AL","FL","MS","LA"];
   var fmt=function(iso){ if(!iso) return "—"; var d=new Date(iso); if(isNaN(d)) return iso;
     return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"}); };
@@ -310,12 +311,12 @@ body.card .leaflet-control-container{display:none}
   var asOf=function(d){ var g=d.gulf||{}; var m=/(\d{1,2})(\d{2}) (AM|PM) (\w+)/.exec(g.source||""); return m?("NHC "+m[1]+":"+m[2]+" "+m[3]+" "+m[4]):("as of "+ctShort(d.updatedAt)); };
   function renderCard(d){
     var lvl=LABEL[d.alertLevel]?d.alertLevel:"quiet", g=d.gulf||{}, s0=(d.storms||[])[0], ww=d.watchesWarnings||{};
-    var held=d.internal&&d.internal.landfallHoldUntil&&new Date(d.internal.landfallHoldUntil)>new Date();
-    $("card").style.setProperty("--lvl","var(--"+lvl+")"); $("c-pill").style.setProperty("--lvl","var(--"+lvl+")"); $("c-pill").textContent=LABEL[lvl];
+    var held=!!d.landfallOccurred;
+    $("card").style.setProperty("--lvl","var(--"+lvl+")"); $("c-pill").style.setProperty("--lvl","var(--"+lvl+")"); $("c-pill").textContent=levelLabel(d);
     var alerts=STATES.filter(function(s){return ww[s]&&ww[s].level}).map(function(s){return s+" "+ww[s].text}).join("; ");
     var line=alerts?("Alerts: "+alerts+"."):"No coastal watches or warnings for AL, FL, MS or LA.";
     if(s0){
-      var lf=d.landfall?(STATE_NAME[d.landfall.state]+" coast, about "+ctShort(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"Latest forecast unavailable":"No landfall on the AL\u2013FL coast in the forecast");
+      var lf=d.landfallOccurred?("Made landfall in "+(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+" about "+ctShort(d.landfallOccurred.at)):d.landfall?("Landfall expected: "+STATE_NAME[d.landfall.state]+" coast, about "+ctShort(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"Latest forecast unavailable":"No landfall on the AL\u2013FL coast in the forecast");
       $("c-l0").textContent=s0.type+(s0.category?" \u00b7 Category "+s0.category:"")+" \u00b7 "+(s0.advisory||asOf(d));
       var short=s0.name.indexOf(s0.type+" ")===0?s0.name.slice(s0.type.length+1):s0.name;
       $("c-l1").innerHTML='<b class="nm">'+esc(short)+" \u00b7 "+esc(s0.winds)+" kt winds</b>";
@@ -323,7 +324,7 @@ body.card .leaflet-control-container{display:none}
       shareText=s0.name+": "+s0.winds+" kt. "+(d.landfall?("Forecast track reaches the "+d.landfall.state+" coast about "+ctShort(d.landfall.eta)+". "):"")+line;
     } else if(held){
       $("c-l0").textContent="Landfall \u00b7 last 48 hours \u00b7 "+asOf(d);
-      $("c-l1").innerHTML='<b class="nm">Landfall on the '+esc(STATE_NAME[d.internal.landfallState]||"Gulf")+' coast</b>';
+      $("c-l1").innerHTML='<b class="nm">Made landfall in '+esc(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+'</b>';
       $("c-l2").textContent=alerts||"No longer an active NHC storm";
       shareText=d.headline||"";
     } else if(g.area){
@@ -393,7 +394,7 @@ body.card .leaflet-control-container{display:none}
     renderCard(d);
     var lvl=LABEL[d.alertLevel]?d.alertLevel:"quiet";
     $("band").style.setProperty("--lvl","var(--"+lvl+")");
-    $("pill-text").textContent=LABEL[lvl];
+    $("pill-text").textContent=levelLabel(d);
     $("headline").textContent=d.headline||"";
     var age=(Date.now()-new Date(d.updatedAt).getTime())/36e5, src=d.sources||{};
     var unavailable=Object.keys(src).filter(function(k){return /unavailable/.test(src[k])}).map(function(k){return k==="alerts"?src[k]:k});
