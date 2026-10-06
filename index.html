@@ -135,6 +135,10 @@ body.card #map{width:1200px;height:900px;border:0;border-radius:0}
 
 body.card .xmark{font-size:56px;line-height:56px}
 body.card .leaflet-control-container{display:none}
+.fold summary{cursor:pointer;font-size:13px;color:var(--accent);list-style:none}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::before{content:"\25B8  "} .fold[open] summary::before{content:"\25BE  "}
+.fold>div{margin-top:8px}
 .logbox summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;cursor:pointer;list-style:none}
 .logbox summary::-webkit-details-marker{display:none}
 .logbox summary h2{margin-right:auto}
@@ -232,8 +236,13 @@ body.card .leaflet-control-container{display:none}
     <div id="map"></div>
     <div class="legend" id="map-legend"></div>
     <div class="legend" id="ec-legend"></div>
-    <div class="map-note" id="map-note"></div>
-    <div class="map-note" id="ec-sum"></div>
+    <details class="fold">
+      <summary>About the lines on this map</summary>
+      <div class="map-note" id="map-note"></div>
+      <div class="map-note" id="ec-sum"></div>
+    </details>
+    <details class="fold">
+      <summary>More model views and sources</summary>
     <div class="foot">
       <span>More model views:</span>
       <a href="https://spaghettimodels.com/" target="_blank" rel="noopener">Mike's Weather Page</a>
@@ -242,6 +251,7 @@ body.card .leaflet-control-container{display:none}
       <a href="https://deepmind.google.com/science/weatherlab" target="_blank" rel="noopener">Google Weather Lab (AI ensemble)</a>
       <a href="https://arctic.som.ou.edu/tburg/products/realtime/tropical/" target="_blank" rel="noopener">Tomer Burg model plots</a>
     </div>
+    </details>
   </section>
 
   <section class="panel">

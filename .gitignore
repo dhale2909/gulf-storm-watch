@@ -4,3 +4,4 @@ gulf-storm-watch.html
 .DS_Store
 node_modules/
 .env
+*.zip
