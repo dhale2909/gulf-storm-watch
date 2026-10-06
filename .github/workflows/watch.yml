@@ -28,6 +28,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+      - run: npm ci --omit=dev --no-audit --no-fund
       - uses: actions/setup-python@v5
         if: ${{ !inputs.test_notify }}
         with:
@@ -44,6 +46,10 @@ jobs:
           PLAYS_JSON: ${{ secrets.PLAYS_JSON }}
           PAGE_URL: ${{ vars.PAGE_URL }}
           PUBLIC_NTFY_TOPIC: ${{ vars.PUBLIC_NTFY_TOPIC }}
+          PUSH_API: ${{ vars.PUSH_API }}
+          PUSH_ADMIN_KEY: ${{ secrets.PUSH_ADMIN_KEY }}
+          VAPID_PUBLIC_KEY: ${{ vars.VAPID_PUBLIC_KEY }}
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
           TEST_NOTIFY: ${{ inputs.test_notify && '1' || '' }}
       - name: Share preview image (optional)
         if: ${{ !inputs.test_notify }}

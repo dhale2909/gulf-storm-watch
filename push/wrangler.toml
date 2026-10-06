@@ -1,0 +1,7 @@
+name = "storm-page-push"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+[[kv_namespaces]]
+binding = "SUBS"
+id = "13ecca541a1244c286e062887e543afe"

@@ -499,6 +499,25 @@ async function notify(title, message, level, topic = process.env.NTFY_TOPIC) {
   return r.ok;
 }
 
+// Browser notifications: devices register with the Cloudflare worker (push/worker.js); we send to them here.
+async function pushBrowsers(title, body) {
+  const { PUSH_API, PUSH_ADMIN_KEY, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, PAGE_URL } = process.env;
+  if (!PUSH_API || !PUSH_ADMIN_KEY || !VAPID_PRIVATE_KEY) return 0;
+  const webpush = (await import('web-push').catch(() => null))?.default;
+  if (!webpush) { console.warn('web-push not installed; browser notifications skipped'); return 0; }
+  webpush.setVapidDetails(PAGE_URL || 'https://dhale2909.github.io/gulf-storm-watch/', VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+  const subs = await (await fetch(`${PUSH_API}/subscriptions`, { headers: { 'x-key': PUSH_ADMIN_KEY }, signal: AbortSignal.timeout(30000) })).json();
+  const dead = [];
+  let sent = 0;
+  await Promise.all(subs.map(async (s) => {
+    try { await webpush.sendNotification(s, JSON.stringify({ title, body, url: PAGE_URL }), { TTL: 6 * 3600, urgency: 'high' }); sent++; }
+    catch (e) { if (e.statusCode === 404 || e.statusCode === 410) dead.push(s.endpoint); else console.warn(`browser push failed: ${e.statusCode || e.message}`); }
+  }));
+  if (dead.length) await fetch(`${PUSH_API}/prune`, { method: 'POST', headers: { 'x-key': PUSH_ADMIN_KEY, 'content-type': 'application/json' }, body: JSON.stringify({ endpoints: dead }) }).catch(() => {});
+  console.log(`browser notifications: ${sent} sent, ${dead.length} expired removed`);
+  return sent;
+}
+
 const readJSON = async (p, fallback) => { try { return JSON.parse(await readFile(p, 'utf8')); } catch { return fallback; } };
 
 async function save(status, entry, map) {
@@ -511,6 +530,11 @@ async function save(status, entry, map) {
 }
 
 async function main() {
+  if (process.env.TEST_PUSH) {
+    const n = await pushBrowsers("Daniel's Storm Page: test", 'Test notification. Storm alerts will reach this device.');
+    console.log(`test browser push: ${n} device(s)`);
+    return;
+  }
   if (process.env.TEST_NOTIFY) {
     const ok = await notify('Gulf Storm Watch: test', 'Test notification. If you can read this, storm alerts will reach this device.', 'watch');
     console.log(ok ? 'test push sent' : 'test push NOT sent');
@@ -557,7 +581,8 @@ async function main() {
     const play = plays[status.alertLevel] ? `\n\nPlay: ${plays[status.alertLevel]}` : '';
     const goog = status.google ? `\n\nGoogle AI ensemble (experimental, not a forecast): ${status.google.text}` : '';
     pushed = await notify(`Gulf Storm Watch: ${status.alertLevel.toUpperCase()}`, `${changes.join('. ')}.\n\n${status.headline}${goog}${play}`, status.alertLevel);
-    // Public subscribers get the same change, weather facts only.
+    // Public subscribers get the same change, weather facts only: browser notifications and the public ntfy feed.
+    await pushBrowsers(`Daniel's Storm Page: ${status.alertLevel.toUpperCase()}`, `${changes.join('. ')}. ${status.headline}`).catch((e) => console.warn(`browser push: ${e.message}`));
     if (process.env.PUBLIC_NTFY_TOPIC) {
       await notify(`Daniel's Storm Page: ${status.alertLevel.toUpperCase()}`, `${changes.join('. ')}.\n\n${status.headline}`, status.alertLevel, process.env.PUBLIC_NTFY_TOPIC).catch((e) => console.warn(`public push failed: ${e.message}`));
     }

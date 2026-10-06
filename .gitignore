@@ -2,3 +2,5 @@ gulf-storm-watch.html
 .claude/
 .ntfy-topic
 .DS_Store
+node_modules/
+.env
