@@ -1,11 +1,12 @@
 {
-  "updatedAt": "2026-10-06T20:00:37.477Z",
+  "updatedAt": "2026-10-06T20:18:42.636Z",
+  "lastAttemptAt": "2026-10-06T20:18:42.636Z",
   "nextCheck": "2026-10-06T20:30:00.000Z",
   "alertLevel": "watch",
   "headline": "NHC gives the Southwestern Gulf of America disturbance a 100% chance of forming within 7 days (100% within 48 hours). No advisories or forecast track yet.",
   "gulf": {
     "area": "Southwestern Gulf of America",
-    "text": "Satellite images and surface observations indicate that showers and thunderstorms are becoming better organized while surface pressures are gradually falling. If these trends continue, advisories will likely be issued on this system later today or tonight while it moves slowly eastward. The low pressure area could bring gusty winds and areas of heavy rain to the western portions of the Yucatan Peninsula of Mexico in a couple of days. The disturbance is expected to turn to the north or northeast toward the northern Gulf Coast by the end of the week. It is still too early to determine specific impacts to the northern Gulf Coast, but interests from the Florida Panhandle to Louisiana should closely monitor the progress of this system. The NOAA Gulfstream jet is en route to sample the environment over the Gulf this afternoon and Air Force and NOAA reconnaissance aircraft are scheduled to investigate the system tomorrow.",
+    "text": "Satellite images and surface observations indicate that showers and thunderstorms are becoming better organized while surface pressures are gradually falling. If these trends continue, advisories will likely be issued on this system later today or tonight while it moves slowly eastward. The low pressure area could bring gusty winds and areas of heavy rain to the western portions of the Yucatan Peninsula of Mexico in a couple of days. The disturbance is expected to turn to the north or northeast toward the northern Gulf Coast by the end of the week. It is still too early to determine specific impacts to the northern Gulf Coast, but interests from the Florida Panhandle to Louisiana should closely monitor the progress of this system. The NOAA Gulfstream jet is en route to sample the environment over the Gulf this afternoon and Air Force and NOAA reconnaissance aircraft are scheduled to investigate the system tomorrow. * Formation chance through 48 hours...high...near 100 percent. * Formation chance through 7 days...high...near 100 percent. $$ Forecaster Cangialosi",
     "formation48": 100,
     "formation7d": 100,
     "source": "NHC outlook, 200 PM EDT Tue Oct 6 2026",
@@ -26,7 +27,14 @@
     "baseline7d": 100,
     "baseline48": 100,
     "landfallHoldUntil": null,
-    "landfallState": null
+    "landfallState": null,
+    "pending": null
+  },
+  "sources": {
+    "outlook": "ok",
+    "storms": "ok",
+    "alerts": "ok",
+    "map": "ok"
   },
   "google": {
     "run": "2026-10-06T12:00:00.000Z",
