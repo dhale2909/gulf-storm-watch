@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-06T21:17:39.118Z",
-  "lastAttemptAt": "2026-10-06T21:17:39.118Z",
+  "updatedAt": "2026-10-06T21:18:23.397Z",
+  "lastAttemptAt": "2026-10-06T21:18:23.397Z",
   "nextCheck": "2026-10-06T21:30:00.000Z",
   "alertLevel": "threat",
-  "headline": "Tropical Depression Nine: 35 mph, 22.1N 95.6W, Gulf, moving E at 6 mph. Forecast track reaches the coast near Venice, LA around Fri, Oct 9, 1 PM CT (approximate).",
+  "headline": "Tropical Depression Nine: 35 mph, 22.1N 95.6W, Gulf, moving E at 6 mph. Forecast track reaches the coast near Pascagoula, MS around Fri, Oct 9, 8 PM CT (approximate).",
   "gulf": {
     "area": "Southwestern Gulf of America",
     "text": "Satellite images and surface observations indicate that showers and thunderstorms are becoming better organized while surface pressures are gradually falling. If these trends continue, advisories will likely be issued on this system later today or tonight while it moves slowly eastward. The low pressure area could bring gusty winds and areas of heavy rain to the western portions of the Yucatan Peninsula of Mexico in a couple of days. The disturbance is expected to turn to the north or northeast toward the northern Gulf Coast by the end of the week. It is still too early to determine specific impacts to the northern Gulf Coast, but interests from the Florida Panhandle to Louisiana should closely monitor the progress of this system. The NOAA Gulfstream jet is en route to sample the environment over the Gulf this afternoon and Air Force and NOAA reconnaissance aircraft are scheduled to investigate the system tomorrow. * Formation chance through 48 hours...high...near 100 percent. * Formation chance through 7 days...high...near 100 percent. $$ Forecaster Cangialosi",
@@ -28,7 +28,7 @@
         "lonW": 95.6
       },
       "forecastStale": false,
-      "gulfRisk": "Forecast track reaches the coast near Venice, LA around Fri, Oct 9, 1 PM CT (approximate)"
+      "gulfRisk": "Forecast track reaches the coast near Pascagoula, MS around Fri, Oct 9, 8 PM CT (approximate)"
     }
   ],
   "watchesWarnings": {
@@ -39,9 +39,9 @@
     "LA": {}
   },
   "landfall": {
-    "state": "AL",
-    "eta": "2026-10-09T18:00:00.000Z",
-    "near": "Venice, LA"
+    "state": "MS",
+    "eta": "2026-10-10T01:46:02.181Z",
+    "near": "Pascagoula, MS"
   },
   "landfallOccurred": null,
   "internal": {
@@ -88,6 +88,6 @@
     "peakMedianKt": 101,
     "text": "32 of 50 ensemble members forecast a track so far. 32 of 32 bring the center to the Louisiana-to-Florida coast (FL 26, AL 6), typically around Fri, Oct 9, 1 PM CT. 31 of 32 reach hurricane strength (18 major); typical peak 115 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-06T21:17:39.118Z"
+    "computedAt": "2026-10-06T21:18:23.397Z"
   }
 }
