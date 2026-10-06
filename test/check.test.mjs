@@ -218,10 +218,19 @@ test('P3: a tracked storm keeps the page even when another storm sorts first by 
 
 // ---- P7 (approved): a carried-over Google summary must belong to the same tracked system ----
 test('P7: a stale Google summary is dropped when the tracked system changed', async () => {
-  const prior = state({ tracked: { invest: 'Invest 92L', stormId: null, name: 'Invest 92L', lastPos: { lat: 22, lonW: 96 } }, google: { system: 'Invest 92L', text: 'old', members: 11, hits: 9, coast: { LA: 0, MS: 0, AL: 0, FL: 9 }, run: '2026-10-08T06:00:00Z', total: 50, hurricane: 9, major: 7, peakMedianKt: 99 } });
+  // The previously tracked storm (al02) is gone from the feed; a different storm (al03) takes over.
+  const prior = state({ tracked: { invest: null, stormId: 'al022026', name: 'Tropical Storm Old', lastPos: { lat: 22, lonW: 96 } }, storms: [{ id: 'al022026', name: 'Tropical Storm Old', type: 'Tropical Storm', winds: 40 }], google: { system: 'al022026', text: 'old', members: 11, hits: 9, coast: { LA: 0, MS: 0, AL: 0, FL: 9 }, run: '2026-10-08T06:00:00Z', total: 50, hurricane: 9, major: 7, peakMedianKt: 99 } });
   responses[TWO] = pre('Tropical cyclone formation is not expected during the next 7 days.');
   responses[FEED] = { activeStorms: [storm({ id: 'al032026', name: 'New', latitudeNumeric: 26, longitudeNumeric: -86 })] };
   responses['https://fixture.invalid/tcm'] = TCM;
   const d = await runMain(prior, {}); // Google download is unmocked, so the fetch fails and the carry-over rule applies
-  assert.equal(d.tracked.stormId, 'al032026'); assert.equal(d.google, null, 'summary for Invest 92L not reused for storm al032026');
+  assert.equal(d.tracked.stormId, 'al032026'); assert.equal(d.google, null, 'summary for al022026 not reused for storm al032026');
+});
+test('P7: the Google summary survives the Invest -> storm upgrade of the same system', async () => {
+  const prior = state({ tracked: { invest: 'Invest 92L', stormId: null, name: 'Invest 92L', lastPos: { lat: 22, lonW: 96 } }, google: { system: 'Invest 92L', text: 'kept', members: 11, hits: 9, coast: { LA: 9, MS: 0, AL: 0, FL: 0 }, run: '2026-10-08T06:00:00Z', total: 50, hurricane: 9, major: 7, peakMedianKt: 99 } });
+  responses[TWO] = pre('Tropical cyclone formation is not expected during the next 7 days.');
+  responses[FEED] = { activeStorms: [storm({ id: 'al192026', name: 'Nineteen', classification: 'TD', intensity: '30', latitudeNumeric: 22.3, longitudeNumeric: -95.6 })] };
+  responses['https://fixture.invalid/tcm'] = TCM;
+  const d = await runMain(prior, {});
+  assert.equal(d.tracked.stormId, 'al192026'); assert.equal(d.tracked.invest, 'Invest 92L'); assert.equal(d.google && d.google.text, 'kept');
 });

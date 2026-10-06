@@ -686,7 +686,7 @@ async function main() {
   status.sources = { outlook: outlookOK ? 'ok' : 'unavailable', storms: stormsOK ? 'ok' : 'unavailable', alerts: ww.unavailable ? `unavailable for ${ww.unavailable.join(', ')}` : 'ok', map: map ? 'ok' : 'unavailable' };
   if (!outlookOK || !stormsOK) { status.updatedAt = prior?.updatedAt || status.updatedAt; } // not a fully fresh reading
   // The Google summary is tied to the system it was computed for; a carried-over summary is kept only for the same system.
-  const systemKey = status.tracked?.stormId || status.tracked?.invest || null;
+  const systemKey = status.tracked?.invest || status.tracked?.stormId || null; // stable across the Invest -> storm upgrade
   status.google = await gatherGoogle(storms[0], models?.invest).then((g) => (g ? { ...g, system: systemKey, computedAt: NOW.toISOString() } : null))
     .catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return prior?.google && prior.google.system === systemKey ? prior.google : null; });
   const changes = diff(prior, status);
