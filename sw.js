@@ -7,7 +7,7 @@ self.addEventListener('push', (e) => {
   // A push with no payload is the "Send me a test" ping from the subscriber service.
   if (!e.data) d = { title: "Daniel's Storm Page: test", body: 'Test notification. Storm alerts will reach this device.' };
   e.waitUntil(self.registration.showNotification(d.title || "Daniel's Storm Page", {
-    body: d.body || 'The Gulf storm picture has changed.', icon: 'icon-192.png', badge: 'icon-192.png',
+    body: d.body || 'Open the page for the latest reading.', icon: 'icon-192.png', badge: 'icon-192.png',
     tag: 'storm-alert', renotify: true, data: { url: d.url || './' },
   }));
 });
