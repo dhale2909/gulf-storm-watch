@@ -58,24 +58,29 @@ const preText = (html) => {
 // ---------- parsing ----------
 
 // Tropical Weather Outlook -> the Gulf disturbance (highest 7-day odds if several), or null.
-function parseTWO(html) {
+export function parseTWO(html) {
   const pre = preText(html);
   if (!pre || !/Tropical Weather Outlook/i.test(pre)) throw new Error('TWO text not found');
   const issued = (/^\d{3,4} (?:AM|PM) \w+ \w+ \w+ \d+ \d{4}$/m.exec(pre) || [''])[0];
   const pct = (s) => (/near 0/i.test(s) ? 0 : +s);
+  // Everything after the basin header, minus the "Active Systems" paragraph (storms with advisories are handled from CurrentStorms.json).
+  const body = pre.replace(/^[\s\S]*?For the North Atlantic[^\n]*\n/i, '').replace(/^Active Systems:(?:.*\n)*?\s*\n/im, '');
   const re = /\* Formation chance through 48 hours\.\.\.\w+\.\.\.(near 0|\d+) percent\.\s*\* Formation chance through 7 days\.\.\.\w+\.\.\.(near 0|\d+) percent\./gi;
   let best = null, last = 0, m;
-  while ((m = re.exec(pre))) {
-    const para = pre.slice(last, m.index).trim().split(/\n\s*\n/).pop().trim();
+  while ((m = re.exec(body))) {
+    // One disturbance = all the text since the previous disturbance's formation lines; it may run to several paragraphs.
+    const lines = body.slice(last, m.index).trim().split('\n');
     last = re.lastIndex;
-    if (!/Gulf of (America|Mexico)|Bay of Campeche/i.test(para)) continue;
-    const lines = para.split('\n');
-    const hasHead = /:$/.test(lines[0]);
+    const hi = lines.findIndex((l) => /:\s*$/.test(l) && l.trim().length < 80);
+    const head = hi >= 0 ? lines[hi].trim() : '';
+    const text = lines.filter((_, k) => k !== hi).join(' ').replace(/\s+/g, ' ').trim();
+    if (!/Gulf of (America|Mexico)|Bay of Campeche/i.test(head + ' ' + text)) continue;
+    const inv = /\(AL(\d\d)\)/i.exec(head);
     const d = {
-      area: hasHead ? lines[0].replace(/^\d+\.\s*/, '').replace(/:$/, '').replace(/\s*\([^)]*\)$/, '') : 'Gulf disturbance',
-      text: lines.slice(hasHead ? 1 : 0).join(' ').replace(/\s+/g, ' ').trim(),
-      formation48: pct(m[1]), formation7d: pct(m[2]),
+      area: head.replace(/^\d+\.\s*/, '').replace(/:$/, '').replace(/\s*\([^)]*\)$/, '').trim() || 'Gulf disturbance',
+      text, formation48: pct(m[1]), formation7d: pct(m[2]),
       source: `NHC outlook, ${issued}`,
+      investHint: inv ? `Invest ${inv[1]}L` : null,
     };
     if (!best || d.formation7d > best.formation7d) best = d;
   }
@@ -525,6 +530,8 @@ async function main() {
   }
   if (gulf && models?.invest) { gulf.invest = models.invest; if (models.winds) gulf.winds = models.winds; }
   else if (gulf && models === undefined && prior?.gulf?.invest) gulf.invest = prior.gulf.invest; // guidance fetch failed: keep the known Invest number
+  else if (gulf && gulf.investHint) gulf.invest = gulf.investHint; // NHC names the Invest in the outlook heading
+  if (gulf) delete gulf.investHint;
   const status = build(prior, gulf, storms, ww);
   status.google = await gatherGoogle(storms[0], models?.invest).catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return prior?.google ?? null; });
   const changes = diff(prior, status);
