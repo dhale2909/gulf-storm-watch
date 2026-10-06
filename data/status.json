@@ -1,19 +1,36 @@
 {
-  "updatedAt": "2026-10-06T20:37:57.112Z",
-  "lastAttemptAt": "2026-10-06T20:37:57.112Z",
-  "nextCheck": "2026-10-06T21:00:00.000Z",
-  "alertLevel": "watch",
-  "headline": "NHC gives the Southwestern Gulf of America disturbance a 100% chance of forming within 7 days (100% within 48 hours). No advisories or forecast track yet.",
+  "updatedAt": "2026-10-06T21:00:20.841Z",
+  "lastAttemptAt": "2026-10-06T21:00:20.841Z",
+  "nextCheck": "2026-10-06T21:30:00.000Z",
+  "alertLevel": "threat",
+  "headline": "Tropical Depression Nine: 30 kt, 22.1N 95.6W, Gulf, moving E at 5 kt. Forecast track reaches the AL coast around Fri, Oct 9, 1 PM CT (approximate).",
   "gulf": {
     "area": "Southwestern Gulf of America",
     "text": "Satellite images and surface observations indicate that showers and thunderstorms are becoming better organized while surface pressures are gradually falling. If these trends continue, advisories will likely be issued on this system later today or tonight while it moves slowly eastward. The low pressure area could bring gusty winds and areas of heavy rain to the western portions of the Yucatan Peninsula of Mexico in a couple of days. The disturbance is expected to turn to the north or northeast toward the northern Gulf Coast by the end of the week. It is still too early to determine specific impacts to the northern Gulf Coast, but interests from the Florida Panhandle to Louisiana should closely monitor the progress of this system. The NOAA Gulfstream jet is en route to sample the environment over the Gulf this afternoon and Air Force and NOAA reconnaissance aircraft are scheduled to investigate the system tomorrow. * Formation chance through 48 hours...high...near 100 percent. * Formation chance through 7 days...high...near 100 percent. $$ Forecaster Cangialosi",
     "formation48": 100,
     "formation7d": 100,
     "source": "NHC outlook, 200 PM EDT Tue Oct 6 2026",
-    "invest": "Invest 92L",
-    "winds": 30
+    "invest": "Invest 92L"
   },
-  "storms": [],
+  "storms": [
+    {
+      "id": "al092026",
+      "name": "Tropical Depression Nine",
+      "type": "Tropical Depression",
+      "winds": 30,
+      "category": 0,
+      "location": "22.1N 95.6W, Gulf",
+      "movement": "E at 5 kt",
+      "advisory": "NHC advisory 001",
+      "advisoryAt": "2026-10-06T21:00:00.000Z",
+      "pos": {
+        "lat": 22.1,
+        "lonW": 95.6
+      },
+      "forecastStale": false,
+      "gulfRisk": "Forecast track reaches the AL coast around Fri, Oct 9, 1 PM CT (approximate)"
+    }
+  ],
   "watchesWarnings": {
     "note": "",
     "AL": {},
@@ -21,7 +38,10 @@
     "MS": {},
     "LA": {}
   },
-  "landfall": null,
+  "landfall": {
+    "state": "AL",
+    "eta": "2026-10-09T18:00:00.000Z"
+  },
   "landfallOccurred": null,
   "internal": {
     "failCount": 0,
@@ -36,11 +56,11 @@
   },
   "tracked": {
     "invest": "Invest 92L",
-    "stormId": null,
-    "name": "Invest 92L",
+    "stormId": "al092026",
+    "name": "Tropical Depression Nine",
     "lastPos": {
       "lat": 22.1,
-      "lonW": 95.8
+      "lonW": 95.6
     }
   },
   "others": [],
@@ -50,21 +70,5 @@
     "alerts": "ok",
     "map": "ok"
   },
-  "google": {
-    "run": "2026-10-06T12:00:00.000Z",
-    "members": 32,
-    "total": 50,
-    "hits": 32,
-    "coast": {
-      "LA": 0,
-      "MS": 0,
-      "AL": 6,
-      "FL": 26
-    },
-    "eta": "2026-10-09T18:00:00.000Z",
-    "hurricane": 31,
-    "major": 18,
-    "peakMedianKt": 101,
-    "text": "32 of 50 ensemble members forecast a track so far. 32 of 32 bring the center to the Louisiana-to-Florida coast (FL 26, AL 6), typically around Fri, Oct 9, 1 PM CT. 31 of 32 reach hurricane strength (18 major); typical peak 101 kt."
-  }
+  "google": null
 }
