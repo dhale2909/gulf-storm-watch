@@ -317,7 +317,7 @@ body.card .leaflet-control-container{display:none}
   var done=function(k){ ready[k]=1; if(!(ready.s&&ready.m&&ready.e)) return;
     // The card's layout settles after the text is filled in; re-measure the map and refit before the screenshot.
     // The card always frames the Gulf edge to edge at one fixed zoom (the text bar sits over the inland US).
-    if(CARD&&map){ map.invalidateSize(); map.setView([27.1,-89.3],6,{animate:false}); }
+    if(CARD&&map){ setTimeout(function(){ map.invalidateSize(); map.setView([27.1,-89.3],6,{animate:false}); window.cardReady=true; },400); return; }
     window.cardReady=true; };
   if(CARD){ document.body.classList.add("card"); $("card-map").appendChild($("map")); }
   var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
@@ -543,7 +543,9 @@ body.card .leaflet-control-container{display:none}
       if(l) (r==="model"?(modelGroups[p.group]||modelGroups.model):group).addLayer(l);
     });
     var b=L.latLngBounds([[24,-94],[31,-81]]); if(group.getLayers().length) b.extend(group.getBounds());
-    lastBounds=b; map.fitBounds(b,{padding:[18,18]});
+    // Clamp to the Gulf region: a cone or track running far inland must not zoom the Gulf down to a sliver.
+    b=L.latLngBounds([[Math.max(18,b.getSouth()),Math.max(-98.5,b.getWest())],[Math.min(33,b.getNorth()),Math.min(-80,b.getEast())]]);
+    lastBounds=b; if(!CARD) map.fitBounds(b,{padding:[18,18]});
     var kind=(m&&m.kind)||"none"; cardKeys.storm=kind==="storm"; cardKeys.outlook=kind==="outlook";
     var hasModels=Object.keys(mods).length>0;
     var modelLegend=["model","consensus","google","ens"].map(function(k){return mods[k]?sw(MODEL[k][0],MODEL[k][3],1):""}).join("");
