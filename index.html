@@ -102,8 +102,10 @@ a{color:var(--accent)}
 .map-note{font-size:13px;color:var(--muted);max-width:80ch}
 .wlbox{background:none;border:0}
 .wl{display:inline-block;font:700 11px/1 var(--mono);padding:3px 6px;border-radius:999px;background:#0f1a24;color:#fff;border:1.5px solid #fff;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(0,0,0,.5)}
-.wl.hu{background:#b3261e}
-.wl.lg{transform:none;margin-right:6px;vertical-align:middle}
+.wl.c1{background:#e3b321;color:#1a1a1a}.wl.c2{background:#ef8f2b;color:#1a1a1a}.wl.c3{background:#d8402a}.wl.c4{background:#a3151e}.wl.c5{background:#7b2aa8}
+.catb{display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 8px;border-radius:6px;font:700 12px/1 var(--mono);letter-spacing:.06em;color:#fff;background:#d8402a}
+.catb.c1{background:#e3b321;color:#1a1a1a}.catb.c2{background:#ef8f2b;color:#1a1a1a}.catb.c4{background:#a3151e}.catb.c5{background:#7b2aa8}
+.wl.lg{transform:none;margin-right:4px;vertical-align:middle;min-width:14px;text-align:center}
 .credit{display:flex;justify-content:center;padding:18px 0 28px}
 .credit a{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;text-decoration:none;opacity:.8}
 .credit a:hover{opacity:1}.credit img{height:24px;width:auto}
@@ -470,7 +472,7 @@ body.card .leaflet-control-container{display:none}
     var st=d.storms||[], s0=st[0];
     $("tiles").setAttribute("data-stage",s0?"storm":"form");
     if(s0){
-      $("st-type").textContent=stormName(s0)+(s0.category?" \u00b7 Cat "+s0.category:"");
+      $("st-type").innerHTML=esc(stormName(s0))+(s0.category?' <span class="catb c'+s0.category+'">CAT '+s0.category+'</span>':"");
       $("st-type-sub").textContent=(s0.advisory||"NHC advisory")+(s0.advisoryAt?" \u00b7 "+fmt(s0.advisoryAt):"");
       $("st-wind").textContent=mph(s0.winds); $("st-wind-sub").textContent=s0.winds+" kt \u00b7 moving "+s0.movement+" \u00b7 "+s0.location;
       $("st-lf").textContent=d.landfallOccurred?("Made landfall: "+d.landfallOccurred.state):d.landfall?("Near "+(d.landfall.near||STATE_NAME[d.landfall.state])):(s0.forecastStale?"Forecast unavailable":"None forecast");
@@ -564,7 +566,7 @@ body.card .leaflet-control-container{display:none}
     group.clearLayers(); Object.keys(modelGroups).forEach(function(k){modelGroups[k].clearLayers()});
     var fg=getComputedStyle(document.documentElement).getPropertyValue("--fg").trim()||"#13202b";
     var muted=getComputedStyle(document.documentElement).getPropertyValue("--muted").trim()||"#5b6b78";
-    var fs=(m&&m.features)||[], kinds={}, mods={}, risk, hasPast=false, hasNow=false;
+    var fs=(m&&m.features)||[], kinds={}, mods={}, risk, hasPast=false, hasNow=false, maxCat=0;
     fs.forEach(function(f){ var p=f.properties||{}, r=p.role, c=f.geometry.coordinates, l;
       if(r==="model"){ mods[p.group]=1; var ms=MODEL[p.group]||MODEL.model;
         l=L.geoJSON(f,{style:{color:ms[0],weight:ms[1]*K,opacity:ms[2]}}).bindTooltip(esc(p.name)+" ("+esc(p.tech)+")",{sticky:true}); }
@@ -578,10 +580,10 @@ body.card .leaflet-control-container{display:none}
       else if(r==="pastpt"){ hasPast=true; l=L.circleMarker([c[1],c[0]],{radius:2.6*(CARD?2:1),color:fg,weight:1,fillColor:fg,fillOpacity:.9}).bindTooltip("Was here "+fmt(p.t)+" \u00b7 "+esc(mph(p.wind))+" mph"); }
       else if(r==="ww"){ kinds[p.kind]=1; l=L.geoJSON(f,{style:{color:(WW[p.kind]||["#888"])[0],weight:6*K,lineCap:"butt"}}).bindTooltip((WW[p.kind]||[0,"Coastal alert"])[1],{sticky:true}); }
       else if(r==="point"){ var kt=p.wind!=null?+p.wind:null, cat=kt==null?0:kt>=137?5:kt>=113?4:kt>=96?3:kt>=83?2:kt>=64?1:0;
-        var txt=kt!=null?(cat?"Cat "+cat+" \u00b7 ":"")+mph(kt):esc(p.label);
+        var txt=kt!=null?mph(kt):esc(p.label); if(cat>maxCat) maxCat=cat;
         // The current position is a plain marker (its wind is in the tile); forecast positions carry their wind label.
         l=p.now?L.circleMarker([c[1],c[0]],{radius:7*(CARD?2:1),color:"#fff",weight:2*(CARD?2:1),fillColor:"#f05b52",fillOpacity:1})
-          :L.marker([c[1],c[0]],{icon:L.divIcon({className:"wlbox",iconSize:[0,0],html:'<span class="wl'+(cat?' hu':'')+'"'+(CARD?' style="font-size:24px;padding:5px 12px;border-width:3px"':'')+'>'+txt+'</span>'}),zIndexOffset:cat*10});
+          :L.marker([c[1],c[0]],{icon:L.divIcon({className:"wlbox",iconSize:[0,0],html:'<span class="wl'+(cat?' c'+cat:'')+'"'+(CARD?' style="font-size:24px;padding:5px 12px;border-width:3px"':'')+'>'+txt+'</span>'}),zIndexOffset:cat*10});
         l
         .bindTooltip((p.now?"Now":esc(p.label))+(kt!=null?" \u00b7 "+esc(mph(kt))+" mph":"")+(p.type?" \u00b7 "+esc(p.type):""),{direction:"top",offset:[0,-14],className:"pt"}); }
       if(l) (r==="model"?(modelGroups[p.group]||modelGroups.model):group).addLayer(l);
@@ -596,7 +598,7 @@ body.card .leaflet-control-container{display:none}
     $("map-title").textContent=kind==="storm"?"Forecast track: "+m.name:kind==="outlook"?(hasModels?"Development area and model tracks":"Development area"):"Storm map";
     $("map-src").textContent=(m&&m.source)||"NHC";
     $("map-legend").innerHTML=kind==="storm"
-      ? '<span><i class="wl lg">45</i>Forecast wind, mph (Cat = hurricane category)</span>'+sw(fg,"NHC forecast track",1)+sw(muted,"Past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")+modelLegend
+      ? '<span><i class="wl lg">45</i>Forecast wind, mph</span>'+(maxCat?'<span>'+[1,2,3,4,5].map(function(c){return '<i class="wl lg c'+c+'">'+c+'</i>'}).join("")+'Hurricane category</span>':'')+sw(fg,"NHC forecast track",1)+sw(muted,"Past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")+modelLegend
       : kind==="outlook" ? sw(RISK[risk]||RISK.Medium,"7-day development area")+(hasNow?'<span><b style="color:var(--landfall)">&#9679;</b> Latest position</span>':'<span><b style="color:var(--landfall)">&#10005;</b> Disturbance now</span>')+(hasPast?sw(fg,"Where it has been",1):"")+modelLegend : "";
     $("map-note").textContent=kind==="storm"
       ? "Labels are NHC forecast positions of the storm center with the expected wind in mph; hover or tap one for the time. The spread of the model tracks shows how uncertain the path is; wind, surge and rain reach well outside the center's line."
