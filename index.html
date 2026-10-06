@@ -121,10 +121,10 @@ body.card #card{display:flex;flex-direction:column;position:relative;width:1200p
 #card-map{position:absolute;inset:0;overflow:hidden}
 body.card #map{width:1200px;height:900px;border:0;border-radius:0}
 #card #c-pill{position:absolute;right:28px;top:40px;z-index:600;font-size:46px;padding:8px 30px}
-#card .c-bar{position:absolute;left:0;right:0;top:0;z-index:550;height:176px;box-sizing:border-box;background:rgba(13,21,28,.88);border-bottom:10px solid var(--lvl,var(--watch));padding:12px 280px 0 34px;font-family:var(--display);white-space:nowrap;overflow:hidden}
+#card .c-bar{position:absolute;left:0;right:0;top:0;z-index:550;height:176px;box-sizing:border-box;background:rgba(13,21,28,.88);border-bottom:10px solid var(--lvl,var(--watch));padding:12px 250px 0 34px;font-family:var(--display);white-space:nowrap;overflow:hidden}
 #c-l0{font:700 32px/40px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--lvl,var(--watch))}
-#c-l1{display:flex;align-items:baseline;gap:22px;font-weight:700;font-size:104px;line-height:1}
-#c-l1 span{font:500 44px var(--body);color:#c3ced6;margin-right:26px}
+#c-l1{display:flex;align-items:baseline;gap:18px;font-weight:700;font-size:92px;line-height:1}
+#c-l1 span{font:500 .46em var(--body);color:#c3ced6;margin-right:22px}
 #c-l1 .nm{font-size:68px;line-height:1.05}
 #c-l2{font:500 34px/42px var(--body);color:#c3ced6}
 #c-l2:empty{display:none}
@@ -338,7 +338,7 @@ body.card .leaflet-control-container{display:none}
     }
     // Shrink long lines (long storm names, several alerts) until they fit the card width.
     ["c-l1","c-l2"].forEach(function(id){ var el=$(id), size=parseFloat(getComputedStyle(el.querySelector(".nm")||el).fontSize);
-      var t=el.querySelector(".nm")||el; while(CARD&&el.scrollWidth>880&&size>24){ size-=2; t.style.fontSize=size+"px"; } });
+      var t=el.querySelector(".nm")||el; while(CARD&&el.scrollWidth>916&&size>24){ size-=2; t.style.fontSize=size+"px"; } });
     done("s");
   }
   // ----- browser notifications: this device registers with the subscriber service; the hourly check sends to it -----
