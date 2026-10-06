@@ -1,6 +1,6 @@
 {
   "name": "Daniel's Storm Page",
-  "short_name": "Daniel's Weather",
+  "short_name": "Storm Page",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
