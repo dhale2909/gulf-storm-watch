@@ -232,7 +232,7 @@ const modelGroup = (t) => (/^GDM/.test(t) ? 'google' : /^A[PC]\d\d$/.test(t) ? '
 const cycleMs = (d) => Date.UTC(+d.slice(0, 4), +d.slice(4, 6) - 1, +d.slice(6, 8), +d.slice(8, 10));
 
 export function parseAdeck(text) {
-  const latest = new Map(); // tech -> { date, pts: Map(tau -> [lon, lat]) }
+  const runs = new Map(); // tech -> Map(date -> Map(tau -> [lon, lat]))
   let origin = null, originDate = '';
   for (const line of text.split('\n')) {
     const c = line.split(',').map((x) => x.trim());
@@ -243,15 +243,23 @@ export function parseAdeck(text) {
     const lat = (+la[1] / 10) * (la[2] === 'S' ? -1 : 1), lon = (+lo[1] / 10) * (lo[2] === 'W' ? -1 : 1);
     if (tech === 'CARQ') { if (tau === 0 && date >= originDate) { originDate = date; origin = { lat, lonW: -lon }; } continue; }
     if (SKIP_TECH.test(tech) || tau < 0 || tau > 168) continue;
-    let t = latest.get(tech);
-    if (!t || date > t.date) latest.set(tech, (t = { date, pts: new Map() }));
-    if (date === t.date) t.pts.set(tau, [lon, lat]);
+    if (!runs.has(tech)) runs.set(tech, new Map());
+    const byDate = runs.get(tech);
+    if (!byDate.has(date)) byDate.set(date, new Map());
+    byDate.get(date).set(tau, [lon, lat]);
+  }
+  if (!runs.size) return null;
+  // Per model: the newest run that has at least 3 points (a run can be filed with only its first point for a while).
+  const latest = new Map();
+  for (const [tech, byDate] of runs) {
+    const date = [...byDate.keys()].filter((d) => byDate.get(d).size >= 3).sort().pop();
+    if (date) latest.set(tech, { date, pts: byDate.get(date) });
   }
   if (!latest.size) return null;
   const init = [...latest.values()].map((t) => t.date).sort().pop();
   const tracks = [];
   for (const [tech, t] of latest) {
-    if (cycleMs(init) - cycleMs(t.date) > 12 * 3600e3 || t.pts.size < 3) continue; // stale run or too short to draw
+    if (cycleMs(init) - cycleMs(t.date) > 12 * 3600e3) continue; // stale run
     tracks.push({ tech, group: modelGroup(tech), name: (MODEL_NAMES.find(([re]) => re.test(tech)) || [0, tech])[1],
       coords: [...t.pts.entries()].sort((a, b) => a[0] - b[0]).map(([, p]) => p) });
   }
@@ -324,6 +332,7 @@ export function summarizeGoogle(csv, ids, initISO) {
   }
   // Google's file can list a system with only its current position and no forecast (seen at the Invest stage).
   // A summary needs real forecast tracks: at least a day of points from most members.
+  const total = members.size;
   for (const [k, pts] of members) if (pts.length < 5) members.delete(k);
   if (members.size < 10) return null;
   const coast = { LA: 0, MS: 0, AL: 0, FL: 0 }, etas = [], peaks = [];
@@ -340,8 +349,9 @@ export function summarizeGoogle(csv, ids, initISO) {
   const eta = hits ? new Date(median(etas)).toISOString() : null;
   const byState = STATES.filter((s) => coast[s]).sort((a, b) => coast[b] - coast[a]).map((s) => `${s} ${coast[s]}`).join(', ');
   return {
-    run: initISO, members: n, hits, coast, eta, hurricane, major, peakMedianKt: Math.round(median(peaks)),
-    text: (hits ? `${hits} of ${n} ensemble members bring the center to the Louisiana-to-Florida coast (${byState}), typically around ${fmtCT(eta)}.` : `None of the ${n} ensemble members bring the center to the Louisiana-to-Florida coast.`) +
+    run: initISO, members: n, total, hits, coast, eta, hurricane, major, peakMedianKt: Math.round(median(peaks)),
+    text: (n < total ? `${n} of ${total} ensemble members forecast a track so far. ` : '') +
+      (hits ? `${hits} of ${n} bring the center to the Louisiana-to-Florida coast (${byState}), typically around ${fmtCT(eta)}.` : `None of the ${n} bring the center to the Louisiana-to-Florida coast.`) +
       ` ${hurricane} of ${n} reach hurricane strength${major ? ` (${major} major)` : ''}; typical peak ${Math.round(median(peaks))} kt.`,
   };
 }
