@@ -317,7 +317,10 @@ export function summarizeGoogle(csv, ids, initISO) {
     if (!members.has(c[col.sample])) members.set(c[col.sample], []);
     members.get(c[col.sample]).push({ t, lat: +c[col.lat], lonW: -lon, wind: +c[col.maximum_sustained_wind_speed_knots] || 0 });
   }
-  if (!members.size) return null;
+  // Google's file can list a system with only its current position and no forecast (seen at the Invest stage).
+  // A summary needs real forecast tracks: at least a day of points from most members.
+  for (const [k, pts] of members) if (pts.length < 5) members.delete(k);
+  if (members.size < 10) return null;
   const coast = { LA: 0, MS: 0, AL: 0, FL: 0 }, etas = [], peaks = [];
   for (const pts of members.values()) {
     pts.sort((a, b) => a.t - b.t);
