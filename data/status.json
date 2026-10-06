@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-06T22:30:06.643Z",
-  "lastAttemptAt": "2026-10-06T22:30:06.643Z",
+  "updatedAt": "2026-10-06T22:37:19.095Z",
+  "lastAttemptAt": "2026-10-06T22:37:19.095Z",
   "nextCheck": "2026-10-06T23:00:00.000Z",
   "alertLevel": "threat",
   "headline": "Tropical Depression Nine: 35 mph, 22.1N 95.6W, Gulf, moving E at 6 mph. Forecast track reaches the coast near Pascagoula, MS around Fri, Oct 9, 8 PM CT (approximate).",
@@ -33,42 +33,50 @@
         {
           "t": "2026-10-07T06:00:00.000Z",
           "lat": 22.1,
-          "lonW": 95
+          "lonW": 95,
+          "wind": 35
         },
         {
           "t": "2026-10-07T18:00:00.000Z",
           "lat": 22.6,
-          "lonW": 93.4
+          "lonW": 93.4,
+          "wind": 45
         },
         {
           "t": "2026-10-08T06:00:00.000Z",
           "lat": 23.1,
-          "lonW": 91.8
+          "lonW": 91.8,
+          "wind": 55
         },
         {
           "t": "2026-10-08T18:00:00.000Z",
           "lat": 24.2,
-          "lonW": 90.1
+          "lonW": 90.1,
+          "wind": 70
         },
         {
           "t": "2026-10-09T06:00:00.000Z",
           "lat": 25.9,
-          "lonW": 88.8
+          "lonW": 88.8,
+          "wind": 80
         },
         {
           "t": "2026-10-09T18:00:00.000Z",
           "lat": 28.5,
-          "lonW": 88.3
+          "lonW": 88.3,
+          "wind": 85
         },
         {
           "t": "2026-10-10T18:00:00.000Z",
           "lat": 34,
-          "lonW": 88.7
+          "lonW": 88.7,
+          "wind": 30
         },
         {
           "t": "2026-10-11T18:00:00.000Z",
           "lat": 38.9,
-          "lonW": 86.5
+          "lonW": 86.5,
+          "wind": 20
         }
       ],
       "forecastStale": false,
@@ -78,14 +86,15 @@
   "watchesWarnings": {
     "note": "",
     "MS": {},
-    "AL": {},
+    "FL": {},
     "LA": {},
-    "FL": {}
+    "AL": {}
   },
   "landfall": {
     "state": "MS",
     "eta": "2026-10-10T01:43:48.220Z",
-    "near": "Pascagoula, MS"
+    "near": "Pascagoula, MS",
+    "windKt": 67
   },
   "landfallOccurred": null,
   "internal": {
@@ -134,6 +143,6 @@
     "peakMedianKt": 101,
     "text": "32 of 50 ensemble members forecast a track so far. 32 of 32 bring the center to the Louisiana-to-Florida coast (FL 26, AL 6), typically around Sat, Oct 10, 1 AM CT. 31 of 32 reach hurricane strength (18 major); typical peak 115 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-06T22:30:06.643Z"
+    "computedAt": "2026-10-06T22:37:19.095Z"
   }
 }
