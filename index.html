@@ -393,7 +393,7 @@ body.card .leaflet-control-container{display:none}
     }
     // Shrink long lines (long storm names, several alerts) until they fit the card width.
     ["c-l1","c-l2"].forEach(function(id){ var el=$(id), size=parseFloat(getComputedStyle(el.querySelector(".nm")||el).fontSize);
-      var t=el.querySelector(".nm")||el; while(CARD&&el.scrollWidth>800&&size>24){ size-=2; t.style.fontSize=size+"px"; } });
+      var t=el.querySelector(".nm")||el; while(CARD&&el.scrollWidth>el.clientWidth&&size>24){ size-=2; t.style.fontSize=size+"px"; } });
     done("s");
   }
   // ----- browser notifications: this device registers with the subscriber service; the hourly check sends to it -----
