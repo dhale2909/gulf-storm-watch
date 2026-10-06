@@ -339,7 +339,8 @@ body.card .leaflet-control-container{display:none}
       var lf=d.landfallOccurred?("Made landfall in "+(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+" about "+ctShort(d.landfallOccurred.at)):d.landfall?("Landfall expected near "+(d.landfall.near||STATE_NAME[d.landfall.state]+" coast")+", about "+ctShort(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"Latest forecast unavailable":"No landfall on the AL\u2013FL coast in the forecast");
       $("c-l0").textContent=s0.type+(s0.category?" \u00b7 Category "+s0.category:"")+" \u00b7 "+(s0.advisory||asOf(d));
       var short=s0.name.indexOf(s0.type+" ")===0?s0.name.slice(s0.type.length+1):s0.name;
-      $("c-l1").innerHTML='<b class="nm">'+esc(stormName({name:short}))+" \u00b7 "+esc(mph(s0.winds))+" mph winds</b>";
+      var isNamed=!/depression|potential/i.test(s0.type);
+      $("c-l1").innerHTML='<b class="nm">'+esc(isNamed?short:stormName(s0))+" \u00b7 "+esc(mph(s0.winds))+" mph winds</b>";
       $("c-l2").textContent=lf+(alerts?" \u00b7 "+alerts:"");
       shareText=s0.name+": "+mph(s0.winds)+" mph. "+(d.landfall?("Forecast track reaches the coast near "+(d.landfall.near||d.landfall.state)+" about "+ctShort(d.landfall.eta)+". "):"")+line;
     } else if(held){
