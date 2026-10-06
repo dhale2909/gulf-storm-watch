@@ -351,7 +351,7 @@ body.card .leaflet-control-container{display:none}
   var done=function(k){ ready[k]=1; if(!(ready.s&&ready.m&&ready.e)) return;
     // The card's layout settles after the text is filled in; re-measure the map and refit before the screenshot.
     // The card always frames the Gulf edge to edge at one fixed zoom (the text bar sits over the inland US).
-    if(CARD&&map){ setTimeout(function(){ map.invalidateSize(); if(CARDX) map.setView([29.2,-89.0],5,{animate:false}); else map.setView([27.1,-89.3],6,{animate:false}); window.cardReady=true; },400); return; }
+    if(CARD&&map){ setTimeout(function(){ map.invalidateSize(); if(CARDX) map.setView([28.4,-89.2],5.5,{animate:false}); else map.setView([27.1,-89.3],6,{animate:false}); window.cardReady=true; },400); return; }
     window.cardReady=true; };
   if(CARD){ document.body.classList.add("card"); if(CARDX) document.body.classList.add("cardx"); $("card-map").appendChild($("map")); }
   var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
@@ -556,7 +556,7 @@ body.card .leaflet-control-container{display:none}
   var sw=function(c,t,line){return '<span><i'+(line?' class="ln" style="border-color:'+c+'"':' style="background:'+c+'"')+'></i>'+t+'</span>'};
   function initMap(){
     if(map||!window.L) return;
-    map=L.map("map",{scrollWheelZoom:false,zoomSnap:CARD?1:0.25}); // finer zoom steps so the Gulf fills the map on a phone
+    map=L.map("map",{scrollWheelZoom:false,zoomSnap:CARDX?0.5:CARD?1:0.25}); // finer zoom steps so the Gulf fills the map on a phone
     var esri="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_";
     L.tileLayer(esri+"Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Map: Esri, HERE, Garmin, &copy; OpenStreetMap contributors",maxZoom:10}).addTo(map);
     if(!CARD) L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
