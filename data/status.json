@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-06T21:07:05.568Z",
-  "lastAttemptAt": "2026-10-06T21:07:05.568Z",
+  "updatedAt": "2026-10-06T21:13:46.979Z",
+  "lastAttemptAt": "2026-10-06T21:13:46.979Z",
   "nextCheck": "2026-10-06T21:30:00.000Z",
   "alertLevel": "threat",
   "headline": "Tropical Depression Nine: 30 kt, 22.1N 95.6W, Gulf, moving E at 5 kt. Forecast track reaches the AL coast around Fri, Oct 9, 1 PM CT (approximate).",
@@ -70,5 +70,23 @@
     "alerts": "ok",
     "map": "ok"
   },
-  "google": null
+  "google": {
+    "run": "2026-10-06T12:00:00.000Z",
+    "members": 32,
+    "total": 50,
+    "hits": 32,
+    "coast": {
+      "LA": 0,
+      "MS": 0,
+      "AL": 6,
+      "FL": 26
+    },
+    "eta": "2026-10-09T18:00:00.000Z",
+    "hurricane": 31,
+    "major": 18,
+    "peakMedianKt": 101,
+    "text": "32 of 50 ensemble members forecast a track so far. 32 of 32 bring the center to the Louisiana-to-Florida coast (FL 26, AL 6), typically around Fri, Oct 9, 1 PM CT. 31 of 32 reach hurricane strength (18 major); typical peak 101 kt.",
+    "system": "Invest 92L",
+    "computedAt": "2026-10-06T21:13:46.979Z"
+  }
 }
