@@ -57,43 +57,52 @@ const preText = (html) => {
 
 // ---------- parsing ----------
 
-// Tropical Weather Outlook -> the Gulf disturbance (highest 7-day odds if several), or null.
+// Tropical Weather Outlook -> the Gulf disturbance (highest 7-day odds if several), or null when the outlook
+// verifiably has no Gulf entry. Throws when a Gulf entry exists but cannot be read, so a parse problem is treated
+// as "data unavailable" (previous reading kept) and never as a quiet Gulf.
 export function parseTWO(html) {
   const pre = preText(html);
   if (!pre || !/Tropical Weather Outlook/i.test(pre)) throw new Error('TWO text not found');
   const issued = (/^\d{3,4} (?:AM|PM) \w+ \w+ \w+ \d+ \d{4}$/m.exec(pre) || [''])[0];
-  const pct = (s) => +String(s).replace(/near/i, '').trim(); // "near 0", "near 100", "70"
-  // Everything after the basin header, minus the "Active Systems" paragraph (storms with advisories are handled from CurrentStorms.json).
-  const body = pre.replace(/^[\s\S]*?For the North Atlantic[^\n]*\n/i, '').replace(/^Active Systems:.*\n(?:.+\n)*\n?/im, '');
-  const re = /\* Formation chance through 48 hours\.\.\.\w+\.\.\.(near \d+|\d+) percent\.\s*\* Formation chance through 7 days\.\.\.\w+\.\.\.(near \d+|\d+) percent\./gi;
-  let best = null, last = 0, m;
-  while ((m = re.exec(body))) {
-    // One disturbance = all the text since the previous disturbance's formation lines; it may run to several paragraphs.
-    const lines = body.slice(last, m.index).trim().split('\n');
-    last = re.lastIndex;
-    const hi = lines.findIndex((l) => /:\s*$/.test(l) && l.trim().length < 80);
-    const head = hi >= 0 ? lines[hi].trim() : '';
-    const text = lines.filter((_, k) => k !== hi).join(' ').replace(/\s+/g, ' ').trim();
-    if (!/Gulf of (America|Mexico)|Bay of Campeche/i.test(head + ' ' + text)) continue;
-    const inv = /\(AL(\d\d)\)/i.exec(head);
+  const pct = (str) => +String(str).replace(/near/i, '').trim(); // "near 0", "near 100", "70"
+  let body = pre.replace(/^[\s\S]*?For the North Atlantic[^\n]*\n/i, '')
+    // Storms with advisories are handled from CurrentStorms.json, not from the outlook's "Active Systems" paragraph.
+    .replace(/^Active Systems:.*\n(?:.+\n)*\n?/im, '')
+    // Formation lines can wrap ("near\n100 percent"); join their continuation lines.
+    .replace(/^\* Formation chance[^\n]*(?:\n(?!\*|\s*$)[^\n]*)*/gim, (m) => m.replace(/\s+/g, ' '));
+  // One entry per heading line ("Southwestern Gulf of America (AL92):", "1. Central Tropical Atlantic:").
+  const entries = [];
+  let cur = null;
+  for (const line of body.split('\n')) {
+    if (/^(?:\d+\.\s*)?[^*\n]{3,78}:\s*$/.test(line)) { cur = { head: line.trim(), lines: [] }; entries.push(cur); }
+    else if (cur) cur.lines.push(line);
+  }
+  const GULF = /Gulf of (America|Mexico)|Bay of Campeche/i;
+  let best = null;
+  for (const e of entries) {
+    const text = e.lines.join(' ').replace(/\s+/g, ' ').trim();
+    if (!GULF.test(e.head + ' ' + text)) continue;
+    const m48 = /\* Formation chance through 48 hours\.\.\.\w+\.\.\.(near \d+|\d+) percent\./i.exec(text);
+    const m7 = /\* Formation chance through 7 days\.\.\.\w+\.\.\.(near \d+|\d+) percent\./i.exec(text);
+    const p48 = m48 ? pct(m48[1]) : NaN, p7 = m7 ? pct(m7[1]) : NaN;
+    if (!(p48 >= 0 && p48 <= 100 && p7 >= 0 && p7 <= 100)) throw new Error(`outlook entry "${e.head}" could not be read`);
+    const inv = /\(AL(\d\d)\)/i.exec(e.head);
     const d = {
-      area: head.replace(/^\d+\.\s*/, '').replace(/:$/, '').replace(/\s*\([^)]*\)$/, '').trim() || 'Gulf disturbance',
-      text, formation48: pct(m[1]), formation7d: pct(m[2]),
+      area: e.head.replace(/^\d+\.\s*/, '').replace(/:$/, '').replace(/\s*\([^)]*\)$/, '').trim() || 'Gulf disturbance',
+      text: text.replace(/\* Formation chance[^.]*percent\./gi, '').replace(/\s+/g, ' ').trim(),
+      formation48: p48, formation7d: p7,
       source: `NHC outlook, ${issued}`,
       investHint: inv ? `Invest ${inv[1]}L` : null,
     };
     if (!best || d.formation7d > best.formation7d) best = d;
   }
-  // Safety net: if the outlook plainly has a Gulf entry that we failed to read, that is a parse failure,
-  // not a quiet Gulf. Failing keeps the previous reading rather than announcing a false all-clear.
-  if (!best && /^[^\n]*(Gulf of (America|Mexico)|Bay of Campeche)[^\n]*:\s*$/im.test(body)) throw new Error('outlook has a Gulf entry the parser could not read');
   return best;
 }
 
 // Forecast advisory -> [{t, lat, lonW}] forecast points.
-function parseTCM(html, issuanceISO) {
+export function parseTCM(html, issuanceISO) {
   const pre = preText(html);
-  if (!pre) return [];
+  if (!pre || !/FORECAST\/ADVISORY|FORECAST VALID|REMNANTS|DISSIPAT/i.test(pre)) return null; // unreadable: unknown, not "no track"
   const base = new Date(issuanceISO);
   const pts = [];
   for (const m of pre.matchAll(/(?:FORECAST|OUTLOOK) VALID (\d{2})\/(\d{2})(\d{2})Z\s+(\d+\.\d)N\s+(\d+\.\d)W/g)) {
@@ -125,53 +134,71 @@ const fmtCT = (iso) => new Date(iso).toLocaleString('en-US', { timeZone: 'Americ
 
 // ---------- gather ----------
 
-async function gatherStorms() {
+export async function gatherStorms(prior) {
   const feed = await get('storms.json', 'https://www.nhc.noaa.gov/CurrentStorms.json', true);
   if (!feed || !Array.isArray(feed.activeStorms)) throw new Error('CurrentStorms.json malformed');
+  const prevById = new Map((prior?.storms || []).map((p) => [p.id, p]));
+  const priorLandfallFor = (id) => (prior?.landfall && prior.storms?.[0]?.id === id ? prior.landfall : null);
   const out = [];
   for (const s of feed.activeStorms) {
-    if (!/^al/i.test(s.id || '')) continue; // Atlantic basin only; never Pacific
-    const here = { t: s.lastUpdate, lat: +s.latitudeNumeric, lonW: -s.longitudeNumeric };
-    let track = [];
+    if (!/^al\d{6}$/i.test(s.id || '')) continue; // Atlantic basin only; never Pacific
+    const prev = prevById.get(s.id);
+    const lat = +s.latitudeNumeric, lon = +s.longitudeNumeric;
+    const posOK = Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180;
+    if (!posOK && !prev) { console.warn(`storm ${s.id}: no usable position; skipped`); continue; }
+    const here = posOK ? { t: s.lastUpdate, lat, lonW: -lon } : null;
+    // Forecast track: null means "could not get it this run", distinct from a storm with no coastal threat.
+    let track = null;
     try {
-      if (s.forecastAdvisory?.url) {
-        track = parseTCM(await get(`tcm-${s.id}.html`, s.forecastAdvisory.url), s.forecastAdvisory.issuance || s.lastUpdate);
-      }
+      if (s.forecastAdvisory?.url) track = parseTCM(await get(`tcm-${s.id}.html`, s.forecastAdvisory.url), s.forecastAdvisory.issuance || s.lastUpdate);
     } catch (e) { console.warn(`forecast advisory for ${s.id} unavailable: ${e.message}`); }
-    const path = [here, ...track];
-    if (!path.some(inGulf) && !path.some(coastHit)) continue; // not a Gulf system
-    const winds = +s.intensity || 0;
-    const type = TYPES[s.classification] || 'Post-Tropical Cyclone';
-    const hit = path.find(coastHit) || null;
+    const forecastStale = track === null;
+    const path = [...(here ? [here] : []), ...(track || [])];
+    const relevant = path.some(inGulf) || path.some(coastHit) || (forecastStale && !!prev);
+    if (!relevant) continue; // not a Gulf system
+    const windsRaw = +s.intensity;
+    const winds = Number.isFinite(windsRaw) && windsRaw >= 0 ? windsRaw : (prev?.winds ?? 0);
+    const known = s.classification in TYPES;
+    const type = known ? TYPES[s.classification] : (/^(PC|EX|LO|DB|WV|SD|SS)$/.test(s.classification || '') ? 'Post-Tropical Cyclone' : 'Tropical Cyclone');
+    if (!known && type === 'Tropical Cyclone') console.warn(`storm ${s.id}: unknown classification "${s.classification}"; treated as tropical`);
+    const hit = forecastStale ? null : path.find(coastHit) || null;
+    const landfall = forecastStale ? priorLandfallFor(s.id) : hit && { state: coastState(hit), eta: hit.t };
+    const loc = here ? `${here.lat.toFixed(1)}N ${here.lonW.toFixed(1)}W` + (inGulf(here) ? (here.lat < 22 && here.lonW >= 90 ? ', Bay of Campeche' : ', Gulf') : ', approaching the Gulf') : `${prev?.location || 'position unavailable'} (last known)`;
     out.push({
       id: s.id, bin: s.binNumber, name: `${type} ${s.name}`, type, winds,
       category: s.classification === 'HU' ? category(winds) : 0,
-      tropical: s.classification in TYPES,
-      location: `${here.lat.toFixed(1)}N ${here.lonW.toFixed(1)}W` + (inGulf(here) ? (here.lat < 22 && here.lonW >= 90 ? ', Bay of Campeche' : ', Gulf') : ', approaching the Gulf'),
-      movement: s.movementSpeed ? `${compass(+s.movementDir)} at ${s.movementSpeed} kt` : 'Stationary',
-      landfall: hit && { state: coastState(hit), eta: hit.t },
-      gulfRisk: hit
-        ? `Forecast track reaches the ${coastState(hit)} coast around ${fmtCT(hit.t)} (approximate)`
-        : track.length ? 'Forecast track stays off the AL/FL/MS/LA coast through the forecast period' : 'No forecast track available',
+      tropical: known || type === 'Tropical Cyclone',
+      location: loc,
+      movement: Number.isFinite(+s.movementSpeed) && +s.movementSpeed > 0 ? `${compass(+s.movementDir)} at ${s.movementSpeed} kt` : 'Stationary',
+      advisory: s.forecastAdvisory?.advNum ? `NHC advisory ${s.forecastAdvisory.advNum}` : '',
+      landfall,
+      forecastStale,
+      gulfRisk: forecastStale
+        ? (prev?.gulfRisk ? `${prev.gulfRisk.replace(/ \(latest forecast advisory unavailable\)$/, '')} (latest forecast advisory unavailable)` : 'Forecast advisory unavailable')
+        : hit ? `Forecast track reaches the ${coastState(hit)} coast around ${fmtCT(hit.t)} (approximate)`
+        : track.length ? 'Forecast track stays off the AL/FL/MS/LA coast through the forecast period' : 'No forecast track in the latest advisory',
     });
   }
   return out.sort((a, b) => (a.landfall ? 0 : 1) - (b.landfall ? 0 : 1) || b.winds - a.winds);
 }
 
-async function gatherAlerts(prior, gulfStorm) {
-  const ww = { note: '' };
+export async function gatherAlerts(prior, gulfStorm) {
+  const ww = { note: '', unavailable: [] };
   for (const st of STATES) {
     try {
       const j = await get(`alerts-${st}.json`, `https://api.weather.gov/alerts/active?area=${st}`, true);
-      const events = [...new Set((j.features || []).map((f) => f.properties?.event).filter((e) => TROPICAL_EVENTS.test(e || '')))];
+      if (!j || !Array.isArray(j.features)) throw new Error('alerts feed malformed (no features array)');
+      const events = [...new Set(j.features.map((f) => f.properties?.event).filter((e) => TROPICAL_EVENTS.test(e || '')))];
       // Florida also has an Atlantic coast; only count its alerts while a Gulf storm exists.
       if (!events.length || (st === 'FL' && !gulfStorm)) ww[st] = {};
       else ww[st] = { level: events.some((e) => /Warning$/.test(e)) ? 'warning' : 'watch', text: events.sort().join(', ') };
     } catch (e) {
       console.warn(`alerts for ${st} unavailable: ${e.message}`);
-      ww[st] = prior?.watchesWarnings?.[st] || {};
+      ww[st] = prior?.watchesWarnings?.[st] || {}; // keep what we knew; never clear a warning on a failed read
+      ww.unavailable.push(st);
     }
   }
+  if (!ww.unavailable.length) delete ww.unavailable;
   return ww;
 }
 
@@ -376,7 +403,7 @@ async function gatherGoogle(storm, invest) {
 
 // ---------- decide ----------
 
-function build(prior, gulf, storms, ww) {
+export function build(prior, gulf, storms, ww) {
   const storm = storms[0] || null;
   const anyAlert = STATES.some((s) => ww[s].level);
   const landfall = storm?.landfall || null;
@@ -402,11 +429,12 @@ function build(prior, gulf, storms, ww) {
   if (anyAlert) headline += ` Tropical alerts in effect: ${STATES.filter((s) => ww[s].level).map((s) => `${s} (${ww[s].text})`).join('; ')}.`;
 
   return {
-    updatedAt: NOW.toISOString(),
+    updatedAt: NOW.toISOString(), // time of the last successful reading (an outage keeps the old value; see lastAttemptAt)
+    lastAttemptAt: NOW.toISOString(),
     nextCheck: new Date((Math.floor(NOW.getTime() / 1800e3) + 1) * 1800e3).toISOString(), // GitHub checks on the hour, the Mac backup on the half hour
     alertLevel, headline,
     gulf: gulf || { area: '', formation48: null, formation7d: null, source: 'NHC outlook', text: storm ? 'NHC is issuing advisories on this system; see the storm panel.' : '' },
-    storms: storms.map(({ landfall: _l, tropical: _t, bin: _b, ...s }) => s),
+    storms: storms.map(({ landfall: _l, tropical: _t, bin: _b, ...s }) => s), // forecastStale stays, so the page and diff can see it
     watchesWarnings: ww,
     landfall,
     internal: {
@@ -420,7 +448,7 @@ function build(prior, gulf, storms, ww) {
 }
 
 // What counts as a change worth a push. Wording-only outlook edits do not.
-function diff(prior, cur) {
+export function diff(prior, cur) {
   const ch = [];
   if (!prior) return ch;
   if (prior.alertLevel !== cur.alertLevel) ch.push(`Alert level ${prior.alertLevel.toUpperCase()} -> ${cur.alertLevel.toUpperCase()}`);
@@ -451,13 +479,15 @@ function diff(prior, cur) {
   for (const [id, p] of ps) if (!cs.has(id)) ch.push(`${p.name} is no longer an active Gulf storm`);
 
   for (const st of STATES) {
-    const x = prior.watchesWarnings?.[st]?.level || null, y = cur.watchesWarnings[st].level || null;
-    if (x !== y) ch.push(y ? `${st}: tropical ${y} posted (${cur.watchesWarnings[st].text})` : `${st}: tropical ${x} dropped`);
+    const px = prior.watchesWarnings?.[st] || {}, cx = cur.watchesWarnings[st] || {};
+    const x = px.level || null, y = cx.level || null;
+    if (x !== y) ch.push(y ? `${st}: tropical ${y} posted (${cx.text})` : `${st}: tropical ${x} dropped`);
+    else if (y && (px.text || '') !== (cx.text || '')) ch.push(`${st}: alerts now ${cx.text} (was ${px.text})`);
   }
 
   const pl = prior.landfall, cl = cur.landfall;
   if (cl && !pl) ch.push(`Forecast track now reaches the ${cl.state} coast around ${fmtCT(cl.eta)}`);
-  else if (pl && !cl && cur.storms.length) ch.push('Forecast track no longer reaches the AL/FL/MS/LA coast');
+  else if (pl && !cl && cur.storms.length && !cur.storms[0].forecastStale) ch.push('Forecast track no longer reaches the AL/FL/MS/LA coast');
   else if (pl && cl) {
     if (pl.state !== cl.state) ch.push(`Forecast landfall shifted ${pl.state} -> ${cl.state} (${fmtCT(cl.eta)})`);
     else if (Math.abs(new Date(pl.eta) - new Date(cl.eta)) >= 12 * 3600e3) ch.push(`Forecast ${cl.state} landfall timing moved to ${fmtCT(cl.eta)}`);
@@ -483,6 +513,7 @@ function minorDiff(prior, cur) {
 // ---------- output ----------
 
 async function notify(title, message, level, topic = process.env.NTFY_TOPIC) {
+  if (!title) return true; // nothing to send on this channel
   if (!topic) { console.log(`[no NTFY_TOPIC, would push] ${title}: ${message}`); return false; }
   const r = await fetch('https://ntfy.sh/', {
     method: 'POST',
@@ -518,6 +549,18 @@ async function pushBrowsers(title, body) {
   return sent;
 }
 
+// Send one alert on every configured channel. Each transport is isolated: one failing never stops the
+// others or the save. Returns which channels got through; failures are kept in status.internal.pending
+// and retried on the next runs (bounded), so a transient outage does not swallow an alert.
+export async function deliver(msg) {
+  const r = { private: null, public: null, browser: null };
+  try { r.private = await notify(msg.privateTitle, msg.privateBody, msg.level); } catch (e) { r.private = false; console.warn(`private push failed: ${e.message}`); }
+  try { r.browser = (await pushBrowsers(msg.publicTitle, msg.publicBody)) >= 0; } catch (e) { r.browser = false; console.warn(`browser push failed: ${e.message}`); }
+  if (process.env.PUBLIC_NTFY_TOPIC) { try { r.public = await notify(msg.publicTitle, msg.publicBody, msg.level, process.env.PUBLIC_NTFY_TOPIC); } catch (e) { r.public = false; console.warn(`public push failed: ${e.message}`); } }
+  return r;
+}
+const PENDING_ATTEMPTS = 3;
+
 const readJSON = async (p, fallback) => { try { return JSON.parse(await readFile(p, 'utf8')); } catch { return fallback; } };
 
 async function save(status, entry, map) {
@@ -542,18 +585,24 @@ async function main() {
   }
 
   const prior = await readJSON('data/status.json', null);
-  let gulf, storms;
-  try {
-    [gulf, storms] = [parseTWO(await get('two.html', 'https://www.nhc.noaa.gov/text/MIATWOAT.shtml')), await gatherStorms()];
-  } catch (e) {
-    // Keep the prior picture, advance "last check", and only speak up on the second miss in a row.
-    console.warn(`NHC fetch failed: ${e.message}`);
-    const failCount = (prior?.internal?.failCount || 0) + 1;
-    const status = { ...(prior || { alertLevel: 'quiet', headline: 'No data yet.', gulf: {}, storms: [], watchesWarnings: {} }), updatedAt: NOW.toISOString(), internal: { ...(prior?.internal || {}), failCount } };
-    const pushed = failCount === 2 && (await notify('Gulf Storm Watch: data outage', 'NHC data has been unreachable for two checks in a row. The dashboard is showing the last good reading.', 'watch'));
-    await save(status, { ts: NOW.toISOString(), changed: false, pushed: !!pushed, alertLevel: status.alertLevel, formation7d: status.gulf?.formation7d ?? null, summary: 'NHC fetch failed' });
+  // Gather the two NHC sources independently: an outlook outage must not hide a storm feed that is fine, and vice versa.
+  let gulf = null, storms = null, outlookOK = true, stormsOK = true;
+  try { gulf = parseTWO(await get('two.html', 'https://www.nhc.noaa.gov/text/MIATWOAT.shtml')); } catch (e) { outlookOK = false; console.warn(`NHC outlook unavailable: ${e.message}`); }
+  try { storms = await gatherStorms(prior); } catch (e) { stormsOK = false; console.warn(`NHC storm feed unavailable: ${e.message}`); }
+  const failCount = outlookOK && stormsOK ? 0 : (prior?.internal?.failCount || 0) + 1;
+  if (!outlookOK && !stormsOK) {
+    // Keep the prior picture and its timestamp, record the attempt, and only speak up on the second miss in a row.
+    const base = prior || { alertLevel: 'quiet', headline: 'No data yet: NHC could not be reached.', gulf: {}, storms: [], watchesWarnings: {} };
+    const status = { ...base, lastAttemptAt: NOW.toISOString(), nextCheck: new Date((Math.floor(NOW.getTime() / 1800e3) + 1) * 1800e3).toISOString(), sources: { outlook: 'unavailable', storms: 'unavailable' }, internal: { ...(prior?.internal || {}), failCount } };
+    let pushed = false;
+    if (failCount === 2) { try { pushed = await notify('Gulf Storm Watch: data outage', 'NHC data has been unreachable for two checks in a row. The dashboard is showing the last good reading.', 'watch'); } catch (e) { console.warn(`outage push failed: ${e.message}`); } }
+    await save(status, { ts: NOW.toISOString(), changed: false, pushed, alertLevel: status.alertLevel, formation7d: status.gulf?.formation7d ?? null, summary: 'NHC fetch failed' });
+    console.log(`${String(status.alertLevel).toUpperCase()} | NHC unreachable (${failCount} in a row); previous reading kept`);
     return;
   }
+  // One source failed: carry that part of the previous reading forward, flagged, rather than treating it as absent.
+  if (!outlookOK) gulf = prior?.gulf?.area ? { ...prior.gulf, stale: true } : null;
+  if (!stormsOK) storms = (prior?.storms || []).map((p, k) => ({ ...p, forecastStale: true, landfall: k === 0 ? prior.landfall : null, tropical: !/Post-Tropical/.test(p.type) }));
 
   const ww = await gatherAlerts(prior, storms.length > 0);
   // The map is a nice-to-have: if its service is down, keep the last map and carry on.
@@ -570,30 +619,48 @@ async function main() {
   else if (gulf && gulf.investHint) gulf.invest = gulf.investHint; // NHC names the Invest in the outlook heading
   if (gulf) delete gulf.investHint;
   const status = build(prior, gulf, storms, ww);
+  status.internal.failCount = failCount;
+  status.sources = { outlook: outlookOK ? 'ok' : 'unavailable', storms: stormsOK ? 'ok' : 'unavailable', alerts: ww.unavailable ? `unavailable for ${ww.unavailable.join(', ')}` : 'ok', map: map ? 'ok' : 'unavailable' };
+  if (!outlookOK || !stormsOK) { status.updatedAt = prior?.updatedAt || status.updatedAt; } // not a fully fresh reading
   status.google = await gatherGoogle(storms[0], models?.invest).catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return prior?.google ?? null; });
   const changes = diff(prior, status);
   const changed = changes.length > 0;
   if (changed) { status.internal.baseline7d = status.gulf.formation7d; status.internal.baseline48 = status.gulf.formation48; }
 
-  let pushed = false;
+  let pushed = false, delivery = null;
   if (changed) {
     const plays = (() => { try { return JSON.parse(process.env.PLAYS_JSON || '{}'); } catch { return {}; } })();
     const play = plays[status.alertLevel] ? `\n\nPlay: ${plays[status.alertLevel]}` : '';
     const goog = status.google ? `\n\nGoogle AI ensemble (experimental, not a forecast): ${status.google.text}` : '';
-    pushed = await notify(`Gulf Storm Watch: ${status.alertLevel.toUpperCase()}`, `${changes.join('. ')}.\n\n${status.headline}${goog}${play}`, status.alertLevel);
-    // Public subscribers get the same change, weather facts only: browser notifications and the public ntfy feed.
-    await pushBrowsers(`Daniel's Storm Page: ${status.alertLevel.toUpperCase()}`, `${changes.join('. ')}. ${status.headline}`).catch((e) => console.warn(`browser push: ${e.message}`));
-    if (process.env.PUBLIC_NTFY_TOPIC) {
-      await notify(`Daniel's Storm Page: ${status.alertLevel.toUpperCase()}`, `${changes.join('. ')}.\n\n${status.headline}`, status.alertLevel, process.env.PUBLIC_NTFY_TOPIC).catch((e) => console.warn(`public push failed: ${e.message}`));
-    }
-  }
+    const msg = {
+      level: status.alertLevel,
+      privateTitle: `Gulf Storm Watch: ${status.alertLevel.toUpperCase()}`, privateBody: `${changes.join('. ')}.\n\n${status.headline}${goog}${play}`,
+      // Public subscribers get the same change, weather facts only: browser notifications and the public ntfy feed.
+      publicTitle: `Daniel's Storm Page: ${status.alertLevel.toUpperCase()}`, publicBody: `${changes.join('. ')}.\n\n${status.headline}`,
+    };
+    delivery = await deliver(msg);
+    pushed = delivery.private === true;
+    const failed = Object.keys(delivery).filter((k) => delivery[k] === false);
+    status.internal.pending = failed.length ? { ...msg, failed, attempts: 1, ts: NOW.toISOString() } : null;
+  } else if (prior?.internal?.pending && prior.internal.pending.attempts < PENDING_ATTEMPTS) {
+    // Nothing new, but a previous alert did not get through everywhere: try those channels again.
+    const pend = prior.internal.pending;
+    const topicSave = process.env.PUBLIC_NTFY_TOPIC;
+    if (!pend.failed.includes('public')) process.env.PUBLIC_NTFY_TOPIC = '';
+    const retry = await deliver({ ...pend, privateTitle: pend.failed.includes('private') ? pend.privateTitle : '', privateBody: pend.privateBody });
+    process.env.PUBLIC_NTFY_TOPIC = topicSave;
+    const stillFailed = pend.failed.filter((k) => retry[k] === false);
+    status.internal.pending = stillFailed.length ? { ...pend, failed: stillFailed, attempts: pend.attempts + 1 } : null;
+    console.log(`retried alert delivery (${pend.failed.join(', ')}): ${stillFailed.length ? 'still failing: ' + stillFailed.join(', ') : 'delivered'}`);
+  } else status.internal.pending = prior?.internal?.pending || null;
 
   const minor = changed ? [] : minorDiff(prior, status);
   const summary = changed ? changes.join('. ') + '.'
     : minor.length ? `Update, below the alert threshold: ${minor.join('. ')}.`
     : prior ? 'No change. ' + status.headline : 'Watch opened. ' + status.headline;
-  await save(status, { ts: NOW.toISOString(), changed, pushed, updated: minor.length > 0, alertLevel: status.alertLevel, formation7d: status.gulf.formation7d, summary }, map);
+  await save(status, { ts: NOW.toISOString(), changed, pushed, delivery, updated: minor.length > 0, alertLevel: status.alertLevel, formation7d: status.gulf.formation7d, summary: (outlookOK && stormsOK ? '' : `(${!outlookOK ? 'outlook' : 'storm feed'} unavailable; previous values carried) `) + summary }, map);
   console.log(`${status.alertLevel.toUpperCase()} | changed=${changed} pushed=${pushed} | ${summary}`);
 }
 
+export { main };
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main().catch((e) => { console.error(e); process.exit(1); });

@@ -2,6 +2,9 @@
   "name": "gulf-storm-watch",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
   "dependencies": {
     "web-push": "^3.6.7"
   }

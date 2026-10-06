@@ -121,7 +121,7 @@ body.card #card{display:flex;flex-direction:column;position:relative;width:1200p
 #card-map{position:absolute;inset:0;overflow:hidden}
 body.card #map{width:1200px;height:900px;border:0;border-radius:0}
 #card #c-pill{position:absolute;right:28px;top:40px;z-index:600;font-size:46px;padding:8px 30px}
-#card .c-bar{position:absolute;left:0;right:0;top:0;z-index:550;height:176px;box-sizing:border-box;background:rgba(13,21,28,.88);border-bottom:10px solid var(--lvl,var(--watch));padding:12px 34px 0;font-family:var(--display);white-space:nowrap;overflow:hidden}
+#card .c-bar{position:absolute;left:0;right:0;top:0;z-index:550;height:176px;box-sizing:border-box;background:rgba(13,21,28,.88);border-bottom:10px solid var(--lvl,var(--watch));padding:12px 280px 0 34px;font-family:var(--display);white-space:nowrap;overflow:hidden}
 #c-l0{font:700 32px/40px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--lvl,var(--watch))}
 #c-l1{display:flex;align-items:baseline;gap:22px;font-weight:700;font-size:104px;line-height:1}
 #c-l1 span{font:500 44px var(--body);color:#c3ced6;margin-right:26px}
@@ -307,31 +307,38 @@ body.card .leaflet-control-container{display:none}
   var ctShort=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric"}); };
   var shareText="";
   var STATE_NAME={AL:"Alabama",FL:"Florida",MS:"Mississippi",LA:"Louisiana"};
+  var asOf=function(d){ var g=d.gulf||{}; var m=/(\d{1,2})(\d{2}) (AM|PM) (\w+)/.exec(g.source||""); return m?("NHC "+m[1]+":"+m[2]+" "+m[3]+" "+m[4]):("as of "+ctShort(d.updatedAt)); };
   function renderCard(d){
     var lvl=LABEL[d.alertLevel]?d.alertLevel:"quiet", g=d.gulf||{}, s0=(d.storms||[])[0], ww=d.watchesWarnings||{};
+    var held=d.internal&&d.internal.landfallHoldUntil&&new Date(d.internal.landfallHoldUntil)>new Date();
     $("card").style.setProperty("--lvl","var(--"+lvl+")"); $("c-pill").style.setProperty("--lvl","var(--"+lvl+")"); $("c-pill").textContent=LABEL[lvl];
     var alerts=STATES.filter(function(s){return ww[s]&&ww[s].level}).map(function(s){return s+" "+ww[s].text}).join("; ");
     var line=alerts?("Alerts: "+alerts+"."):"No coastal watches or warnings for AL, FL, MS or LA.";
     if(s0){
-      var lf=d.landfall?(STATE_NAME[d.landfall.state]+" coast, about "+ctShort(d.landfall.eta)):"No US landfall in the forecast";
-      $("c-l0").textContent=s0.type+(s0.category?" \u00b7 Category "+s0.category:"");
+      var lf=d.landfall?(STATE_NAME[d.landfall.state]+" coast, about "+ctShort(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"Latest forecast unavailable":"No landfall on the AL\u2013FL coast in the forecast");
+      $("c-l0").textContent=s0.type+(s0.category?" \u00b7 Category "+s0.category:"")+" \u00b7 "+(s0.advisory||asOf(d));
       var short=s0.name.indexOf(s0.type+" ")===0?s0.name.slice(s0.type.length+1):s0.name;
       $("c-l1").innerHTML='<b class="nm">'+esc(short)+" \u00b7 "+esc(s0.winds)+" kt winds</b>";
       $("c-l2").textContent=lf+(alerts?" \u00b7 "+alerts:"");
       shareText=s0.name+": "+s0.winds+" kt. "+(d.landfall?("Forecast track reaches the "+d.landfall.state+" coast about "+ctShort(d.landfall.eta)+". "):"")+line;
+    } else if(held){
+      $("c-l0").textContent="Landfall \u00b7 last 48 hours \u00b7 "+asOf(d);
+      $("c-l1").innerHTML='<b class="nm">Landfall on the '+esc(STATE_NAME[d.internal.landfallState]||"Gulf")+' coast</b>';
+      $("c-l2").textContent=alerts||"No longer an active NHC storm";
+      shareText=d.headline||"";
     } else if(g.area){
-      $("c-l0").textContent=g.invest||"Gulf disturbance";
+      $("c-l0").textContent=(g.invest||"Gulf disturbance")+" \u00b7 formation chance \u00b7 "+asOf(d);
       $("c-l1").innerHTML="<b>"+esc(g.formation7d)+"%</b><span>in 7 days</span><b>"+esc(g.formation48)+"%</b><span>in 48 hours</span>";
       $("c-l2").textContent=alerts;
       shareText="Gulf storm update: "+g.formation7d+"% chance of forming within 7 days ("+g.formation48+"% within 48 hours). "+line;
     } else {
-      $("c-l0").textContent="All clear";
-      $("c-l1").innerHTML='<b class="nm">The Gulf is quiet</b>'; $("c-l2").textContent="No storms or disturbances";
+      $("c-l0").textContent=(alerts?"Coastal alerts":"All clear")+" \u00b7 "+asOf(d);
+      $("c-l1").innerHTML='<b class="nm">'+(alerts?"Coastal alerts in effect":"The Gulf is quiet")+'</b>'; $("c-l2").textContent=alerts||"No storms or disturbances";
       shareText="Gulf storm update: nothing brewing in the Gulf right now.";
     }
     // Shrink long lines (long storm names, several alerts) until they fit the card width.
     ["c-l1","c-l2"].forEach(function(id){ var el=$(id), size=parseFloat(getComputedStyle(el.querySelector(".nm")||el).fontSize);
-      var t=el.querySelector(".nm")||el; while(CARD&&el.scrollWidth>1132&&size>24){ size-=2; t.style.fontSize=size+"px"; } });
+      var t=el.querySelector(".nm")||el; while(CARD&&el.scrollWidth>880&&size>24){ size-=2; t.style.fontSize=size+"px"; } });
     done("s");
   }
   // ----- browser notifications: this device registers with the subscriber service; the hourly check sends to it -----
@@ -388,8 +395,10 @@ body.card .leaflet-control-container{display:none}
     $("band").style.setProperty("--lvl","var(--"+lvl+")");
     $("pill-text").textContent=LABEL[lvl];
     $("headline").textContent=d.headline||"";
-    var age=(Date.now()-new Date(d.updatedAt).getTime())/36e5;
-    $("stale").hidden=!(age>3); $("stale").textContent="Last successful update was "+Math.round(age)+" hours ago; this reading may be out of date.";
+    var age=(Date.now()-new Date(d.updatedAt).getTime())/36e5, src=d.sources||{};
+    var unavailable=Object.keys(src).filter(function(k){return /unavailable/.test(src[k])}).map(function(k){return k==="alerts"?src[k]:k});
+    $("stale").hidden=!(age>3||unavailable.length);
+    $("stale").textContent=(age>3?"Last successful reading was "+Math.round(age)+" hours ago; this may be out of date. ":"")+(unavailable.length?"Could not reach: "+unavailable.join(", ")+"; those parts show the previous reading.":"");
     var g=d.gulf||{}, p7=g.formation7d, p48=g.formation48;
     $("p7").textContent=p7==null?"—":p7; $("nd7").style.left=(p7==null?0:Math.max(0,Math.min(100,p7)))+"%";
     $("p48").textContent=p48==null?"—":p48; $("p48sub").textContent=g.area||"No Gulf disturbance in the outlook";
@@ -401,7 +410,7 @@ body.card .leaflet-control-container{display:none}
     $("storms").innerHTML=st.length?st.map(function(s){var k=catKey(s);return '<div class="storm"><div class="cat" data-k="'+k+'">'+k+'</div><div><div class="nm">'+esc(s.name)+'</div><dl>'+
       '<dt>Winds</dt><dd class="mono">'+esc(s.winds)+' kt</dd>'+
       '<dt>Position</dt><dd>'+esc(s.location)+'</dd><dt>Motion</dt><dd>'+esc(s.movement)+'</dd>'+
-      '<dt>Track</dt><dd>'+esc(s.gulfRisk)+'</dd></dl></div></div>'}).join(""):'<div class="empty">Not yet a depression. No NHC advisories or forecast track.</div>';
+      '<dt>Track</dt><dd>'+esc(s.gulfRisk)+'</dd>'+(s.advisory?'<dt>Source</dt><dd>'+esc(s.advisory)+'</dd>':'')+'</dl></div></div>'}).join(""):'<div class="empty">Not yet a depression. No NHC advisories or forecast track.</div>';
     var ww=d.watchesWarnings||{};
     $("coast").innerHTML=STATES.map(function(s){var v=ww[s]||{}; var c=v.level==="warning"?"var(--landfall)":v.level==="watch"?"var(--threat)":"var(--line)";
       return '<div class="st" style="--stc:'+c+'"><b>'+s+'</b><span>'+esc(v.text||"Clear")+'</span></div>'}).join("");
@@ -413,7 +422,7 @@ body.card .leaflet-control-container{display:none}
       var rows=STATES.map(function(s){return [s,G.coast[s]||0]}).concat([["Stays away",G.members-G.hits]]);
       $("goog-bars").innerHTML=rows.map(function(r){return '<b>'+r[0]+'</b><div class="bar"><i style="width:'+(100*r[1]/G.members)+'%"></i></div><span class="mono">'+r[1]+' of '+G.members+'</span>'}).join("");
     } else { $("goog-text").textContent="No data for this system yet. Google's ensemble only covers systems NHC has numbered."; $("goog-run").textContent="Experimental"; }
-    $("last").textContent=fmt(d.updatedAt); var due=d.nextCheck?new Date(d.nextCheck).getTime():0, lateMin=Math.round((Date.now()-due)/6e4);
+    $("last").textContent=fmt(d.lastAttemptAt||d.updatedAt); var due=d.nextCheck?new Date(d.nextCheck).getTime():0, lateMin=Math.round((Date.now()-due)/6e4);
     $("next").textContent=!due?"Checks run every 30 minutes":lateMin>10?("Check due "+fmt(d.nextCheck)+" is running late ("+lateMin+" min)"):("Next check about "+fmt(d.nextCheck));
   }
   function renderLog(rows){
