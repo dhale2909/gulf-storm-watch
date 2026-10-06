@@ -480,7 +480,7 @@ body.card .leaflet-control-container{display:none}
       ? '<div class="st all"><b>No tropical watches or warnings</b><span>None reported for Alabama, Florida, Mississippi or Louisiana. Official NWS alerts: '+STATES.map(function(s){return '<a href="https://alerts.weather.gov/search?area='+s+'" target="_blank" rel="noopener">'+s+'</a>'}).join(" \u00b7 ")+'</span></div>'
       : STATES.map(function(s){var v=ww[s]||{}; var c=v.level==="warning"?"var(--landfall)":v.level==="watch"?"var(--threat)":"var(--line)";
       return '<div class="st" style="--stc:'+c+'"><b>'+s+'</b><span>'+esc(v.text||(unavail.indexOf(s)>=0?"NWS not reachable; previous reading shown":"No tropical watch or warning reported"))+'</span><a href="https://alerts.weather.gov/search?area='+s+'" target="_blank" rel="noopener" style="font-size:12px">Official NWS alerts</a></div>'}).join("");
-    $("coast-note").textContent=(STATES.some(function(s){return ww[s]&&ww[s].level})?"Tropical watches or warnings are in effect; tap a state for the official product. ":"No tropical watch or warning reported for the four states. ")+(unavail.length?"NWS could not be reached for "+unavail.join(", ")+"; showing the previous reading.":"");
+    $("coast-note").textContent=(anyWW?"Tropical watches or warnings are in effect; tap a state for the official product. ":"")+(unavail.length?"NWS could not be reached for "+unavail.join(", ")+"; showing the previous reading.":"");
     var G=d.google;
     $("goog-text").classList.toggle("empty",!G); $("goog-bars").hidden=!G;
     if(G){
