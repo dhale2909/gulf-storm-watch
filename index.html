@@ -394,6 +394,8 @@ body.card .leaflet-control-container{display:none}
     done("s");
   }
   // ----- browser notifications: this device registers with the subscriber service; the hourly check sends to it -----
+  // Cloudflare Web Analytics (visits; cookie-free). Not loaded for the card screenshot, so the hourly redraw is not a "visit".
+  if(!CARD){ var cfa=document.createElement("script"); cfa.type="module"; cfa.src="https://static.cloudflareinsights.com/beacon.min.js"; cfa.setAttribute("data-cf-beacon",'{"token": "41e80651c1934e04871219a3f4ce24c6"}'); document.head.appendChild(cfa); }
   var PUSH_API="https://storm-page-push.daniel-48f.workers.dev";
   var hit=function(e){ try{ navigator.sendBeacon(PUSH_API+"/hit", e); }catch(x){} }; // a count per event per day, nothing else
   var VAPID_PUBLIC="BNbw4rWNN4JtPg4hBoEUyy5aKS0KDOB6IN_1-EMfXGFumWS99_SOzOi5BDlAArQUIomdfb811-0E-9i4BNh9iL0";
