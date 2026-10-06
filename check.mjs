@@ -64,7 +64,7 @@ export function parseTWO(html) {
   const issued = (/^\d{3,4} (?:AM|PM) \w+ \w+ \w+ \d+ \d{4}$/m.exec(pre) || [''])[0];
   const pct = (s) => (/near 0/i.test(s) ? 0 : +s);
   // Everything after the basin header, minus the "Active Systems" paragraph (storms with advisories are handled from CurrentStorms.json).
-  const body = pre.replace(/^[\s\S]*?For the North Atlantic[^\n]*\n/i, '').replace(/^Active Systems:(?:.*\n)*?\s*\n/im, '');
+  const body = pre.replace(/^[\s\S]*?For the North Atlantic[^\n]*\n/i, '').replace(/^Active Systems:.*\n(?:.+\n)*\n?/im, '');
   const re = /\* Formation chance through 48 hours\.\.\.\w+\.\.\.(near 0|\d+) percent\.\s*\* Formation chance through 7 days\.\.\.\w+\.\.\.(near 0|\d+) percent\./gi;
   let best = null, last = 0, m;
   while ((m = re.exec(body))) {
