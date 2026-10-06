@@ -132,6 +132,9 @@ body.card #card{display:flex;flex-direction:column;position:relative;width:1200p
 #card-map{position:absolute;inset:0;overflow:hidden}
 body.card #map{width:1200px;height:900px;border:0;border-radius:0}
 #card #c-pill{position:absolute;right:28px;top:40px;z-index:600;font-size:40px;padding:8px 26px}
+#card #c-pill.num{display:flex;flex-direction:column;align-items:center;line-height:1;padding:10px 26px 12px;top:22px}
+#card #c-pill.num b{font-size:76px;font-weight:700}#card #c-pill.num small{font-size:22px;letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+#c-l2.lead{font:700 40px/48px var(--display);color:#fff}
 #card .c-bar{position:absolute;left:0;right:0;top:0;z-index:550;height:176px;box-sizing:border-box;background:rgba(13,21,28,.88);border-bottom:10px solid var(--lvl,var(--watch));padding:12px 300px 0 34px;font-family:var(--display);white-space:nowrap;overflow:hidden}
 #c-l0{font:700 32px/40px var(--display);letter-spacing:.1em;text-transform:uppercase;color:var(--lvl,var(--watch))}
 #c-l1{display:flex;align-items:baseline;gap:18px;font-weight:700;font-size:92px;line-height:1}
@@ -360,11 +363,13 @@ body.card .leaflet-control-container{display:none}
     var line=alerts?("Alerts: "+alerts+"."):"No coastal watches or warnings for AL, FL, MS or LA.";
     if(s0){
       var lf=d.landfallOccurred?("Made landfall in "+(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+" about "+ctShort(d.landfallOccurred.at)):d.landfall?("Landfall expected near "+(d.landfall.near||STATE_NAME[d.landfall.state]+" coast")+", about "+ctShort(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"Latest forecast unavailable":"No landfall on the AL\u2013FL coast in the forecast");
-      $("c-l0").textContent=s0.type+(s0.category?" \u00b7 Category "+s0.category:"")+" \u00b7 "+(s0.advisory||asOf(d));
-      var short=s0.name.indexOf(s0.type+" ")===0?s0.name.slice(s0.type.length+1):s0.name;
-      var isNamed=!/depression|potential/i.test(s0.type);
-      $("c-l1").innerHTML='<b class="nm">'+esc(isNamed?short:stormName(s0))+" \u00b7 "+esc(mph(s0.winds))+" mph winds</b>";
-      $("c-l2").textContent=lf+(alerts?" \u00b7 "+alerts:"");
+      var lfKt=d.landfall&&d.landfall.windKt!=null?+d.landfall.windKt:null, lfCat=lfKt==null?0:lfKt>=137?5:lfKt>=113?4:lfKt>=96?3:lfKt>=83?2:lfKt>=64?1:0;
+      var arrival=lfKt==null?"":" \u00b7 arriving at about "+mph(lfKt)+" mph"+(lfCat?" (Category "+lfCat+")":lfKt>=34?" (tropical storm)":"");
+      if(d.landfall&&!d.landfallOccurred) lf="Landfall near "+(d.landfall.near||STATE_NAME[d.landfall.state]+" coast")+" \u00b7 about "+ctShort(d.landfall.eta)+arrival+(s0.forecastStale?" (last available forecast)":"");
+      $("c-l0").textContent=(s0.advisory||"NHC advisory")+(s0.advisoryAt?" \u00b7 "+ctShort(s0.advisoryAt):"")+(s0.category?" \u00b7 Category "+s0.category:"");
+      $("c-l1").innerHTML='<b class="nm">'+esc(stormName(s0))+"</b>";
+      $("c-pill").innerHTML='<b>'+esc(mph(s0.winds))+'</b><small>mph now</small>'; $("c-pill").classList.add("num");
+      $("c-l2").textContent=lf+(alerts?" \u00b7 "+alerts:""); $("c-l2").classList.toggle("lead",!!d.landfall);
       shareText=s0.name+": "+mph(s0.winds)+" mph. "+(d.landfall?("Forecast track reaches the coast near "+(d.landfall.near||d.landfall.state)+" about "+ctShort(d.landfall.eta)+". "):"")+line;
     } else if(held){
       $("c-l0").textContent="Landfall \u00b7 last 48 hours \u00b7 "+asOf(d);

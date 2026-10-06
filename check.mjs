@@ -148,7 +148,10 @@ export function parseTCM(html, issuanceISO, expect = {}) {
   const base = new Date(issuanceISO);
   if (Number.isNaN(base.getTime())) return null;
   const pts = [];
-  for (const line of pre.match(/^.*\b(?:FORECAST|OUTLOOK) VALID\b.*$/gim) || []) {
+  const lines = pre.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!/\b(?:FORECAST|OUTLOOK) VALID\b/i.test(line)) continue;
     if (/VALID\s+\d{2}\/\d{4}Z\s*\.*\s*(?:DISSIPATED|ABSORBED|REMNANT)/i.test(line)) continue; // the end of the forecast, no position
     const m = /(?:FORECAST|OUTLOOK) VALID (\d{2})\/(\d{2})(\d{2})Z\s+(\d+\.\d)([NS])\s+(\d+\.\d)([EW])/i.exec(line);
     if (!m) return null; // a forecast line without a readable position ("POSITION UNAVAILABLE"): the track is unknown, not shorter
@@ -159,7 +162,8 @@ export function parseTCM(html, issuanceISO, expect = {}) {
     if (d.getTime() - base.getTime() > 8 * 86400000) return null; // a 5-day advisory never reaches this far
     const lat = +m[4] * (m[5] === 'S' ? -1 : 1), lonW = m[7] === 'W' ? +m[6] : -+m[6];
     if (Math.abs(lat) > 90 || Math.abs(lonW) > 180) return null;
-    pts.push({ t: d.toISOString(), lat, lonW });
+    const w = /MAX WIND\s+(\d+)\s*KT/i.exec(lines[i + 1] || '');
+    pts.push({ t: d.toISOString(), lat, lonW, ...(w ? { wind: +w[1] } : {}) });
   }
   // A header with no readable forecast is only "no track" when the text says the system is ending.
   if (!pts.length && !/REMNANTS|DISSIPAT|POST-TROPICAL|EXTRATROPICAL|LAST (?:PUBLIC )?ADVISORY|NO LONGER A TROPICAL/i.test(pre)) return null;
@@ -231,11 +235,12 @@ function landfallPoint(path) {
     if (best == null) continue;
     const lat = a.lat + (b.lat - a.lat) * best, lonW = a.lonW + (b.lonW - a.lonW) * best;
     const t = new Date(new Date(a.t).getTime() + (new Date(b.t).getTime() - new Date(a.t).getTime()) * best).toISOString();
-    if (lonW <= 93.9 && lonW >= 80.8) return { lat, lonW, t, crossing: true };
+    const wind = a.wind != null && b.wind != null ? Math.round(a.wind + (b.wind - a.wind) * best) : b.wind ?? a.wind ?? null;
+    if (lonW <= 93.9 && lonW >= 80.8) return { lat, lonW, t, wind, crossing: true };
   }
   // Otherwise: the first forecast point inside the coast (e.g. the path ends in Mobile Bay).
   const b = path.find(coastHit);
-  return b ? { lat: b.lat, lonW: b.lonW, t: b.t, crossing: false } : null;
+  return b ? { lat: b.lat, lonW: b.lonW, t: b.t, wind: b.wind ?? null, crossing: false } : null;
 }
 const nearestTown = (p) => TOWNS.map(([name, lat, lonW]) => [name, Math.hypot(lat - p.lat, (lonW - p.lonW) * Math.cos(p.lat * Math.PI / 180))]).sort((a, b) => a[1] - b[1])[0][0];
 const category = (kt) => (kt >= 137 ? 5 : kt >= 113 ? 4 : kt >= 96 ? 3 : kt >= 83 ? 2 : kt >= 64 ? 1 : 0);
@@ -260,7 +265,7 @@ export async function gatherStorms(prior) {
     const posOK = Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180;
     if (!posOK && !prev) { console.warn(`storm ${s.id}: no usable position; record skipped`); incomplete.push(s.id); continue; }
     const when = s.lastUpdate && !Number.isNaN(Date.parse(s.lastUpdate)) ? s.lastUpdate : s.forecastAdvisory?.issuance || null;
-    const here = posOK ? { t: when || NOW.toISOString(), lat, lonW: -lon } : null;
+    const here = posOK ? { t: when || NOW.toISOString(), lat, lonW: -lon, ...(Number.isFinite(num(s.intensity)) ? { wind: num(s.intensity) } : {}) } : null;
     // Forecast track: null means "could not get it this run", distinct from a storm with no coastal threat.
     let track = null;
     try {
@@ -277,7 +282,7 @@ export async function gatherStorms(prior) {
     const type = known ? TYPES[s.classification] : (/^(PC|EX|LO|DB|WV|SD|SS)$/.test(s.classification || '') ? 'Post-Tropical Cyclone' : 'Tropical Cyclone');
     if (!known && type === 'Tropical Cyclone') console.warn(`storm ${s.id}: unknown classification "${s.classification}"; treated as tropical`);
     const hit = forecastStale ? null : landfallPoint(path);
-    const landfall = forecastStale ? priorLandfallFor(s.id) : hit && { state: coastState(hit), eta: hit.t, near: nearestTown(hit) };
+    const landfall = forecastStale ? priorLandfallFor(s.id) : hit && { state: coastState(hit), eta: hit.t, near: nearestTown(hit), windKt: hit.wind ?? null };
     const loc = here ? `${here.lat.toFixed(1)}N ${here.lonW.toFixed(1)}W` + (inGulf(here) ? (here.lat < 22 && here.lonW >= 90 ? ', Bay of Campeche' : ', Gulf') : ', approaching the Gulf') : `${prev?.location || 'position unavailable'} (last known)`;
     out.push({
       id: s.id, bin: s.binNumber, name: `${type} ${s.name}`, type, winds,
@@ -367,7 +372,7 @@ export async function gatherMap(gulf, storm) {
       features.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: line }, properties: { role: 'track' } });
       if (!pts.length) {
         features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: line[0] }, properties: { role: 'point', label: 'now', wind: storm.winds, now: true } });
-        storm.forecast.forEach((q) => features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [-q.lonW, q.lat] }, properties: { role: 'point', label: new Date(q.t).toLocaleString('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric' }), wind: null, now: false } }));
+        storm.forecast.forEach((q) => features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [-q.lonW, q.lat] }, properties: { role: 'point', label: new Date(q.t).toLocaleString('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric' }), wind: q.wind ?? null, now: false } }));
       }
       source = `${storm.advisory || 'NHC advisory'} (track from the text advisory; ${failed.length ? 'some map layers unavailable' : 'cone not yet published'})`;
     } else if (failed.length) source += ` (${failed.join(', ')} layer${failed.length > 1 ? 's' : ''} unavailable)`;

@@ -451,3 +451,13 @@ test('R10 control: a registered device test sends one payload-free request with 
     assert.equal(await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},pub,Buffer.from(s,'base64url'),Buffer.from(h+'.'+p)),true);
   } finally {globalThis.fetch=oldFetch;}
 });
+
+// ---- landfall wind: the forecast wind at the crossing, read from the advisory's MAX WIND lines ----
+test('landfall carries the forecast wind at the crossing, interpolated between the bracketing points', async () => {
+  responses[FEED] = { activeStorms: [storm()] };
+  responses['https://fixture.invalid/tcm'] = '<pre>FORECAST VALID 09/1200Z 25.0N 88.0W\nMAX WIND  60 KT...GUSTS  75 KT.\nFORECAST VALID 10/1200Z 31.0N 88.0W\nMAX WIND  80 KT...GUSTS 100 KT.</pre>';
+  const [st] = await m.gatherStorms(state());
+  assert.deepEqual(st.forecast.map((q) => q.wind), [60, 80]);
+  assert.ok(st.landfall.windKt >= 76 && st.landfall.windKt <= 78, `about 87% of the way from 60 to 80 kt, got ${st.landfall.windKt}`);
+  assert.equal(m.parseTCM('<pre>FORECAST VALID 09/1200Z 25.0N 88.0W</pre>', '2026-10-08T15:00:00Z')[0].wind, undefined, 'no wind line: no wind, still a valid point');
+});
