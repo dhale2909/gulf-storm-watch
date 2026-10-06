@@ -181,6 +181,7 @@ export async function gatherStorms(prior) {
       landfall,
       ashore: here && ashore(here) ? { state: coastState(here), t: here.t } : null,
       pos: here ? { lat: here.lat, lonW: here.lonW } : prev?.pos || null,
+      forecast: track && track.length ? track : prev?.forecast || [],
       forecastStale,
       gulfRisk: forecastStale
         ? (prev?.gulfRisk ? `${prev.gulfRisk.replace(/ \(latest forecast advisory unavailable\)$/, '')} (latest forecast advisory unavailable)` : 'Forecast advisory unavailable')
@@ -226,7 +227,7 @@ const flat = (c) => (typeof c[0] === 'number' ? [c] : c.flatMap(flat));
 const touchesGulf = (f) => flat(f.geometry.coordinates).some(([lon, lat]) => inGulf({ lat, lonW: -lon }));
 const feat = (f, role, props = {}) => ({ type: 'Feature', geometry: f.geometry, properties: { role, ...props } });
 
-async function gatherMap(gulf, storm) {
+export async function gatherMap(gulf, storm) {
   const features = [];
   if (storm && /^AT[1-5]$/.test(storm.bin || '')) {
     const base = 4 + 26 * (+storm.bin[2] - 1);
@@ -242,7 +243,18 @@ async function gatherMap(gulf, storm) {
       label: `${f.properties.datelbl} ${f.properties.timezone || ''}`.trim(), wind: f.properties.maxwind,
       type: f.properties.tcdvlp, cat: f.properties.ssnum, now: f.properties.tau === 0,
     })));
-    return { kind: 'storm', name: storm.name, source: `NHC advisory ${adv ?? ''}`.trim(), features };
+    let source = `NHC advisory ${adv ?? ''}`.trim();
+    if (!track.length && storm.forecast?.length && storm.pos) {
+      // The map service has not caught up with the advisory yet: draw the track from the text advisory itself.
+      const line = [[-storm.pos.lonW, storm.pos.lat], ...storm.forecast.map((q) => [-q.lonW, q.lat])];
+      features.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: line }, properties: { role: 'track' } });
+      if (!pts.length) {
+        features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: line[0] }, properties: { role: 'point', label: 'now', wind: storm.winds, now: true } });
+        storm.forecast.forEach((q) => features.push({ type: 'Feature', geometry: { type: 'Point', coordinates: [-q.lonW, q.lat] }, properties: { role: 'point', label: new Date(q.t).toLocaleString('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric' }), wind: null, now: false } }));
+      }
+      source = `${storm.advisory || 'NHC advisory'} (track from the text advisory; cone not yet published)`;
+    }
+    return { kind: 'storm', name: storm.name, source, features };
   }
   if (gulf) {
     const [areas, pts, motion] = await Promise.all([layer(3, 'areas'), layer(2, 'origins'), layer(398, 'motion')]);
@@ -340,7 +352,7 @@ async function gatherModels(gulf, storm) {
     if (!storm && !(d.origin && inGulf(d.origin))) continue;
     const invest = storm ? null : `Invest ${f.slice(3, 5)}L`;
     // NHC's own past-track layer takes over once advisories start; before that, draw it from the best-track file.
-    const history = storm ? { features: [], winds: null } : await gatherHistory(f).catch((e) => { console.warn(`past track unavailable: ${e.message}`); return { features: [], winds: null }; });
+    const history = await gatherHistory(f).catch((e) => { console.warn(`past track unavailable: ${e.message}`); return { features: [], winds: null }; });
     const run = new Date(cycleMs(d.init)).toLocaleString('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric' }) + ' CT';
     return {
       invest, winds: history.winds, history: history.features, label: `${d.tracks.length} model tracks, latest run ${run}`,
@@ -450,7 +462,7 @@ export function build(prior, gulf, storms, ww) {
     nextCheck: new Date((Math.floor(NOW.getTime() / 1800e3) + 1) * 1800e3).toISOString(), // GitHub checks on the hour, the Mac backup on the half hour
     alertLevel, headline,
     gulf: gulf || { area: '', formation48: null, formation7d: null, source: 'NHC outlook', text: storm ? 'NHC is issuing advisories on this system; see the storm panel.' : '' },
-    storms: storms.map(({ landfall: _l, tropical: _t, bin: _b, ashore: _a, ...s }) => s), // forecastStale and pos stay, so the page and diff can see it
+    storms: storms.map(({ landfall: _l, tropical: _t, bin: _b, ashore: _a, forecast: _f, ...s }) => s), // forecastStale and pos stay, so the page and diff can see it
     watchesWarnings: ww,
     landfall, // forecast landfall (expected)
     landfallOccurred: occurred,
@@ -665,7 +677,10 @@ async function main() {
   if (map && models) {
     // One "now" position: once the best track exists, its latest fix replaces the outlook's X.
     const base = models.history?.length ? map.features.filter((f) => f.properties.role !== 'origin') : map.features;
-    map.features = [...models.features, ...base, ...(models.history || [])];
+    // Storm stage: NOAA's own past-track layer wins; the best-track file fills in until that layer is published.
+    const hasPast = map.features.some((f) => f.properties.role === 'past');
+    const hist = map.kind === 'storm' && hasPast ? [] : (models.history || []).map((f) => (map.kind === 'storm' && f.properties.role === 'pastpt' ? { ...f, properties: { ...f.properties, now: false } } : f));
+    map.features = [...models.features, ...base, ...hist];
     map.models = models.label;
   }
   if (gulf && models?.invest) { gulf.invest = models.invest; if (models.winds) gulf.winds = models.winds; }

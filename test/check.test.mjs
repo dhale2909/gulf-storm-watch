@@ -234,3 +234,16 @@ test('P7: the Google summary survives the Invest -> storm upgrade of the same sy
   const d = await runMain(prior, {});
   assert.equal(d.tracked.stormId, 'al192026'); assert.equal(d.tracked.invest, 'Invest 92L'); assert.equal(d.google && d.google.text, 'kept');
 });
+
+// ---- storm stage: the map must not be empty while NOAA's layers lag the first advisory ----
+test('storm map falls back to the text advisory track when the map service has nothing yet', async () => {
+  responses[FEED] = { activeStorms: [storm()] }; responses['https://fixture.invalid/tcm'] = TCM;
+  const [st] = await m.gatherStorms(state());
+  assert.equal(st.forecast.length, 2);
+  const MAPSRV = 'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer';
+  for (const id of [6, 7, 8, 9, 12]) responses[`${MAPSRV}/${id}/query?where=1%3D1&outFields=*&f=geojson&geometryPrecision=2`] = { features: [] };
+  const map = await m.gatherMap(null, { ...st, bin: 'AT1' });
+  const roles = map.features.map((f) => f.properties.role);
+  assert.ok(roles.includes('track') && roles.filter((r) => r === 'point').length === 3, 'track line plus now + 2 forecast points');
+  assert.match(map.source, /text advisory/);
+});
