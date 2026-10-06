@@ -1,14 +1,14 @@
 {
-  "updatedAt": "2026-10-06T05:00:25.628Z",
-  "nextCheck": "2026-10-06T05:30:00.000Z",
+  "updatedAt": "2026-10-06T05:30:07.085Z",
+  "nextCheck": "2026-10-06T06:00:00.000Z",
   "alertLevel": "watch",
-  "headline": "NHC gives the Southwestern Gulf of America disturbance a 80% chance of forming within 7 days (70% within 48 hours). No advisories or forecast track yet.",
+  "headline": "NHC gives the Southwestern Gulf of America disturbance a 80% chance of forming within 7 days (80% within 48 hours). No advisories or forecast track yet.",
   "gulf": {
     "area": "Southwestern Gulf of America",
-    "text": "A trough of low pressure over the southwestern Gulf of America is producing disorganized showers and thunderstorms. Although environmental conditions appear to be only marginally conducive, gradual development is becoming more likely, and a tropical depression is expected to form during the middle portion of the week. This system is expected to drift east-northeastward over the next couple of days, before it turns northward. It is too early to determine the specific impacts to the northern Gulf Coast, but interests there should closely monitor the progress of this system.",
-    "formation48": 70,
+    "text": "A trough of low pressure over the southwestern Gulf of America is producing disorganized showers and thunderstorms. Although environmental conditions appear only marginally conducive for development, a tropical depression is likely to form within the next couple of days. The system is expected to drift east-northeastward through the middle portion of the week before turning northward. It is too early to determine specific impacts to the northern Gulf Coast, but interests there should closely monitor the progress of this system.",
+    "formation48": 80,
     "formation7d": 80,
-    "source": "NHC outlook, 800 PM EDT Mon Oct 5 2026",
+    "source": "NHC outlook, 200 AM EDT Tue Oct 6 2026",
     "invest": "Invest 92L",
     "winds": 25
   },
@@ -23,8 +23,8 @@
   "landfall": null,
   "internal": {
     "failCount": 0,
-    "baseline7d": 70,
-    "baseline48": 60,
+    "baseline7d": 80,
+    "baseline48": 80,
     "landfallHoldUntil": null,
     "landfallState": null
   },
