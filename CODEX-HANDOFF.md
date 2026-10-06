@@ -62,3 +62,15 @@ as "update". Channels: private ntfy topic (with business "play" text from a secr
     pip install eccodes && python ecmwf_tracks.py
     pip install playwright && playwright install chromium && python card_shot.py
 Secrets are not in the repo (.env, .ntfy-topic are gitignored). Do not commit any.
+
+## Update, Oct 6 evening (after the first review)
+- All P1 findings from `STORM-REVIEW.md` were fixed; regression tests live in `test/check.test.mjs` (`npm test`, no network).
+  Proposals P1, P3, P5, P7 were approved and built; P2 (coastline geometry) is deferred until after this storm; P4 declined; P6 wording only.
+- The system was upgraded to Tropical Depression Nine (al092026) at 21:00Z. The Invest -> advisory hand-off ran live:
+  alert delivered on all channels, identity carried (`status.tracked`), tiles switched to storm mode. NOAA's map layers
+  lagged the first advisory by several minutes; `gatherMap` now falls back to the text advisory's track meanwhile.
+- New since the review: stage-aware tiles, coastal alerts panel above the map, "Monitoring" label, mph wording,
+  per-device "Send me a test" (Worker-sent push), one-tracked-system logic, landfall expected vs occurred.
+- Please review now against a live storm: `data/status.json`, `data/map.json`, the card (`card.png`), and the page as
+  rendered in advisory stage. Design opinions on the storm-stage layout and map are welcome; the owner wants to keep
+  the share card as it is (default layers), and alert rules are unchanged.
