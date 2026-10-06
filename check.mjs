@@ -60,7 +60,7 @@ const preText = (html) => {
 // Tropical Weather Outlook -> the Gulf disturbance (highest 7-day odds if several), or null when the outlook
 // verifiably has no Gulf entry. Throws when a Gulf entry exists but cannot be read, so a parse problem is treated
 // as "data unavailable" (previous reading kept) and never as a quiet Gulf.
-export function parseTWO(html) {
+export function parseTWOAll(html) {
   const pre = preText(html);
   if (!pre || !/Tropical Weather Outlook/i.test(pre)) throw new Error('TWO text not found');
   const issued = (/^\d{3,4} (?:AM|PM) \w+ \w+ \w+ \d+ \d{4}$/m.exec(pre) || [''])[0];
@@ -78,7 +78,7 @@ export function parseTWO(html) {
     else if (cur) cur.lines.push(line);
   }
   const GULF = /Gulf of (America|Mexico)|Bay of Campeche/i;
-  let best = null;
+  const found = [];
   for (const e of entries) {
     const text = e.lines.join(' ').replace(/\s+/g, ' ').trim();
     if (!GULF.test(e.head + ' ' + text)) continue;
@@ -94,10 +94,11 @@ export function parseTWO(html) {
       source: `NHC outlook, ${issued}`,
       investHint: inv ? `Invest ${inv[1]}L` : null,
     };
-    if (!best || d.formation7d > best.formation7d) best = d;
+    found.push(d);
   }
-  return best;
+  return found.sort((a, b) => b.formation7d - a.formation7d);
 }
+export function parseTWO(html) { return parseTWOAll(html)[0] || null; }
 
 // Forecast advisory -> [{t, lat, lonW}] forecast points.
 export function parseTCM(html, issuanceISO) {
@@ -177,6 +178,7 @@ export async function gatherStorms(prior) {
       advisory: s.forecastAdvisory?.advNum ? `NHC advisory ${s.forecastAdvisory.advNum}` : '',
       landfall,
       ashore: here && ashore(here) ? { state: coastState(here), t: here.t } : null,
+      pos: here ? { lat: here.lat, lonW: here.lonW } : prev?.pos || null,
       forecastStale,
       gulfRisk: forecastStale
         ? (prev?.gulfRisk ? `${prev.gulfRisk.replace(/ \(latest forecast advisory unavailable\)$/, '')} (latest forecast advisory unavailable)` : 'Forecast advisory unavailable')
@@ -437,6 +439,8 @@ export function build(prior, gulf, storms, ww) {
     headline = 'No Gulf disturbance in the NHC outlook and no Gulf storm.';
   }
   if (anyAlert) headline += ` Tropical alerts in effect: ${STATES.filter((s) => ww[s].level).map((s) => `${s} (${ww[s].text})`).join('; ')}.`;
+  const others = storms.slice(1).filter((o) => !o.other || true);
+  if (others.length) headline += ` Also in the Gulf: ${others.map((o) => `${o.name} (${o.winds} kt; ${o.gulfRisk.toLowerCase()})`).join('; ')}.`;
 
   return {
     updatedAt: NOW.toISOString(), // time of the last successful reading (an outage keeps the old value; see lastAttemptAt)
@@ -444,7 +448,7 @@ export function build(prior, gulf, storms, ww) {
     nextCheck: new Date((Math.floor(NOW.getTime() / 1800e3) + 1) * 1800e3).toISOString(), // GitHub checks on the hour, the Mac backup on the half hour
     alertLevel, headline,
     gulf: gulf || { area: '', formation48: null, formation7d: null, source: 'NHC outlook', text: storm ? 'NHC is issuing advisories on this system; see the storm panel.' : '' },
-    storms: storms.map(({ landfall: _l, tropical: _t, bin: _b, ashore: _a, ...s }) => s), // forecastStale stays, so the page and diff can see it
+    storms: storms.map(({ landfall: _l, tropical: _t, bin: _b, ashore: _a, ...s }) => s), // forecastStale and pos stay, so the page and diff can see it
     watchesWarnings: ww,
     landfall, // forecast landfall (expected)
     landfallOccurred: occurred,
@@ -495,6 +499,10 @@ export function diff(prior, cur) {
     const x = px.level || null, y = cx.level || null;
     if (x !== y) ch.push(y ? `${st}: tropical ${y} posted (${cx.text})` : `${st}: tropical ${x} dropped`);
     else if (y && (px.text || '') !== (cx.text || '')) ch.push(`${st}: alerts now ${cx.text} (was ${px.text})`);
+  }
+
+  for (const o of (cur.others || [])) {
+    if (o.threat && !(prior.internal?.othersAlerted || []).includes(o.id)) ch.push(`Another Gulf system: ${o.name} ${o.detail}`);
   }
 
   if (cur.landfallOccurred && !prior.landfallOccurred) ch.push(`Landfall in ${cur.landfallOccurred.state} around ${fmtCT(cur.landfallOccurred.at)}`);
@@ -600,9 +608,26 @@ async function main() {
 
   const prior = await readJSON('data/status.json', null);
   // Gather the two NHC sources independently: an outlook outage must not hide a storm feed that is fine, and vice versa.
-  let gulf = null, storms = null, outlookOK = true, stormsOK = true;
-  try { gulf = parseTWO(await get('two.html', 'https://www.nhc.noaa.gov/text/MIATWOAT.shtml')); } catch (e) { outlookOK = false; console.warn(`NHC outlook unavailable: ${e.message}`); }
+  let gulf = null, storms = null, outlookOK = true, stormsOK = true, entries = [];
+  try { entries = parseTWOAll(await get('two.html', 'https://www.nhc.noaa.gov/text/MIATWOAT.shtml')); } catch (e) { outlookOK = false; console.warn(`NHC outlook unavailable: ${e.message}`); }
   try { storms = await gatherStorms(prior); } catch (e) { stormsOK = false; console.warn(`NHC storm feed unavailable: ${e.message}`); }
+
+  // ---- one tracked system (P3): keep following the same Invest / storm; anything else is "another system" ----
+  const prevTracked = prior?.tracked || (prior?.gulf?.invest ? { invest: prior.gulf.invest, stormId: null } : prior?.storms?.[0] ? { invest: null, stormId: prior.storms[0].id } : null);
+  const lastPos = prior?.tracked?.lastPos || prior?.storms?.[0]?.pos || null;
+  const dist = (a, b) => (a && b ? Math.hypot(a.lat - b.lat, a.lonW - b.lonW) : Infinity);
+  if (outlookOK) {
+    // The outlook entry for our Invest by its (ALnn) tag; otherwise the strongest Gulf entry.
+    gulf = (prevTracked?.invest && entries.find((e) => e.investHint === prevTracked.invest)) || entries[0] || null;
+  }
+  let otherEntries = outlookOK ? entries.filter((e) => e !== gulf) : [];
+  if (stormsOK && storms.length) {
+    let primary = prevTracked?.stormId ? storms.find((x) => x.id === prevTracked.stormId) : null;
+    // Our Invest became a storm: adopt the Gulf storm closest to where the Invest was (or the only one).
+    if (!primary && !prevTracked?.stormId) primary = storms.length === 1 ? storms[0] : storms.slice().sort((a, b) => dist(a.pos, lastPos) - dist(b.pos, lastPos))[0];
+    if (!primary) primary = storms[0]; // previously tracked storm is gone; the remaining system takes over
+    storms = [primary, ...storms.filter((x) => x !== primary)];
+  }
   const failCount = outlookOK && stormsOK ? 0 : (prior?.internal?.failCount || 0) + 1;
   if (!outlookOK && !stormsOK) {
     // Keep the prior picture and its timestamp, record the attempt, and only speak up on the second miss in a row.
@@ -646,6 +671,16 @@ async function main() {
   else if (gulf && gulf.investHint) gulf.invest = gulf.investHint; // NHC names the Invest in the outlook heading
   if (gulf) delete gulf.investHint;
   const status = build(prior, gulf, storms, ww);
+  const primary = storms[0] || null;
+  status.tracked = primary ? { invest: prevTracked?.invest || gulf?.investHint || null, stormId: primary.id, name: primary.name, lastPos: primary.pos || lastPos }
+    : gulf ? { invest: gulf.investHint || gulf.invest || prevTracked?.invest || null, stormId: null, name: gulf.investHint || gulf.invest || gulf.area, lastPos: models?.history?.length ? (() => { const c = models.history[models.history.length - 1].geometry.coordinates; return { lat: c[1], lonW: -c[0] }; })() : lastPos }
+    : null;
+  // Other Gulf systems: listed, and announced once if they become a coastal threat. They never replace the tracked one.
+  status.others = [
+    ...storms.slice(1).map((o) => ({ id: o.id, name: o.name, threat: !!(o.tropical && o.landfall), detail: o.landfall ? `is forecast to reach the ${o.landfall.state} coast around ${fmtCT(o.landfall.eta)}` : `is in the Gulf (${o.winds} kt)` })),
+    ...otherEntries.map((e) => ({ id: e.investHint || e.area, name: e.investHint ? `${e.investHint} (${e.area})` : e.area, threat: false, detail: `${e.formation7d}% chance of forming within 7 days` })),
+  ];
+  status.internal.othersAlerted = [...new Set([...(prior?.internal?.othersAlerted || []), ...status.others.filter((o) => o.threat).map((o) => o.id)])];
   status.internal.failCount = failCount;
   status.internal.vanishedChecks = holding ? vanishedBefore + 1 : 0;
   status.sources = { outlook: outlookOK ? 'ok' : 'unavailable', storms: stormsOK ? 'ok' : 'unavailable', alerts: ww.unavailable ? `unavailable for ${ww.unavailable.join(', ')}` : 'ok', map: map ? 'ok' : 'unavailable' };

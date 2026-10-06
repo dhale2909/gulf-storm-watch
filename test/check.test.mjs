@@ -102,8 +102,9 @@ async function runMain(prior, { twoFails = false, feedFails = false, ntfy = 200 
   const dir = await mkdtemp(path.join(tmpdir(), 'gsw-')); process.chdir(dir); calls = [];
   await import('node:fs/promises').then((fs) => fs.mkdir('data', { recursive: true }));
   if (prior) await writeFile('data/status.json', JSON.stringify(prior));
-  responses[TWO] = twoFails ? new Error('fixture outage') : pre('Gulf of Mexico:\nDevelopment is possible.\n* Formation chance through 48 hours...medium...50 percent.\n* Formation chance through 7 days...medium...50 percent.');
-  responses[FEED] = feedFails ? new Error('fixture outage') : { activeStorms: [] };
+  // Defaults only where a test has not set its own response.
+  if (twoFails) responses[TWO] = new Error('fixture outage'); else if (responses[TWO] === undefined) responses[TWO] = pre('Gulf of Mexico:\nDevelopment is possible.\n* Formation chance through 48 hours...medium...50 percent.\n* Formation chance through 7 days...medium...50 percent.');
+  if (feedFails) responses[FEED] = new Error('fixture outage'); else if (responses[FEED] === undefined) responses[FEED] = { activeStorms: [] };
   for (const s of ['AL', 'FL', 'MS', 'LA']) responses[alertsURL(s)] = { features: [] };
   responses['https://ntfy.sh/'] = ntfy === 200 ? { id: 'x' } : { __http: ntfy };
   await m.main();
@@ -178,4 +179,39 @@ test('P1: landfall expected (forecast within 24 h) is not a 48-hour hold; an obs
   // storm gone from the feed afterwards: the hold keeps the level and the headline says it made landfall
   const f = m.build(e, null, [], ww());
   assert.equal(f.alertLevel, 'landfall'); assert.match(f.headline, /Made landfall in LA/);
+});
+
+// ---- P3 (approved): one tracked system; others are noted and announced once when they become a threat ----
+test('P3: the tracked Invest is followed into the nearest new storm; a second storm is "another system"', async () => {
+  const prior = state({ tracked: { invest: 'Invest 92L', stormId: null, name: 'Invest 92L', lastPos: { lat: 22, lonW: 96 } } });
+  const dir = await mkdtemp(path.join(tmpdir(), 'gsw-')); process.chdir(dir); calls = [];
+  await import('node:fs/promises').then((fs) => fs.mkdir('data', { recursive: true }));
+  await writeFile('data/status.json', JSON.stringify(prior));
+  responses[TWO] = pre('Tropical cyclone formation is not expected during the next 7 days.');
+  // Storm A: far east with a coastal forecast. Storm B: right where the Invest was, no coastal forecast yet.
+  responses[FEED] = { activeStorms: [storm({ id: 'al012026', name: 'Far', latitudeNumeric: 25, longitudeNumeric: -84 }), storm({ id: 'al022026', name: 'Near', latitudeNumeric: 22.4, longitudeNumeric: -95.5, forecastAdvisory: { url: 'https://fixture.invalid/tcm2', issuance: '2026-10-08T15:00:00Z', advNum: '1' } })] };
+  responses['https://fixture.invalid/tcm'] = TCM; responses['https://fixture.invalid/tcm2'] = '<pre>FORECAST VALID 09/1200Z 23.0N 94.0W\nFORECAST VALID 10/1200Z 24.0N 93.0W</pre>';
+  for (const s of ['AL', 'FL', 'MS', 'LA']) responses[alertsURL(s)] = { features: [] };
+  responses['https://ntfy.sh/'] = { id: 'x' };
+  await m.main();
+  const d = JSON.parse(await readFile('data/status.json', 'utf8'));
+  assert.equal(d.tracked.stormId, 'al022026', 'nearest storm adopted as the tracked system'); assert.equal(d.tracked.invest, 'Invest 92L');
+  assert.equal(d.storms[0].id, 'al022026'); assert.equal(d.others.length, 1); assert.equal(d.others[0].threat, true);
+  const log = JSON.parse(await readFile('data/log.json', 'utf8'));
+  assert.match(log[0].summary, /Another Gulf system: Tropical Storm Far is forecast to reach the AL coast/);
+  assert.match(d.headline, /Also in the Gulf: Tropical Storm Far/);
+  // next check: the other system is not announced again
+  await writeFile('data/status.json', JSON.stringify(d));
+  await m.main();
+  const log2 = JSON.parse(await readFile('data/log.json', 'utf8'));
+  assert.doesNotMatch(log2[0].summary, /Another Gulf system/);
+});
+test('P3: a tracked storm keeps the page even when another storm sorts first by landfall', async () => {
+  const prior = state({ tracked: { invest: null, stormId: 'al022026', name: 'Tropical Storm Near', lastPos: { lat: 22, lonW: 95 } }, storms: [{ id: 'al022026', name: 'Tropical Storm Near', type: 'Tropical Storm', winds: 40 }] });
+  responses[FEED] = { activeStorms: [storm({ id: 'al012026', name: 'Far', latitudeNumeric: 25, longitudeNumeric: -84 }), storm({ id: 'al022026', name: 'Near', latitudeNumeric: 22.4, longitudeNumeric: -95.5, forecastAdvisory: { url: 'https://fixture.invalid/tcm2', issuance: '2026-10-08T15:00:00Z', advNum: '1' } })] };
+  responses['https://fixture.invalid/tcm'] = TCM; responses['https://fixture.invalid/tcm2'] = '<pre>FORECAST VALID 09/1200Z 23.0N 94.0W\nFORECAST VALID 10/1200Z 24.0N 93.0W</pre>';
+  const got = await m.gatherStorms(prior);
+  assert.equal(got[0].id, 'al012026', 'raw feed order puts the coastal-threat storm first');
+  const d = await runMain(prior, {});
+  assert.equal(d.storms[0].id, 'al022026', 'but the tracked storm stays primary');
 });
