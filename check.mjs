@@ -146,6 +146,34 @@ const TOWNS = [
   ['Tarpon Springs, FL', 28.15, 82.76], ['Tampa, FL', 27.95, 82.46], ['St. Petersburg, FL', 27.77, 82.64], ['Sarasota, FL', 27.34, 82.53],
   ['Fort Myers, FL', 26.64, 81.87], ['Naples, FL', 26.14, 81.80], ['Marco Island, FL', 25.94, 81.72], ['Key West, FL', 24.56, 81.78],
 ];
+// Rough coastline: latitude of the northern Gulf coast by longitude, and longitude of Florida's west coast by latitude.
+const COAST_N = [[94.5, 29.6], [93.5, 29.7], [92.0, 29.6], [91.3, 29.3], [90.5, 29.2], [89.9, 29.1], [89.4, 29.0], [89.1, 30.2], [88.6, 30.3], [88.0, 30.2], [87.5, 30.25], [86.5, 30.35], [85.7, 30.1], [85.3, 29.8], [84.9, 29.7], [84.3, 30.0], [83.6, 29.9], [83.1, 29.2], [82.8, 28.8]];
+const COAST_W = [[28.8, 82.8], [28.1, 82.8], [27.6, 82.75], [27.0, 82.45], [26.4, 81.95], [25.9, 81.7], [25.2, 81.1]];
+const interp = (table, x) => { for (let i = 1; i < table.length; i++) { const [x0, y0] = table[i - 1], [x1, y1] = table[i]; if ((x <= x0 && x >= x1) || (x >= x0 && x <= x1)) return y0 + (y1 - y0) * (x - x0) / (x1 - x0); } return null; };
+const coastLat = (lonW) => interp(COAST_N, lonW);
+const coastLonW = (lat) => interp(COAST_W, lat);
+// Where the forecast path meets the coast: the crossing point on the segment that reaches it, with its time
+// interpolated, or the first point inside the coast box if no clean crossing is found.
+function landfallPoint(path) {
+  for (let i = 0; i < path.length; i++) {
+    const b = path[i];
+    if (!coastHit(b)) continue;
+    const a = i ? path[i - 1] : null;
+    if (a && a.t && b.t) {
+      const cl = coastLat(b.lonW), cw = coastLonW(b.lat);
+      let f = null;
+      if (cl != null && a.lat < cl && b.lat >= cl) f = (cl - a.lat) / (b.lat - a.lat);
+      else if (cw != null && a.lonW > cw && b.lonW <= cw) f = (a.lonW - cw) / (a.lonW - b.lonW);
+      if (f != null && f >= 0 && f <= 1) {
+        const lat = a.lat + (b.lat - a.lat) * f, lonW = a.lonW + (b.lonW - a.lonW) * f;
+        const t = new Date(new Date(a.t).getTime() + (new Date(b.t).getTime() - new Date(a.t).getTime()) * f).toISOString();
+        return { lat, lonW, t, crossing: true };
+      }
+    }
+    return { lat: b.lat, lonW: b.lonW, t: b.t, crossing: false };
+  }
+  return null;
+}
 const nearestTown = (p) => TOWNS.map(([name, lat, lonW]) => [name, Math.hypot(lat - p.lat, (lonW - p.lonW) * Math.cos(p.lat * Math.PI / 180))]).sort((a, b) => a[1] - b[1])[0][0];
 const category = (kt) => (kt >= 137 ? 5 : kt >= 113 ? 4 : kt >= 96 ? 3 : kt >= 83 ? 2 : kt >= 64 ? 1 : 0);
 const compass = (deg) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round(deg / 22.5) % 16];
@@ -180,7 +208,7 @@ export async function gatherStorms(prior) {
     const known = s.classification in TYPES;
     const type = known ? TYPES[s.classification] : (/^(PC|EX|LO|DB|WV|SD|SS)$/.test(s.classification || '') ? 'Post-Tropical Cyclone' : 'Tropical Cyclone');
     if (!known && type === 'Tropical Cyclone') console.warn(`storm ${s.id}: unknown classification "${s.classification}"; treated as tropical`);
-    const hit = forecastStale ? null : path.find(coastHit) || null;
+    const hit = forecastStale ? null : landfallPoint(path);
     const landfall = forecastStale ? priorLandfallFor(s.id) : hit && { state: coastState(hit), eta: hit.t, near: nearestTown(hit) };
     const loc = here ? `${here.lat.toFixed(1)}N ${here.lonW.toFixed(1)}W` + (inGulf(here) ? (here.lat < 22 && here.lonW >= 90 ? ', Bay of Campeche' : ', Gulf') : ', approaching the Gulf') : `${prev?.location || 'position unavailable'} (last known)`;
     out.push({

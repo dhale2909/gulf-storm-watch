@@ -198,7 +198,7 @@ test('P3: the tracked Invest is followed into the nearest new storm; a second st
   assert.equal(d.tracked.stormId, 'al022026', 'nearest storm adopted as the tracked system'); assert.equal(d.tracked.invest, 'Invest 92L');
   assert.equal(d.storms[0].id, 'al022026'); assert.equal(d.others.length, 1); assert.equal(d.others[0].threat, true);
   const log = JSON.parse(await readFile('data/log.json', 'utf8'));
-  assert.match(log[0].summary, /Another Gulf system: Tropical Storm Far is forecast to reach the AL coast/);
+  assert.match(log[0].summary, /Another Gulf system: Tropical Storm Far is forecast to reach the coast near /);
   assert.match(d.headline, /Also in the Gulf: Tropical Storm Far/);
   // next check: the other system is not announced again
   await writeFile('data/status.json', JSON.stringify(d));
@@ -246,4 +246,14 @@ test('storm map falls back to the text advisory track when the map service has n
   const roles = map.features.map((f) => f.properties.role);
   assert.ok(roles.includes('track') && roles.filter((r) => r === 'point').length === 3, 'track line plus now + 2 forecast points');
   assert.match(map.source, /text advisory/);
+});
+
+// ---- landfall point: the coast crossing, with interpolated timing and the nearest town ----
+test('landfall uses the coast crossing: nearest town and interpolated time, not the first point past the coast', async () => {
+  // 25N 88W at 09/1200Z -> 31N 88W at 10/1200Z: crosses the Mississippi/Alabama coast (about 30.2N) 87% of the way
+  // along that 24-hour leg, so around 10/0900Z, near Dauphin Island.
+  responses[FEED] = { activeStorms: [storm()] }; responses['https://fixture.invalid/tcm'] = '<pre>FORECAST VALID 09/1200Z 25.0N 88.0W\nFORECAST VALID 10/1200Z 31.0N 88.0W</pre>';
+  const [st] = await m.gatherStorms(state());
+  assert.equal(st.landfall.state, 'AL'); assert.equal(st.landfall.near, 'Dauphin Island, AL');
+  assert.equal(st.landfall.eta.slice(0, 13), '2026-10-10T08');
 });
