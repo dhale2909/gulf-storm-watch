@@ -23,7 +23,7 @@ ENSEMBLES = [
     ("ecaie", "European AI ensemble (AIFS)", "aifs-ens/0p25/enfo", {0: 360, 6: 360, 12: 360, 18: 360}),
 ]
 MAX_HOURS = 168
-VERSION = 4  # bump to force a rebuild of data/ecmwf.json when its shape changes
+VERSION = 5  # bump to force a rebuild of data/ecmwf.json when its shape changes
 CELL = 0.25  # swath grid size, degrees
 REACH = 0.6  # a member "covers" grid cells within this many degrees of its track
 MISSING = 1e99
@@ -127,8 +127,9 @@ def read_tracks(raw):
 def mean_track(gulf, members):
     """Typical member position (median) at each forecast hour, where most members have a storm at that hour.
 
-    A member whose track ends at the coast is held at its last position, so the line is not dragged back
-    out to sea by the few slow members still over water after the rest have made landfall.
+    A member whose track has ended (landfall, or the model losing the system over water) is held at its
+    last position, so the line runs to where the typical member finishes instead of stopping early
+    or being dragged around by whichever members happen to remain.
     """
     by_hour = {}
     last_hour = max(t["pts"][-1][0] for t in gulf) if gulf else 0
@@ -136,9 +137,8 @@ def mean_track(gulf, members):
         for hours, la, lo, _ in t["pts"]:
             by_hour.setdefault(hours, {}).setdefault(t["member"], (la, lo))
         end = t["pts"][-1]
-        if coast_hit(end[1], end[2]):
-            for hours in range(end[0] + 6, last_hour + 1, 6):
-                by_hour.setdefault(hours, {}).setdefault(t["member"], (end[1], end[2]))
+        for hours in range(end[0] + 6, last_hour + 1, 6):
+            by_hour.setdefault(hours, {}).setdefault(t["member"], (end[1], end[2]))
     need = max(5, 0.6 * members)
     line = []
     for hours in sorted(by_hour):
