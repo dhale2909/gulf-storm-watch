@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-06T21:18:23.397Z",
-  "lastAttemptAt": "2026-10-06T21:18:23.397Z",
+  "updatedAt": "2026-10-06T21:19:46.769Z",
+  "lastAttemptAt": "2026-10-06T21:19:46.769Z",
   "nextCheck": "2026-10-06T21:30:00.000Z",
   "alertLevel": "threat",
   "headline": "Tropical Depression Nine: 35 mph, 22.1N 95.6W, Gulf, moving E at 6 mph. Forecast track reaches the coast near Pascagoula, MS around Fri, Oct 9, 8 PM CT (approximate).",
@@ -88,6 +88,6 @@
     "peakMedianKt": 101,
     "text": "32 of 50 ensemble members forecast a track so far. 32 of 32 bring the center to the Louisiana-to-Florida coast (FL 26, AL 6), typically around Fri, Oct 9, 1 PM CT. 31 of 32 reach hurricane strength (18 major); typical peak 115 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-06T21:18:23.397Z"
+    "computedAt": "2026-10-06T21:19:46.769Z"
   }
 }
