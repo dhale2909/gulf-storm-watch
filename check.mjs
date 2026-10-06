@@ -134,6 +134,7 @@ const ashore = (p) => coastHit(p) && (
   (p.lat >= 28.5 && p.lat >= (p.lonW > 89.5 ? 29.5 : p.lonW > 87.5 ? 30.3 : p.lonW > 84 ? 30.1 : 29.0)) ||
   (p.lat < 28.5 && p.lonW <= 82.0));
 
+const mph = (kt) => Math.round((+kt || 0) * 1.15078 / 5) * 5; // NHC public advisories round mph to the nearest 5
 const category = (kt) => (kt >= 137 ? 5 : kt >= 113 ? 4 : kt >= 96 ? 3 : kt >= 83 ? 2 : kt >= 64 ? 1 : 0);
 const compass = (deg) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round(deg / 22.5) % 16];
 const fmtCT = (iso) => new Date(iso).toLocaleString('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric' }) + ' CT';
@@ -175,7 +176,7 @@ export async function gatherStorms(prior) {
       category: s.classification === 'HU' ? category(winds) : 0,
       tropical: known || type === 'Tropical Cyclone',
       location: loc,
-      movement: Number.isFinite(+s.movementSpeed) && +s.movementSpeed > 0 ? `${compass(+s.movementDir)} at ${s.movementSpeed} kt` : 'Stationary',
+      movement: Number.isFinite(+s.movementSpeed) && +s.movementSpeed > 0 ? `${compass(+s.movementDir)} at ${Math.round(+s.movementSpeed * 1.15078)} mph` : 'Stationary',
       advisory: s.forecastAdvisory?.advNum ? `NHC advisory ${s.forecastAdvisory.advNum}` : '',
       advisoryAt: s.forecastAdvisory?.issuance || s.lastUpdate || null,
       landfall,
@@ -403,7 +404,7 @@ export function summarizeGoogle(csv, ids, initISO) {
     run: initISO, members: n, total, hits, coast, eta, hurricane, major, peakMedianKt: Math.round(median(peaks)),
     text: (n < total ? `${n} of ${total} ensemble members forecast a track so far. ` : '') +
       (hits ? `${hits} of ${n} bring the center to the Louisiana-to-Florida coast (${byState}), typically around ${fmtCT(eta)}.` : `None of the ${n} bring the center to the Louisiana-to-Florida coast.`) +
-      ` ${hurricane} of ${n} reach hurricane strength${major ? ` (${major} major)` : ''}; typical peak ${Math.round(median(peaks))} kt.`,
+      ` ${hurricane} of ${n} reach hurricane strength${major ? ` (${major} major)` : ''}; typical peak ${mph(median(peaks))} mph.`,
   };
 }
 
@@ -444,7 +445,7 @@ export function build(prior, gulf, storms, ww) {
   let headline;
   if (storm) {
     headline = (occurred ? `${storm.name} made landfall in ${occurred.state} around ${fmtCT(occurred.at)}. ` : '') +
-      `${storm.name}: ${storm.winds} kt${storm.category ? ` (Category ${storm.category})` : ''}, ${storm.location}, moving ${storm.movement}. ${storm.gulfRisk}.`;
+      `${storm.name}: ${mph(storm.winds)} mph${storm.category ? ` (Category ${storm.category})` : ''}, ${storm.location}, moving ${storm.movement}. ${storm.gulfRisk}.`;
   } else if (held) {
     headline = `Made landfall in ${occurred.state} around ${fmtCT(occurred.at)}; the system is no longer an active NHC storm.`;
   } else if (gulf) {
@@ -454,7 +455,7 @@ export function build(prior, gulf, storms, ww) {
   }
   if (anyAlert) headline += ` Tropical alerts in effect: ${STATES.filter((s) => ww[s].level).map((s) => `${s} (${ww[s].text})`).join('; ')}.`;
   const others = storms.slice(1).filter((o) => !o.other || true);
-  if (others.length) headline += ` Also in the Gulf: ${others.map((o) => `${o.name} (${o.winds} kt; ${o.gulfRisk.toLowerCase()})`).join('; ')}.`;
+  if (others.length) headline += ` Also in the Gulf: ${others.map((o) => `${o.name} (${mph(o.winds)} mph; ${o.gulfRisk.toLowerCase()})`).join('; ')}.`;
 
   return {
     updatedAt: NOW.toISOString(), // time of the last successful reading (an outage keeps the old value; see lastAttemptAt)
@@ -502,9 +503,9 @@ export function diff(prior, cur) {
   const cs = new Map(cur.storms.map((s) => [s.id, s]));
   for (const [id, s] of cs) {
     const p = ps.get(id);
-    if (!p) ch.push(`${s.name} is now a Gulf system (${s.winds} kt)`);
+    if (!p) ch.push(`${s.name} is now a Gulf system (${mph(s.winds)} mph)`);
     else if (p.type !== s.type) ch.push(`${p.name} is now ${s.name}`);
-    else if ((p.category || 0) !== (s.category || 0)) ch.push(`${s.name} is now Category ${s.category} (${s.winds} kt)`);
+    else if ((p.category || 0) !== (s.category || 0)) ch.push(`${s.name} is now Category ${s.category} (${mph(s.winds)} mph)`);
   }
   for (const [id, p] of ps) if (!cs.has(id)) ch.push(`${p.name} is no longer an active Gulf storm`);
 
@@ -541,7 +542,7 @@ function minorDiff(prior, cur) {
   const ps = new Map((prior.storms || []).map((s) => [s.id, s]));
   for (const s of cur.storms) {
     const p = ps.get(s.id);
-    if (p && p.type === s.type && (p.category || 0) === (s.category || 0) && p.winds !== s.winds) notes.push(`${s.name} winds ${p.winds} -> ${s.winds} kt`);
+    if (p && p.type === s.type && (p.category || 0) === (s.category || 0) && p.winds !== s.winds) notes.push(`${s.name} winds ${mph(p.winds)} -> ${mph(s.winds)} mph`);
   }
   return notes;
 }
@@ -696,7 +697,7 @@ async function main() {
     : null;
   // Other Gulf systems: listed, and announced once if they become a coastal threat. They never replace the tracked one.
   status.others = [
-    ...storms.slice(1).map((o) => ({ id: o.id, name: o.name, threat: !!(o.tropical && o.landfall), detail: o.landfall ? `is forecast to reach the ${o.landfall.state} coast around ${fmtCT(o.landfall.eta)}` : `is in the Gulf (${o.winds} kt)` })),
+    ...storms.slice(1).map((o) => ({ id: o.id, name: o.name, threat: !!(o.tropical && o.landfall), detail: o.landfall ? `is forecast to reach the ${o.landfall.state} coast around ${fmtCT(o.landfall.eta)}` : `is in the Gulf (${mph(o.winds)} mph)` })),
     ...otherEntries.map((e) => ({ id: e.investHint || e.area, name: e.investHint ? `${e.investHint} (${e.area})` : e.area, threat: false, detail: `${e.formation7d}% chance of forming within 7 days` })),
   ];
   status.internal.othersAlerted = [...new Set([...(prior?.internal?.othersAlerted || []), ...status.others.filter((o) => o.threat).map((o) => o.id)])];

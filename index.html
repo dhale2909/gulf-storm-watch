@@ -190,7 +190,7 @@ body.card .leaflet-control-container{display:none}
     </div>
     <div class="tile stage-storm">
       <div class="eyebrow">Sustained winds</div>
-      <div class="val"><span id="st-wind">—</span><span style="font-size:18px"> kt</span></div>
+      <div class="val"><span id="st-wind">—</span><span style="font-size:18px"> mph</span></div>
       <div class="sub" id="st-wind-sub"></div>
     </div>
     <div class="tile stage-storm">
@@ -324,6 +324,7 @@ body.card .leaflet-control-container{display:none}
   var ctShort=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric"}); };
   var shareText="";
   var STATE_NAME={AL:"Alabama",FL:"Florida",MS:"Mississippi",LA:"Louisiana"};
+  var mph=function(kt){ return Math.round((+kt||0)*1.15078/5)*5; }; // public wording in mph, as NHC's advisories do
   // NHC numbers depressions in words ("Nine"); show digits. Named storms keep their names.
   var NUMS={One:1,Two:2,Three:3,Four:4,Five:5,Six:6,Seven:7,Eight:8,Nine:9,Ten:10,Eleven:11,Twelve:12,Thirteen:13,Fourteen:14,Fifteen:15,Sixteen:16,Seventeen:17,Eighteen:18,Nineteen:19,Twenty:20,"Twenty-One":21,"Twenty-Two":22,"Twenty-Three":23,"Twenty-Four":24,"Twenty-Five":25};
   var stormName=function(s){ var n=s.name||""; var last=n.split(" ").pop(); return NUMS[last]?n.replace(new RegExp(last+"$"),NUMS[last]):n; };
@@ -338,9 +339,9 @@ body.card .leaflet-control-container{display:none}
       var lf=d.landfallOccurred?("Made landfall in "+(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+" about "+ctShort(d.landfallOccurred.at)):d.landfall?("Landfall expected: "+STATE_NAME[d.landfall.state]+" coast, about "+ctShort(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"Latest forecast unavailable":"No landfall on the AL\u2013FL coast in the forecast");
       $("c-l0").textContent=s0.type+(s0.category?" \u00b7 Category "+s0.category:"")+" \u00b7 "+(s0.advisory||asOf(d));
       var short=s0.name.indexOf(s0.type+" ")===0?s0.name.slice(s0.type.length+1):s0.name;
-      $("c-l1").innerHTML='<b class="nm">'+esc(stormName({name:short}))+" \u00b7 "+esc(s0.winds)+" kt winds</b>";
+      $("c-l1").innerHTML='<b class="nm">'+esc(stormName({name:short}))+" \u00b7 "+esc(mph(s0.winds))+" mph winds</b>";
       $("c-l2").textContent=lf+(alerts?" \u00b7 "+alerts:"");
-      shareText=s0.name+": "+s0.winds+" kt. "+(d.landfall?("Forecast track reaches the "+d.landfall.state+" coast about "+ctShort(d.landfall.eta)+". "):"")+line;
+      shareText=s0.name+": "+mph(s0.winds)+" mph. "+(d.landfall?("Forecast track reaches the "+d.landfall.state+" coast about "+ctShort(d.landfall.eta)+". "):"")+line;
     } else if(held){
       $("c-l0").textContent="Landfall \u00b7 last 48 hours \u00b7 "+asOf(d);
       $("c-l1").innerHTML='<b class="nm">Made landfall in '+esc(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+'</b>';
@@ -440,14 +441,14 @@ body.card .leaflet-control-container{display:none}
     if(s0){
       $("st-type").textContent=stormName(s0)+(s0.category?" \u00b7 Cat "+s0.category:"");
       $("st-type-sub").textContent=(s0.advisory||"NHC advisory")+(s0.advisoryAt?" \u00b7 "+fmt(s0.advisoryAt):"");
-      $("st-wind").textContent=s0.winds; $("st-wind-sub").textContent="Moving "+s0.movement+" \u00b7 "+s0.location;
+      $("st-wind").textContent=mph(s0.winds); $("st-wind-sub").textContent=s0.winds+" kt \u00b7 moving "+s0.movement+" \u00b7 "+s0.location;
       $("st-lf").textContent=d.landfallOccurred?("Made landfall: "+d.landfallOccurred.state):d.landfall?("Expected: "+d.landfall.state):(s0.forecastStale?"Forecast unavailable":"None forecast");
       $("st-lf-sub").textContent=d.landfallOccurred?("about "+fmt(d.landfallOccurred.at)):d.landfall?("about "+fmt(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"showing the last known reading":"Track stays off the AL\u2013FL coast through the forecast period");
     }
     $("sysstat").textContent=s0?s0.name:(g.area?(g.invest||"Disturbance"):"None");
-    $("sysstatsub").textContent=s0?(s0.winds+" kt · "+s0.movement):(g.area?(g.invest?(g.winds?g.winds+" kt winds; ":"")+"no NHC advisories yet":"Not designated; no NHC advisories yet"):"No Gulf system flagged");
+    $("sysstatsub").textContent=s0?(mph(s0.winds)+" mph · "+s0.movement):(g.area?(g.invest?(g.winds?mph(g.winds)+" mph winds; ":"")+"no NHC advisories yet":"Not designated; no NHC advisories yet"):"No Gulf system flagged");
     $("storms").innerHTML=st.length?st.map(function(s){var k=catKey(s);return '<div class="storm"><div class="cat" data-k="'+k+'">'+k+'</div><div><div class="nm">'+esc(s.name)+'</div><dl>'+
-      '<dt>Winds</dt><dd class="mono">'+esc(s.winds)+' kt</dd>'+
+      '<dt>Winds</dt><dd class="mono">'+esc(mph(s.winds))+' mph ('+esc(s.winds)+' kt)</dd>'+
       '<dt>Position</dt><dd>'+esc(s.location)+'</dd><dt>Motion</dt><dd>'+esc(s.movement)+'</dd>'+
       '<dt>Track</dt><dd>'+esc(s.gulfRisk)+'</dd>'+(s.advisory?'<dt>Source</dt><dd>'+esc(s.advisory)+'</dd>':'')+'</dl></div></div>'}).join(""):'<div class="empty">Not yet a depression. No NHC advisories or forecast track.</div>';
     var ww=d.watchesWarnings||{};
@@ -487,7 +488,7 @@ body.card .leaflet-control-container{display:none}
       (e.features||[]).forEach(function(f){ var p=f.properties;
         if(p.role==="ecswath") ecGroups[e.key].addLayer(L.geoJSON(f,{pane:"ec",interactive:false,style:{stroke:false,fillColor:c[0],fillOpacity:p.level>=50?.22:.13}}));
         else if(p.role==="ecmean") ecGroups[e.key].addLayer(L.geoJSON(f,{style:{color:c[0],weight:3.5*K,opacity:.95}}).bindTooltip(c[1]+": typical path of "+p.members+" members",{sticky:true}));
-        else ecGroups[e.key+"_m"].addLayer(L.geoJSON(f,{pane:"ec",style:{color:c[0],weight:1.2,opacity:.6}}).bindTooltip(c[1]+" member "+p.member+", peak "+p.peak+" kt",{sticky:true})); });
+        else ecGroups[e.key+"_m"].addLayer(L.geoJSON(f,{pane:"ec",style:{color:c[0],weight:1.2,opacity:.6}}).bindTooltip(c[1]+" member "+p.member+", peak "+mph(p.peak)+" mph",{sticky:true})); });
       if(!(e.features||[]).length) return;
       cardKeys[e.key]=1;
       legend+=sw(c[0],c[1],1);
@@ -538,11 +539,11 @@ body.card .leaflet-control-container{display:none}
       else if(r==="cone") l=L.geoJSON(f,{style:{color:"#cfd8df",weight:1.2*K,fillColor:"#cfd8df",fillOpacity:.18,dashArray:CARD?"":"4 4"}}).bindTooltip("Forecast cone: probable path of the storm center",{sticky:true});
       else if(r==="track") l=L.geoJSON(f,{style:{color:"#fff",weight:3*K,opacity:.95}});
       else if(r==="past"){ hasPast=true; l=L.geoJSON(f,{style:{color:fg,weight:1.6*K,opacity:.85,dashArray:CARD?"2 12":"1 6",lineCap:"round"}}); }
-      else if(r==="pastpt"&&p.now){ hasNow=true; l=L.circleMarker([c[1],c[0]],{radius:7*(CARD?2:1),color:"#fff",weight:2*(CARD?2:1),fillColor:"#f05b52",fillOpacity:1}).bindTooltip("Position at "+fmt(p.t)+" \u00b7 "+esc(p.wind)+" kt winds"); }
-      else if(r==="pastpt"){ hasPast=true; l=L.circleMarker([c[1],c[0]],{radius:2.6*(CARD?2:1),color:fg,weight:1,fillColor:fg,fillOpacity:.9}).bindTooltip("Was here "+fmt(p.t)+" \u00b7 "+esc(p.wind)+" kt"); }
+      else if(r==="pastpt"&&p.now){ hasNow=true; l=L.circleMarker([c[1],c[0]],{radius:7*(CARD?2:1),color:"#fff",weight:2*(CARD?2:1),fillColor:"#f05b52",fillOpacity:1}).bindTooltip("Position at "+fmt(p.t)+" \u00b7 "+esc(mph(p.wind))+" mph winds"); }
+      else if(r==="pastpt"){ hasPast=true; l=L.circleMarker([c[1],c[0]],{radius:2.6*(CARD?2:1),color:fg,weight:1,fillColor:fg,fillOpacity:.9}).bindTooltip("Was here "+fmt(p.t)+" \u00b7 "+esc(mph(p.wind))+" mph"); }
       else if(r==="ww"){ kinds[p.kind]=1; l=L.geoJSON(f,{style:{color:(WW[p.kind]||["#888"])[0],weight:6*K,lineCap:"butt"}}).bindTooltip((WW[p.kind]||[0,"Coastal alert"])[1],{sticky:true}); }
       else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:(p.now?9:6.5)*(CARD?2:1),color:"#fff",weight:(p.now?3:2)*(CARD?2:1),fillColor:windColor(+p.wind||0),fillOpacity:1})
-        .bindTooltip((p.now?"Now":esc(p.label))+(p.wind!=null?" \u00b7 "+esc(p.wind)+" kt":"")+(p.type?" \u00b7 "+esc(p.type):""),{direction:"top",offset:[0,-8],className:"pt"});
+        .bindTooltip((p.now?"Now":esc(p.label))+(p.wind!=null?" \u00b7 "+esc(mph(p.wind))+" mph":"")+(p.type?" \u00b7 "+esc(p.type):""),{direction:"top",offset:[0,-8],className:"pt"});
       if(l) (r==="model"?(modelGroups[p.group]||modelGroups.model):group).addLayer(l);
     });
     var b=L.latLngBounds([[24,-94],[31,-81]]); if(group.getLayers().length) b.extend(group.getBounds());
