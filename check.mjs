@@ -685,7 +685,10 @@ async function main() {
   status.internal.vanishedChecks = holding ? vanishedBefore + 1 : 0;
   status.sources = { outlook: outlookOK ? 'ok' : 'unavailable', storms: stormsOK ? 'ok' : 'unavailable', alerts: ww.unavailable ? `unavailable for ${ww.unavailable.join(', ')}` : 'ok', map: map ? 'ok' : 'unavailable' };
   if (!outlookOK || !stormsOK) { status.updatedAt = prior?.updatedAt || status.updatedAt; } // not a fully fresh reading
-  status.google = await gatherGoogle(storms[0], models?.invest).catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return prior?.google ?? null; });
+  // The Google summary is tied to the system it was computed for; a carried-over summary is kept only for the same system.
+  const systemKey = status.tracked?.stormId || status.tracked?.invest || null;
+  status.google = await gatherGoogle(storms[0], models?.invest).then((g) => (g ? { ...g, system: systemKey, computedAt: NOW.toISOString() } : null))
+    .catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return prior?.google && prior.google.system === systemKey ? prior.google : null; });
   const changes = diff(prior, status);
   const changed = changes.length > 0;
   if (changed) { status.internal.baseline7d = status.gulf.formation7d; status.internal.baseline48 = status.gulf.formation48; }

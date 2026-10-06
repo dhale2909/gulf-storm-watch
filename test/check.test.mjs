@@ -215,3 +215,13 @@ test('P3: a tracked storm keeps the page even when another storm sorts first by 
   const d = await runMain(prior, {});
   assert.equal(d.storms[0].id, 'al022026', 'but the tracked storm stays primary');
 });
+
+// ---- P7 (approved): a carried-over Google summary must belong to the same tracked system ----
+test('P7: a stale Google summary is dropped when the tracked system changed', async () => {
+  const prior = state({ tracked: { invest: 'Invest 92L', stormId: null, name: 'Invest 92L', lastPos: { lat: 22, lonW: 96 } }, google: { system: 'Invest 92L', text: 'old', members: 11, hits: 9, coast: { LA: 0, MS: 0, AL: 0, FL: 9 }, run: '2026-10-08T06:00:00Z', total: 50, hurricane: 9, major: 7, peakMedianKt: 99 } });
+  responses[TWO] = pre('Tropical cyclone formation is not expected during the next 7 days.');
+  responses[FEED] = { activeStorms: [storm({ id: 'al032026', name: 'New', latitudeNumeric: 26, longitudeNumeric: -86 })] };
+  responses['https://fixture.invalid/tcm'] = TCM;
+  const d = await runMain(prior, {}); // Google download is unmocked, so the fetch fails and the carry-over rule applies
+  assert.equal(d.tracked.stormId, 'al032026'); assert.equal(d.google, null, 'summary for Invest 92L not reused for storm al032026');
+});

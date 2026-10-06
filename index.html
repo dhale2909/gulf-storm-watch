@@ -419,8 +419,9 @@ body.card .leaflet-control-container{display:none}
     var G=d.google;
     $("goog-text").classList.toggle("empty",!G); $("goog-bars").hidden=!G;
     if(G){
-      $("goog-text").textContent=G.text; $("goog-run").textContent="Run "+fmt(G.run);
-      var rows=STATES.map(function(s){return [s,G.coast[s]||0]}).concat([["Stays away",G.members-G.hits]]);
+      var gAge=G.computedAt?Math.round((Date.now()-new Date(G.computedAt).getTime())/36e5):0;
+      $("goog-text").textContent=G.text; $("goog-run").textContent="Run "+fmt(G.run)+(gAge>=3?" \u00b7 summary "+gAge+" h old":"");
+      var rows=STATES.map(function(s){return [s,G.coast[s]||0]}).concat([["Center not forecast to reach the AL\u2013FL coast",G.members-G.hits]]);
       $("goog-bars").innerHTML=rows.map(function(r){return '<b>'+r[0]+'</b><div class="bar"><i style="width:'+(100*r[1]/G.members)+'%"></i></div><span class="mono">'+r[1]+' of '+G.members+'</span>'}).join("");
     } else { $("goog-text").textContent="No data for this system yet. Google's ensemble only covers systems NHC has numbered."; $("goog-run").textContent="Experimental"; }
     $("last").textContent=fmt(d.lastAttemptAt||d.updatedAt); var due=d.nextCheck?new Date(d.nextCheck).getTime():0, lateMin=Math.round((Date.now()-due)/6e4);
