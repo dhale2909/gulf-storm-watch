@@ -19,6 +19,10 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="900">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Daniel's Storm Page">
+<meta name="twitter:description" content="Live Gulf storm tracking: NHC track, model guidance and alerts to your phone.">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/main/card-x.png?v=0">
+<meta name="twitter:image:alt" content="Map of the storm's NHC forecast track across the Gulf with forecast winds and model tracks.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -133,6 +137,7 @@ body.card .wrap{display:none}
 body.card #card{display:flex;flex-direction:column;position:relative;width:1200px;height:900px;background:var(--bg)}
 #card-map{position:absolute;inset:0;overflow:hidden}
 body.card #map{width:1200px;height:900px;border:0;border-radius:0}
+body.cardx #card,body.cardx #map{height:628px}
 #card #c-pill{position:absolute;right:28px;top:40px;z-index:600;font-size:40px;padding:8px 26px}
 #card #c-pill.num{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:0 30px;top:14px;height:176px;min-width:176px;border-radius:30px}
 #card #c-pill.num b{font-size:118px;font-weight:700;color:#fff;letter-spacing:-.02em}#card #c-pill.num small{font-size:30px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-top:4px;color:#fff}
@@ -341,14 +346,14 @@ body.card .leaflet-control-container{display:none}
     if(/depression/.test(t)) return "TD"; if(/hurricane/.test(t)) return "H"+(s.category||1); if(/storm/.test(t)) return "TS"; return "PT"; };
 
   // Card mode (index.html?card=1): the share preview image. Default layers, local data, Central time.
-  var CARD=/[?&]card=1/.test(location.search), ready={}, K=CARD?2.6:1; // K: line weight multiplier for the card
+  var CARD=/[?&]card=(1|x)/.test(location.search), CARDX=/[?&]card=x/.test(location.search), ready={}, K=CARD?2.6:1; // K: line weight multiplier for the card; card=x is the wide 2:1 version X/Twitter previews use
   var cardKeys={};
   var done=function(k){ ready[k]=1; if(!(ready.s&&ready.m&&ready.e)) return;
     // The card's layout settles after the text is filled in; re-measure the map and refit before the screenshot.
     // The card always frames the Gulf edge to edge at one fixed zoom (the text bar sits over the inland US).
-    if(CARD&&map){ setTimeout(function(){ map.invalidateSize(); map.setView([27.1,-89.3],6,{animate:false}); window.cardReady=true; },400); return; }
+    if(CARD&&map){ setTimeout(function(){ map.invalidateSize(); if(CARDX) map.setView([29.2,-89.0],5,{animate:false}); else map.setView([27.1,-89.3],6,{animate:false}); window.cardReady=true; },400); return; }
     window.cardReady=true; };
-  if(CARD){ document.body.classList.add("card"); $("card-map").appendChild($("map")); }
+  if(CARD){ document.body.classList.add("card"); if(CARDX) document.body.classList.add("cardx"); $("card-map").appendChild($("map")); }
   var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
   var fmtHour=function(iso){ var d=new Date(iso); if(isNaN(d)) return "\u2014"; d=new Date(Math.round(d.getTime()/36e5)*36e5); return fmt(d.toISOString()); };
   var ctShort=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric"}); };

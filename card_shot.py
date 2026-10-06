@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Screenshot index.html?card=1 to card.png: the preview image texting apps show when the page link is shared."""
+"""Screenshot index.html?card=1 to card.png (4:3, for Messages and most apps) and index.html?card=x to card-x.png
+(2:1, the shape X/Twitter crops link previews to)."""
 import functools
 import http.server
 import threading
@@ -17,10 +18,12 @@ threading.Thread(target=server.serve_forever, daemon=True).start()
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
-    page = browser.new_page(viewport={"width": 1200, "height": 900}, color_scheme="dark")
-    page.goto(f"http://127.0.0.1:{server.server_port}/index.html?card=1", wait_until="networkidle", timeout=60000)
-    page.wait_for_function("window.cardReady === true", timeout=30000)
-    page.wait_for_timeout(2500)  # let the last map tiles paint
-    page.screenshot(path="card.png")
+    for mode, size, out in (("1", (1200, 900), "card.png"), ("x", (1200, 628), "card-x.png")):
+        page = browser.new_page(viewport={"width": size[0], "height": size[1]}, color_scheme="dark")
+        page.goto(f"http://127.0.0.1:{server.server_port}/index.html?card={mode}", wait_until="networkidle", timeout=60000)
+        page.wait_for_function("window.cardReady === true", timeout=30000)
+        page.wait_for_timeout(2500)  # let the last map tiles paint
+        page.screenshot(path=out)
+        page.close()
+        print(f"{out} written")
     browser.close()
-print("card.png written")

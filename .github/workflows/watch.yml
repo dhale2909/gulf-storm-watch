@@ -65,10 +65,12 @@ jobs:
         if: ${{ !inputs.test_notify }}
         continue-on-error: true
         # Phones cache link-preview images by address, so each redraw gets a new one. Only when a card was actually drawn.
-        run: test -n "$(git status --porcelain card.png)" && sed -i -E 's#(main/card\.png)(\?v=[0-9]+)?"#\1?v='"$(date +%s)"'"#' index.html || true
+        run: |
+          test -n "$(git status --porcelain card.png)" && sed -i -E 's#(main/card\.png)(\?v=[0-9]+)?"#\1?v='"$(date +%s)"'"#' index.html || true
+          test -n "$(git status --porcelain card-x.png)" && sed -i -E 's#(main/card-x\.png)(\?v=[0-9]+)?"#\1?v='"$(date +%s)"'"#' index.html || true
       - name: Save the optional assets
         if: ${{ !inputs.test_notify }}
-        run: bash scripts/save.sh data card.png index.html
+        run: bash scripts/save.sh data card.png card-x.png index.html
 
   # Publish the refreshed card and data. Shares the "pages" queue with pages.yml so publishes never collide.
   publish:
