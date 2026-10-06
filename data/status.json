@@ -1,20 +1,22 @@
 {
-  "updatedAt": "2026-10-06T22:00:20.849Z",
-  "lastAttemptAt": "2026-10-06T22:00:20.849Z",
+  "updatedAt": "2026-10-06T22:02:50.551Z",
+  "lastAttemptAt": "2026-10-06T22:02:50.551Z",
   "nextCheck": "2026-10-06T22:30:00.000Z",
   "alertLevel": "threat",
   "headline": "Tropical Depression Nine: 35 mph, 22.1N 95.6W, Gulf, moving E at 6 mph. Forecast track reaches the coast near Pascagoula, MS around Fri, Oct 9, 8 PM CT (approximate).",
   "gulf": {
     "area": "Southwestern Gulf of America",
-    "text": "Satellite images and surface observations indicate that showers and thunderstorms are becoming better organized while surface pressures are gradually falling. If these trends continue, advisories will likely be issued on this system later today or tonight while it moves slowly eastward. The low pressure area could bring gusty winds and areas of heavy rain to the western portions of the Yucatan Peninsula of Mexico in a couple of days. The disturbance is expected to turn to the north or northeast toward the northern Gulf Coast by the end of the week. It is still too early to determine specific impacts to the northern Gulf Coast, but interests from the Florida Panhandle to Louisiana should closely monitor the progress of this system. The NOAA Gulfstream jet is en route to sample the environment over the Gulf this afternoon and Air Force and NOAA reconnaissance aircraft are scheduled to investigate the system tomorrow. * Formation chance through 48 hours...high...near 100 percent. * Formation chance through 7 days...high...near 100 percent. $$ Forecaster Cangialosi",
+    "text": "Satellite images and surface observations indicate that showers and thunderstorms are becoming better organized while surface pressures are gradually falling. If these trends continue, advisories will likely be issued on this system later today or tonight while it moves slowly eastward. The low pressure area could bring gusty winds and areas of heavy rain to the western portions of the Yucatan Peninsula of Mexico in a couple of days. The disturbance is expected to turn to the north or northeast toward the northern Gulf Coast by the end of the week. It is still too early to determine specific impacts to the northern Gulf Coast, but interests from the Florida Panhandle to Louisiana should closely monitor the progress of this system. The NOAA Gulfstream jet is en route to sample the environment over the Gulf this afternoon and Air Force and NOAA reconnaissance aircraft are scheduled to investigate the system tomorrow.",
     "formation48": 100,
     "formation7d": 100,
     "source": "NHC outlook, 200 PM EDT Tue Oct 6 2026",
+    "issuedAt": "2026-10-06T18:00:00.000Z",
     "invest": "Invest 92L"
   },
   "storms": [
     {
       "id": "al092026",
+      "bin": "AT4",
       "name": "Tropical Depression Nine",
       "type": "Tropical Depression",
       "winds": 30,
@@ -27,15 +29,57 @@
         "lat": 22.1,
         "lonW": 95.6
       },
+      "forecast": [
+        {
+          "t": "2026-10-07T06:00:00.000Z",
+          "lat": 22.1,
+          "lonW": 95
+        },
+        {
+          "t": "2026-10-07T18:00:00.000Z",
+          "lat": 22.6,
+          "lonW": 93.4
+        },
+        {
+          "t": "2026-10-08T06:00:00.000Z",
+          "lat": 23.1,
+          "lonW": 91.8
+        },
+        {
+          "t": "2026-10-08T18:00:00.000Z",
+          "lat": 24.2,
+          "lonW": 90.1
+        },
+        {
+          "t": "2026-10-09T06:00:00.000Z",
+          "lat": 25.9,
+          "lonW": 88.8
+        },
+        {
+          "t": "2026-10-09T18:00:00.000Z",
+          "lat": 28.5,
+          "lonW": 88.3
+        },
+        {
+          "t": "2026-10-10T18:00:00.000Z",
+          "lat": 34,
+          "lonW": 88.7
+        },
+        {
+          "t": "2026-10-11T18:00:00.000Z",
+          "lat": 38.9,
+          "lonW": 86.5
+        }
+      ],
       "forecastStale": false,
       "gulfRisk": "Forecast track reaches the coast near Pascagoula, MS around Fri, Oct 9, 8 PM CT (approximate)"
     }
   ],
   "watchesWarnings": {
     "note": "",
+    "MS": {},
     "AL": {},
     "FL": {},
-    "MS": {},
     "LA": {}
   },
   "landfall": {
@@ -49,6 +93,7 @@
     "baseline7d": 100,
     "baseline48": 100,
     "landfallAt": null,
+    "landfallStormId": null,
     "landfallHoldUntil": null,
     "landfallState": null,
     "othersAlerted": [],
@@ -68,6 +113,7 @@
   "sources": {
     "outlook": "ok",
     "storms": "ok",
+    "forecast": "ok",
     "alerts": "ok",
     "map": "ok"
   },
@@ -88,6 +134,6 @@
     "peakMedianKt": 101,
     "text": "32 of 50 ensemble members forecast a track so far. 32 of 32 bring the center to the Louisiana-to-Florida coast (FL 26, AL 6), typically around Fri, Oct 9, 1 PM CT. 31 of 32 reach hurricane strength (18 major); typical peak 115 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-06T22:00:20.849Z"
+    "computedAt": "2026-10-06T22:02:50.551Z"
   }
 }
