@@ -3,6 +3,24 @@
 const ORIGIN = 'https://dhale2909.github.io';
 const cors = { 'Access-Control-Allow-Origin': ORIGIN, 'Access-Control-Allow-Methods': 'POST, GET, OPTIONS', 'Access-Control-Allow-Headers': 'content-type' };
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', ...cors } });
+const MAX_BODY = 4096; // a push subscription is well under 1 KB
+
+// Only real browser push services are accepted as endpoints, so this worker can never be pointed at an
+// arbitrary server (its test push is a signed POST to whatever endpoint is registered).
+const PUSH_HOSTS = [/^fcm\.googleapis\.com$/, /^updates\.push\.services\.mozilla\.com$/, /(^|\.)notify\.windows\.com$/, /(^|\.)push\.apple\.com$/];
+function validEndpoint(endpoint) {
+  if (typeof endpoint !== 'string' || endpoint.length > 1500) return false;
+  let u; try { u = new URL(endpoint); } catch { return false; }
+  return u.protocol === 'https:' && !u.username && !u.password && PUSH_HOSTS.some((re) => re.test(u.hostname));
+}
+const b64len = (s, n) => typeof s === 'string' && /^[A-Za-z0-9_-]+$/.test(s) && (() => { try { return fromB64url(s).length === n; } catch { return false; } })();
+async function readJSON(req) {
+  const len = +(req.headers.get('content-length') || 0);
+  if (len > MAX_BODY) return null;
+  const text = await req.text();
+  if (text.length > MAX_BODY) return null;
+  try { return JSON.parse(text); } catch { return null; }
+}
 
 async function keyFor(endpoint) {
   const d = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(endpoint));
@@ -25,8 +43,20 @@ async function vapidAuth(endpoint, env) {
 }
 
 async function sendTest(endpoint, env) {
-  const r = await fetch(endpoint, { method: 'POST', headers: { Authorization: await vapidAuth(endpoint, env), TTL: '60', Urgency: 'high', 'Content-Length': '0' } });
+  // Bounded, and never follows a redirect away from the push service.
+  const r = await fetch(endpoint, { method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(10000), headers: { Authorization: await vapidAuth(endpoint, env), TTL: '60', Urgency: 'high', 'Content-Length': '0' } });
   return r.status;
+}
+
+// Serialise test requests per device inside this isolate: KV reads are eventually consistent, so two requests
+// arriving together could both see "no recent test". Within one isolate they now run one after the other.
+// (Across Cloudflare locations the five-minute spacing is best-effort; a device can only ever test itself.)
+const inflight = new Map();
+function serialised(key, fn) {
+  const prev = inflight.get(key) || Promise.resolve();
+  const run = prev.then(fn, fn);
+  inflight.set(key, run.finally(() => { if (inflight.get(key) === run) inflight.delete(key); }));
+  return run;
 }
 
 export default {
@@ -36,34 +66,39 @@ export default {
 
     // A registered device asks for its own test push; at most one every 5 minutes per device.
     if (req.method === 'POST' && url.pathname === '/test') {
-      let body;
-      try { body = await req.json(); } catch { return json({ error: 'bad json' }, 400); }
-      if (!body || typeof body.endpoint !== 'string' || !body.endpoint.startsWith('https://')) return json({ error: 'bad endpoint' }, 400);
+      const body = await readJSON(req);
+      if (!body || !validEndpoint(body.endpoint)) return json({ error: 'bad endpoint' }, 400);
       const key = await keyFor(body.endpoint);
       const reg = await env.SUBS.getWithMetadata(key);
       if (!reg || !reg.metadata) return json({ error: 'not registered' }, 404);
-      if (await env.SUBS.get(`test:${key}`)) return json({ error: 'try again in a few minutes' }, 429);
-      await env.SUBS.put(`test:${key}`, '1', { expirationTtl: 300 });
       if (!env.VAPID_PRIVATE_KEY || !env.VAPID_PUBLIC_KEY) return json({ error: 'test sending not configured' }, 503);
-      const status = await sendTest(body.endpoint, env);
-      return json({ ok: status >= 200 && status < 300, status }, status >= 200 && status < 300 ? 200 : 502);
+      return serialised(key, async () => {
+        if (await env.SUBS.get(`test:${key}`)) return json({ error: 'try again in a few minutes' }, 429);
+        await env.SUBS.put(`test:${key}`, '1', { expirationTtl: 300 });
+        try {
+          const status = await sendTest(body.endpoint, env);
+          return json({ ok: status >= 200 && status < 300, status }, status >= 200 && status < 300 ? 200 : 502);
+        } catch (e) {
+          return json({ ok: false, error: `push service not reached: ${e.name === 'TimeoutError' ? 'timed out' : 'send failed'}` }, 502);
+        }
+      });
     }
 
     // Devices (public, rate-limited by Cloudflare's free tier): register or remove themselves.
     if (req.method === 'POST' && (url.pathname === '/subscribe' || url.pathname === '/unsubscribe')) {
-      let sub;
-      try { sub = await req.json(); } catch { return json({ error: 'bad json' }, 400); }
-      if (!sub || typeof sub.endpoint !== 'string' || !sub.endpoint.startsWith('https://') || sub.endpoint.length > 1500) return json({ error: 'bad subscription' }, 400);
+      const sub = await readJSON(req);
+      if (!sub || !validEndpoint(sub.endpoint)) return json({ error: 'bad subscription' }, 400);
       const key = await keyFor(sub.endpoint);
       if (url.pathname === '/unsubscribe') { await env.SUBS.delete(key); return json({ ok: true }); }
-      if (!sub.keys || typeof sub.keys.p256dh !== 'string' || typeof sub.keys.auth !== 'string') return json({ error: 'bad keys' }, 400);
+      // p256dh is a 65-byte P-256 public key, auth a 16-byte secret, both base64url.
+      if (!sub.keys || !b64len(sub.keys.p256dh, 65) || !b64len(sub.keys.auth, 16)) return json({ error: 'bad keys' }, 400);
       // Keep the subscription in metadata so a single list() call returns everything.
       await env.SUBS.put(key, '1', { metadata: { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth }, added: Date.now() } });
       return json({ ok: true }, 201);
     }
 
     // The tracker (holds ADMIN_KEY): list every subscription, or prune dead ones after sending.
-    if (req.headers.get('x-key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
+    if (!env.ADMIN_KEY || req.headers.get('x-key') !== env.ADMIN_KEY) return json({ error: 'forbidden' }, 403);
     if (req.method === 'GET' && url.pathname === '/subscriptions') {
       const out = [];
       let cursor;
@@ -75,7 +110,8 @@ export default {
       return json(out);
     }
     if (req.method === 'POST' && url.pathname === '/prune') {
-      const { endpoints = [] } = await req.json();
+      const body = await readJSON(req);
+      const endpoints = Array.isArray(body?.endpoints) ? body.endpoints.filter((e) => typeof e === 'string').slice(0, 500) : [];
       for (const e of endpoints) await env.SUBS.delete(await keyFor(e));
       return json({ removed: endpoints.length });
     }

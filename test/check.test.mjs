@@ -257,3 +257,198 @@ test('landfall uses the coast crossing: nearest town and interpolated time, not 
   assert.equal(st.landfall.state, 'AL'); assert.equal(st.landfall.near, 'Dauphin Island, AL');
   assert.equal(st.landfall.eta.slice(0, 13), '2026-10-10T08');
 });
+
+// ---- Follow-up review (Oct 6 evening) ----
+// These assert desired behavior. Known failures are TODOs rather than skipped tests:
+// they execute on every npm test run and document defects pending owner/implementer fixes.
+// No production code, live requests, credentials, or alert policies are changed here.
+// gap(): still open, by owner decision (coastline geometry is a proposal; see STORM-REVIEW-2.md R7/R8). fixed(): a regression test now.
+const gap = (id, name, fn) => test(`${id}: ${name}`, { todo: 'Open: coastline geometry proposal (STORM-REVIEW-2.md R7/R8) awaiting owner decision' }, fn);
+const fixed = (id, name, fn) => test(`${id}: ${name}`, fn);
+const quietOutlook = () => pre('Tropical cyclone formation is not expected during the next 7 days.');
+const forecastStorm = (extra = {}) => ({ id: 'al012026', name: 'Tropical Storm Test', type: 'Tropical Storm', winds: 50, tropical: true, location: 'Gulf', movement: 'N at 5 mph', gulfRisk: 'Forecast', ...extra });
+
+fixed('R1', 'public status must never persist private Play text in a retry record', async () => {
+  process.env.NTFY_TOPIC = 'fixture-private';
+  process.env.PLAYS_JSON = JSON.stringify({ watch: 'PRIVATE_TEST_SENTINEL_NOT_A_SECRET' });
+  try {
+    const d = await runMain(state({ alertLevel: 'quiet', gulf: {} }), { ntfy: 503 });
+    assert.equal(JSON.stringify(d).includes('PRIVATE_TEST_SENTINEL_NOT_A_SECRET'), false);
+  } finally { delete process.env.NTFY_TOPIC; delete process.env.PLAYS_JSON; }
+});
+
+fixed('R2', 'browser transient delivery failures must report failure, not success', async () => {
+  const webpush = (await import('web-push')).default;
+  const oldSend = webpush.sendNotification, oldVapid = webpush.setVapidDetails;
+  process.env.PUSH_API = 'https://fixture.invalid'; process.env.PUSH_ADMIN_KEY = 'fixture'; process.env.VAPID_PRIVATE_KEY = 'fixture';
+  webpush.setVapidDetails = () => {};
+  webpush.sendNotification = async () => { throw Object.assign(new Error('fixture 503'), { statusCode: 503 }); };
+  responses['https://fixture.invalid/subscriptions'] = [{ endpoint: 'https://fixture.invalid/device', keys: {} }];
+  try {
+    const d = await m.deliver({ privateTitle: '', publicTitle: 'Fixture', publicBody: 'Fixture', level: 'watch' });
+    assert.equal(d.browser, false);
+  } finally {
+    webpush.sendNotification = oldSend; webpush.setVapidDetails = oldVapid;
+    for (const k of ['PUSH_API', 'PUSH_ADMIN_KEY', 'VAPID_PRIVATE_KEY']) delete process.env[k];
+  }
+});
+
+fixed('R2', 'retrying only private ntfy must not send another browser notification', async () => {
+  const webpush = (await import('web-push')).default;
+  const oldSend = webpush.sendNotification, oldVapid = webpush.setVapidDetails;
+  let sent = 0;
+  process.env.NTFY_TOPIC = 'fixture-private'; process.env.PUSH_API = 'https://fixture.invalid'; process.env.PUSH_ADMIN_KEY = 'fixture'; process.env.VAPID_PRIVATE_KEY = 'fixture';
+  webpush.setVapidDetails = () => {}; webpush.sendNotification = async () => { sent++; };
+  responses['https://fixture.invalid/subscriptions'] = [{ endpoint: 'https://fixture.invalid/device', keys: {} }];
+  const p = state({ gulf: { area: 'Gulf of Mexico', formation7d: 50, formation48: 50 }, internal: { baseline7d: 50, baseline48: 50, pending: { privateTitle: 'Fixture', privateBody: 'Fixture', publicTitle: 'Fixture', publicBody: 'Fixture', level: 'watch', failed: ['private'], attempts: 1 } } });
+  try { await runMain(p); assert.equal(sent, 0); }
+  finally {
+    webpush.sendNotification = oldSend; webpush.setVapidDetails = oldVapid;
+    for (const k of ['NTFY_TOPIC', 'PUSH_API', 'PUSH_ADMIN_KEY', 'VAPID_PRIVATE_KEY', 'PUBLIC_NTFY_TOPIC']) delete process.env[k];
+  }
+});
+
+fixed('R3', 'a TCM header with malformed forecast positions is unavailable, not terminal', () => {
+  assert.equal(m.parseTCM('<pre>TROPICAL STORM TEST FORECAST/ADVISORY NUMBER 3\nFORECAST VALID 09/1200Z POSITION UNAVAILABLE</pre>', '2026-10-08T15:00:00Z'), null);
+});
+
+fixed('R3', 'a TWO with Gulf content but no recognized heading is not a verified quiet outlook', () => {
+  assert.throws(() => m.parseTWO(pre('Gulf of Mexico\nA tropical disturbance is developing.\n' + chances)));
+});
+
+fixed('R4', 'NWS must still be checked when both NHC sources fail', async () => {
+  await runMain(state(), { twoFails: true, feedFails: true });
+  assert.ok(calls.some((u) => u.includes('api.weather.gov/alerts/active')));
+});
+
+fixed('R5', 'null position and intensity do not become a zero fix and zero winds', async () => {
+  responses[FEED] = { activeStorms: [storm({ latitudeNumeric: null, longitudeNumeric: null, intensity: null })] };
+  responses['https://fixture.invalid/tcm'] = TCM;
+  const p = state({ storms: [forecastStorm({ pos: { lat: 25, lonW: 88 } })] });
+  const out = await m.gatherStorms(p);
+  assert.equal(out[0].winds, 50); assert.deepEqual(out[0].pos, { lat: 25, lonW: 88 });
+});
+
+fixed('R6', 'an unrelated sole storm must not replace an Invest still explicitly in the outlook', async () => {
+  const p = state({ tracked: { invest: 'Invest 92L', stormId: null, lastPos: { lat: 22, lonW: 96 } } });
+  // Outlook issued at 10 AM CDT (15:00Z), after the unrelated storm's 12:00Z advisory: NHC knowingly lists both.
+  responses[TWO] = '<pre>Tropical Weather Outlook\n1000 AM CDT Thu Oct 8 2026\n\nFor the North Atlantic...\n\nGulf of Mexico (AL92):\nThe tracked disturbance remains.\n' + chances + '</pre>';
+  responses[FEED] = { activeStorms: [storm({ id: 'al032026', name: 'Unrelated', latitudeNumeric: 27, longitudeNumeric: -83, forecastAdvisory: { url: 'https://fixture.invalid/tcm', issuance: '2026-10-08T12:00:00Z', advNum: '3' } })] };
+  responses['https://fixture.invalid/tcm'] = TCM;
+  const d = await runMain(p);
+  assert.equal(d.tracked.stormId, null); assert.equal(d.tracked.invest, 'Invest 92L');
+});
+
+fixed('R6', 'a different primary storm must not inherit the old Invest identity or Google summary', async () => {
+  const p = state({ tracked: { invest: 'Invest 92L', stormId: 'al012026', lastPos: { lat: 22, lonW: 96 } }, storms: [forecastStorm()], google: { system: 'Invest 92L', computedAt: '2026-10-08T12:00:00Z', text: 'old-system aggregate' } });
+  responses[TWO] = quietOutlook(); responses[FEED] = { activeStorms: [storm({ id: 'al032026', name: 'Different' })] }; responses['https://fixture.invalid/tcm'] = TCM;
+  const d = await runMain(p);
+  assert.equal(d.tracked.stormId, 'al032026'); assert.equal(d.google, null); assert.equal(d.tracked.invest, null);
+});
+
+gap('R7', 'an offshore position south of the configured coastline is not observed landfall', async () => {
+  // COAST_N explicitly puts the coast at 29.6N at 92W; 29.55N is seaward of that line.
+  responses[FEED] = { activeStorms: [storm({ latitudeNumeric: 29.55, longitudeNumeric: -92 })] };
+  responses['https://fixture.invalid/tcm'] = '<pre>FORECAST VALID 09/1200Z 30.5N 92.0W</pre>';
+  assert.equal((await m.gatherStorms(state()))[0].ashore, null);
+});
+
+fixed('R7', 'a 48-hour-old observed landfall does not restart while the center remains inland', () => {
+  const p = state({ internal: { landfallAt: '2026-10-06T12:00:00Z', landfallState: 'LA' }, landfallOccurred: { at: '2026-10-06T12:00:00Z', state: 'LA' } });
+  const d = m.build(p, null, [forecastStorm({ ashore: { state: 'LA', t: '2026-10-08T15:00:00Z' }, landfall: null })], ww());
+  assert.equal(d.alertLevel, 'watch'); assert.notEqual(d.internal.landfallAt, '2026-10-08T15:00:00.000Z');
+});
+
+fixed('R7', 'landfall occurrence uses observation time, not the polling time', () => {
+  const d = m.build(state(), null, [forecastStorm({ ashore: { state: 'LA', t: '2026-10-08T12:00:00Z' } })], ww());
+  assert.equal(d.landfallOccurred.at, '2026-10-08T12:00:00Z');
+});
+
+gap('R8', 'oblique crossing solves the path against coastline segments, not the endpoint latitude', async () => {
+  responses[FEED] = { activeStorms: [storm({ latitudeNumeric: 28, longitudeNumeric: -92, lastUpdate: '2026-10-08T12:00:00Z' })] };
+  responses['https://fixture.invalid/tcm'] = '<pre>FORECAST VALID 09/1200Z 31.0N 84.0W</pre>';
+  // At the intersection: lonW=92-8f, lat=28+3f. COAST_N segment
+  // (86.5,30.35)->(85.7,30.1) has lat=30.35 + .3125*(lonW-86.5).
+  const f = 4.06875 / 5.5;
+  const expected = Date.parse('2026-10-08T12:00:00Z') + f * 86400000;
+  const got = Date.parse((await m.gatherStorms(state()))[0].landfall.eta);
+  assert.ok(Math.abs(got - expected) < 1000, `crossing differs by ${Math.round((got - expected) / 60000)} min`);
+});
+
+gap('R8', 'nearest-town state and announced landfall state agree at the Louisiana delta', async () => {
+  responses[FEED] = { activeStorms: [storm({ latitudeNumeric: 28, longitudeNumeric: -89.35 })] };
+  responses['https://fixture.invalid/tcm'] = '<pre>FORECAST VALID 09/1200Z 29.5N 89.3W</pre>';
+  const lf = (await m.gatherStorms(state()))[0].landfall;
+  assert.equal(lf.state, lf.near.split(', ')[1]);
+});
+
+fixed('R9', 'text-advisory fallback survives a failing map layer, not only an empty layer', async () => {
+  const MAP = 'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer';
+  for (const id of [6,7,8,9,12]) responses[`${MAP}/${id}/query?where=1%3D1&outFields=*&f=geojson&geometryPrecision=2`] = { features: [] };
+  responses[`${MAP}/8/query?where=1%3D1&outFields=*&f=geojson&geometryPrecision=2`] = new Error('fixture cone unavailable');
+  const map = await m.gatherMap(null, forecastStorm({ bin: 'AT1', pos: { lat: 25, lonW: 88 }, forecast: [{t:'2026-10-09T12:00:00Z', lat:30, lonW:88}] }));
+  assert.ok(map.features.some((f) => f.properties.role === 'track'));
+});
+
+fixed('R9', 'storm-feed outage does not overwrite the prior storm map with kind none', async () => {
+  const p = state({ gulf: {}, storms: [forecastStorm({ pos: { lat:25, lonW:88 } })], tracked: { stormId:'al012026' } });
+  responses[TWO] = quietOutlook();
+  await runMain(p, { feedFails:true });
+  let map = null; try { map=JSON.parse(await readFile('data/map.json','utf8')); } catch {}
+  assert.notEqual(map?.kind, 'none', 'retain last map or report unavailable; never publish a verified empty map');
+});
+
+// Worker tests use an in-memory KV and ephemeral in-memory VAPID keys. No keys are saved.
+// Worker is bundled as ESM by Wrangler; import its unchanged source as ESM for Node.
+const workerSource = await readFile(new URL('../push/worker.js', import.meta.url), 'utf8');
+const worker = (await import('data:text/javascript;base64,' + Buffer.from(workerSource).toString('base64'))).default;
+const memKV = () => { const a=new Map(); return { get:async k=>a.get(k)?.value??null, getWithMetadata:async k=>a.get(k)??null, put:async(k,value,o={})=>{a.set(k,{value,metadata:o.metadata})}, delete:async k=>{a.delete(k)} }; };
+const workerReq = (route, body) => new Request('https://fixture.invalid'+route,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+const PUSH_EP = 'https://fcm.googleapis.com/fcm/send/fixture-device'; // a push-service endpoint shape the worker accepts
+const PUSH_KEYS = { p256dh: Buffer.from([4, ...Array(64).fill(7)]).toString('base64url'), auth: Buffer.alloc(16, 9).toString('base64url') };
+
+fixed('R10', 'test-push registration rejects arbitrary non-push HTTPS endpoints', async () => {
+  const r=await worker.fetch(workerReq('/subscribe',{endpoint:'https://arbitrary-target.invalid/path',keys:{p256dh:'invalid',auth:'invalid'}}),{SUBS:memKV()});
+  assert.equal(r.status,400);
+});
+
+fixed('R10', 'concurrent test requests enforce one send per device within the cooldown', async () => {
+  const webpush=(await import('web-push')).default;
+  const keys=webpush.generateVAPIDKeys();
+  const env={SUBS:memKV(),VAPID_PUBLIC_KEY:keys.publicKey,VAPID_PRIVATE_KEY:keys.privateKey,PAGE_URL:'https://fixture.invalid/'};
+  const endpoint=PUSH_EP;
+  await worker.fetch(workerReq('/subscribe',{endpoint,keys:PUSH_KEYS}),env);
+  // A slow cooldown read: without serialisation both requests read "no recent test" before either writes.
+  const originalGet=env.SUBS.get;
+  env.SUBS.get=async k=>{if(k.startsWith('test:')) await new Promise(r=>setTimeout(r,20)); return originalGet(k)};
+  const oldFetch=globalThis.fetch; let sent=0;
+  globalThis.fetch=async()=>{sent++;return {status:201}};
+  try {
+    const rs=await Promise.all([worker.fetch(workerReq('/test',{endpoint}),env),worker.fetch(workerReq('/test',{endpoint}),env)]);
+    assert.equal(sent,1); assert.ok(rs.some(r=>r.status===429));
+  } finally {globalThis.fetch=oldFetch;}
+});
+
+test('R10 control: an unregistered device cannot request a test push', async () => {
+  const r=await worker.fetch(workerReq('/test',{endpoint:PUSH_EP.replace('fixture-device','unregistered')}),{SUBS:memKV()});
+  assert.equal(r.status,404);
+});
+
+test('R10 control: a registered device test sends one payload-free request with a verifiable VAPID token', async () => {
+  const webpush=(await import('web-push')).default, keys=webpush.generateVAPIDKeys();
+  const env={SUBS:memKV(),VAPID_PUBLIC_KEY:keys.publicKey,VAPID_PRIVATE_KEY:keys.privateKey,PAGE_URL:'https://fixture.invalid/'};
+  const endpoint=PUSH_EP;
+  await worker.fetch(workerReq('/subscribe',{endpoint,keys:PUSH_KEYS}),env);
+  const oldFetch=globalThis.fetch; let sent=[];
+  globalThis.fetch=async(url,options)=>{sent.push({url,options});return {status:201}};
+  try {
+    assert.equal((await worker.fetch(workerReq('/test',{endpoint}),env)).status,200);
+    assert.equal((await worker.fetch(workerReq('/test',{endpoint}),env)).status,429);
+    assert.equal(sent.length,1); assert.equal(sent[0].url,endpoint); assert.equal(sent[0].options.body,undefined);
+    const auth=sent[0].options.headers.Authorization;
+    const token=auth.match(/^vapid t=([^,]+), k=/)[1]; const [h,p,s]=token.split('.');
+    const payload=JSON.parse(Buffer.from(p,'base64url')); assert.equal(payload.aud,new URL(endpoint).origin); assert.equal(payload.sub,env.PAGE_URL);
+    const pub=await crypto.subtle.importKey('raw',Buffer.from(keys.publicKey,'base64url'),{name:'ECDSA',namedCurve:'P-256'},false,['verify']);
+    assert.equal(await crypto.subtle.verify({name:'ECDSA',hash:'SHA-256'},pub,Buffer.from(s,'base64url'),Buffer.from(h+'.'+p)),true);
+  } finally {globalThis.fetch=oldFetch;}
+});

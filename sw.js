@@ -5,10 +5,11 @@ self.addEventListener('push', (e) => {
   let d = {};
   try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data && e.data.text() }; }
   // A push with no payload is the "Send me a test" ping from the subscriber service.
-  if (!e.data) d = { title: "Daniel's Storm Page: test", body: 'Test notification. Storm alerts will reach this device.' };
+  const isTest = !e.data;
+  if (isTest) d = { title: "Daniel's Storm Page: test", body: 'Test notification. Storm alerts will reach this device.' };
   e.waitUntil(self.registration.showNotification(d.title || "Daniel's Storm Page", {
     body: d.body || 'Open the page for the latest reading.', icon: 'icon-192.png', badge: 'icon-192.png',
-    tag: 'storm-alert', renotify: true, data: { url: d.url || './' },
+    tag: isTest ? 'storm-test' : 'storm-alert', renotify: true, data: { url: d.url || './' }, // a test never replaces a real alert in the tray
   }));
 });
 self.addEventListener('notificationclick', (e) => {

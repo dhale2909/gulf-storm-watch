@@ -85,6 +85,7 @@ a{color:var(--accent)}
 .st{border:1px solid var(--line);border-radius:8px;padding:10px;display:grid;gap:4px;border-top:4px solid var(--stc,var(--line))}
 .st b{font-family:var(--display);font-size:18px;font-weight:700}
 .st span{font-size:12px;color:var(--muted)}
+.coast.clear{grid-template-columns:1fr}.st.all span a{color:var(--fg)}
 
 .log-row{display:grid;grid-template-columns:150px 1fr auto;gap:12px;padding:9px 0;border-top:1px solid var(--line);align-items:baseline;font-size:13.5px}
 .log-row:first-child{border-top:0}
@@ -173,7 +174,7 @@ body.card .leaflet-control-container{display:none}
   <section class="band" id="band">
     <div class="band-top">
       <div>
-        <div class="eyebrow">Southwestern Gulf system · AL · FL · MS · LA</div>
+        <div class="eyebrow" id="eyebrow">Gulf of Mexico · AL · FL · MS · LA</div>
         <h1>Daniel's Storm Page</h1>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -184,6 +185,7 @@ body.card .leaflet-control-container{display:none}
     </div>
     <p class="headline" id="headline">Loading the latest check.</p>
     <div class="stale" id="stale" hidden></div>
+    <div class="sub" id="level-note" hidden style="margin-top:8px"></div>
   </section>
 
   <section class="tiles" id="tiles">
@@ -331,6 +333,7 @@ body.card .leaflet-control-container{display:none}
     window.cardReady=true; };
   if(CARD){ document.body.classList.add("card"); $("card-map").appendChild($("map")); }
   var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
+  var fmtHour=function(iso){ var d=new Date(iso); if(isNaN(d)) return "\u2014"; d=new Date(Math.round(d.getTime()/36e5)*36e5); return fmt(d.toISOString()); };
   var ctShort=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric"}); };
   var shareText="";
   var STATE_NAME={AL:"Alabama",FL:"Florida",MS:"Mississippi",LA:"Louisiana"};
@@ -439,14 +442,21 @@ body.card .leaflet-control-container{display:none}
     $("pill-text").textContent=levelLabel(d);
     $("headline").textContent=d.headline||"";
     var age=(Date.now()-new Date(d.updatedAt).getTime())/36e5, src=d.sources||{};
-    var unavailable=Object.keys(src).filter(function(k){return /unavailable/.test(src[k])}).map(function(k){return k==="alerts"?src[k]:k});
+    var SRC_NAME={outlook:"NHC outlook",storms:"NHC storm list",forecast:"NHC forecast advisory",map:"map layers"};
+    var unavailable=Object.keys(src).filter(function(k){return /unavailable|incomplete/.test(src[k])}).map(function(k){return k==="alerts"?"NWS "+src[k]:(SRC_NAME[k]||k)+(/incomplete/.test(src[k])?" ("+src[k]+")":"")});
     $("stale").hidden=!(age>3||unavailable.length);
-    $("stale").textContent=(age>3?"Last successful reading was "+Math.round(age)+" hours ago; this may be out of date. ":"")+(unavailable.length?"Could not reach: "+unavailable.join(", ")+"; those parts show the previous reading.":"");
+    $("stale").textContent=(age>3?"Last successful reading was "+Math.round(age)+" hours ago; this may be out of date. ":"")+(unavailable.length?"Could not read: "+unavailable.join("; ")+". Those parts show the previous reading.":"");
+    // THREAT and "Landfall expected" are this page's own reading of the NHC track, not an official product.
+    var official=STATES.some(function(s){return (d.watchesWarnings||{})[s]&&d.watchesWarnings[s].level});
+    $("level-note").hidden=!((lvl==="threat"||lvl==="landfall")&&!official);
+    $("level-note").textContent=lvl==="landfall"&&!d.landfallOccurred?"\u201cLandfall expected\u201d is this page\u2019s reading of the NHC forecast track, not an official watch or warning. None is in effect for AL, FL, MS or LA."
+      :lvl==="threat"?"\u201cThreat\u201d is this page\u2019s reading: the NHC forecast track reaches the coast. It is not an official watch or warning; none is in effect for AL, FL, MS or LA.":"";
+    $("eyebrow").textContent=((d.tracked&&d.tracked.name)||(d.storms&&d.storms[0]&&d.storms[0].name)||((d.gulf||{}).area)||"Gulf of Mexico")+" \u00b7 AL \u00b7 FL \u00b7 MS \u00b7 LA";
     var g=d.gulf||{}, p7=g.formation7d, p48=g.formation48;
     $("p7").textContent=p7==null?"—":p7; $("nd7").style.left=(p7==null?0:Math.max(0,Math.min(100,p7)))+"%";
     $("p48").textContent=p48==null?"—":p48; $("p48sub").textContent=g.area||"No Gulf disturbance in the outlook";
     $("outlook").textContent=g.text||"No Gulf disturbance in the current NHC outlook.";
-    $("src").textContent=g.source||"NHC outlook";
+    $("src").textContent=((d.storms||[])[0]&&g.area?"Earlier outlook, before advisories began \u00b7 ":"")+(g.source||"NHC outlook");
     var st=d.storms||[], s0=st[0];
     $("tiles").setAttribute("data-stage",s0?"storm":"form");
     if(s0){
@@ -454,7 +464,7 @@ body.card .leaflet-control-container{display:none}
       $("st-type-sub").textContent=(s0.advisory||"NHC advisory")+(s0.advisoryAt?" \u00b7 "+fmt(s0.advisoryAt):"");
       $("st-wind").textContent=mph(s0.winds); $("st-wind-sub").textContent=s0.winds+" kt \u00b7 moving "+s0.movement+" \u00b7 "+s0.location;
       $("st-lf").textContent=d.landfallOccurred?("Made landfall: "+d.landfallOccurred.state):d.landfall?("Near "+(d.landfall.near||STATE_NAME[d.landfall.state])):(s0.forecastStale?"Forecast unavailable":"None forecast");
-      $("st-lf-sub").textContent=d.landfallOccurred?("about "+fmt(d.landfallOccurred.at)):d.landfall?("expected about "+fmt(d.landfall.eta)+" (approximate)"+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"showing the last known reading":"Track stays off the AL\u2013FL coast through the forecast period");
+      $("st-lf-sub").textContent=d.landfallOccurred?("about "+fmt(d.landfallOccurred.at)):d.landfall?("center estimated to cross the coast about "+fmtHour(d.landfall.eta)+", read from the NHC track"+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"showing the last known reading":"Track stays off the AL\u2013FL coast through the forecast period");
     }
     $("sysstat").textContent=s0?s0.name:(g.area?(g.invest||"Disturbance"):"None");
     $("sysstatsub").textContent=s0?(mph(s0.winds)+" mph · "+s0.movement):(g.area?(g.invest?(g.winds?mph(g.winds)+" mph winds; ":"")+"no NHC advisories yet":"Not designated; no NHC advisories yet"):"No Gulf system flagged");
@@ -463,9 +473,13 @@ body.card .leaflet-control-container{display:none}
       '<dt>Position</dt><dd>'+esc(s.location)+'</dd><dt>Motion</dt><dd>'+esc(s.movement)+'</dd>'+
       '<dt>Track</dt><dd>'+esc(s.gulfRisk)+'</dd>'+(s.advisory?'<dt>Source</dt><dd>'+esc(s.advisory)+'</dd>':'')+'</dl></div></div>'}).join(""):'<div class="empty">Not yet a depression. No NHC advisories or forecast track.</div>';
     var ww=d.watchesWarnings||{};
-    $("coast").innerHTML=STATES.map(function(s){var v=ww[s]||{}; var c=v.level==="warning"?"var(--landfall)":v.level==="watch"?"var(--threat)":"var(--line)";
-      return '<div class="st" style="--stc:'+c+'"><b>'+s+'</b><span>'+esc(v.text||"No tropical watch or warning reported")+'</span><a href="https://alerts.weather.gov/search?area='+s+'" target="_blank" rel="noopener" style="font-size:12px">Official NWS alerts</a></div>'}).join("");
     var unavail=(ww.unavailable||[]);
+    var anyWW=STATES.some(function(s){return ww[s]&&ww[s].level});
+    $("coast").classList.toggle("clear",!anyWW&&!unavail.length);
+    $("coast").innerHTML=(!anyWW&&!unavail.length)
+      ? '<div class="st all"><b>No tropical watches or warnings</b><span>None reported for Alabama, Florida, Mississippi or Louisiana. Official NWS alerts: '+STATES.map(function(s){return '<a href="https://alerts.weather.gov/search?area='+s+'" target="_blank" rel="noopener">'+s+'</a>'}).join(" \u00b7 ")+'</span></div>'
+      : STATES.map(function(s){var v=ww[s]||{}; var c=v.level==="warning"?"var(--landfall)":v.level==="watch"?"var(--threat)":"var(--line)";
+      return '<div class="st" style="--stc:'+c+'"><b>'+s+'</b><span>'+esc(v.text||(unavail.indexOf(s)>=0?"NWS not reachable; previous reading shown":"No tropical watch or warning reported"))+'</span><a href="https://alerts.weather.gov/search?area='+s+'" target="_blank" rel="noopener" style="font-size:12px">Official NWS alerts</a></div>'}).join("");
     $("coast-note").textContent=(STATES.some(function(s){return ww[s]&&ww[s].level})?"Tropical watches or warnings are in effect; tap a state for the official product. ":"No tropical watch or warning reported for the four states. ")+(unavail.length?"NWS could not be reached for "+unavail.join(", ")+"; showing the previous reading.":"");
     var G=d.google;
     $("goog-text").classList.toggle("empty",!G); $("goog-bars").hidden=!G;
@@ -553,7 +567,7 @@ body.card .leaflet-control-container{display:none}
       else if(r==="pastpt"&&p.now){ hasNow=true; l=L.circleMarker([c[1],c[0]],{radius:7*(CARD?2:1),color:"#fff",weight:2*(CARD?2:1),fillColor:"#f05b52",fillOpacity:1}).bindTooltip("Position at "+fmt(p.t)+" \u00b7 "+esc(mph(p.wind))+" mph winds"); }
       else if(r==="pastpt"){ hasPast=true; l=L.circleMarker([c[1],c[0]],{radius:2.6*(CARD?2:1),color:fg,weight:1,fillColor:fg,fillOpacity:.9}).bindTooltip("Was here "+fmt(p.t)+" \u00b7 "+esc(mph(p.wind))+" mph"); }
       else if(r==="ww"){ kinds[p.kind]=1; l=L.geoJSON(f,{style:{color:(WW[p.kind]||["#888"])[0],weight:6*K,lineCap:"butt"}}).bindTooltip((WW[p.kind]||[0,"Coastal alert"])[1],{sticky:true}); }
-      else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:(p.now?9:6.5)*(CARD?2:1),color:"#fff",weight:(p.now?3:2)*(CARD?2:1),fillColor:windColor(+p.wind||0),fillOpacity:1})
+      else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:(p.now?9:6.5)*(CARD?2:1),color:"#fff",weight:(p.now?3:2)*(CARD?2:1),fillColor:p.wind!=null?windColor(+p.wind||0):muted,fillOpacity:1})
         .bindTooltip((p.now?"Now":esc(p.label))+(p.wind!=null?" \u00b7 "+esc(mph(p.wind))+" mph":"")+(p.type?" \u00b7 "+esc(p.type):""),{direction:"top",offset:[0,-8],className:"pt"});
       if(l) (r==="model"?(modelGroups[p.group]||modelGroups.model):group).addLayer(l);
     });
@@ -572,7 +586,7 @@ body.card .leaflet-control-container{display:none}
     $("map-note").textContent=kind==="storm"
       ? "Dots are NHC forecast positions of the storm center with time and wind. The cone shows where the center will probably track; wind, surge and rain reach well outside it."
       : kind==="outlook" ? "NHC has not issued a forecast track yet. The shaded area is where it expects the system to develop over the next 7 days; the track, cone and any coastal watches appear here automatically once a depression forms."
-      : "No Gulf system to map.";
+      : (m&&m.unavailable) ? "The map could not be loaded just now; it will retry on the next refresh." : "No Gulf system to map.";
     if(hasModels) $("map-note").textContent+=" Thin coloured lines are raw computer-model runs ("+(m.models||"NHC model guidance")+"). They are not a forecast, they disagree with each other, and they shift from run to run; hover or tap a line for the model name. Switch each group on or off with the layers button on the map.";
     else if(kind==="outlook") $("map-note").textContent+=" Model tracks will be drawn here once NHC designates the system as an Invest and starts publishing guidance for it.";
   }
@@ -627,7 +641,7 @@ body.card .leaflet-control-container{display:none}
     var get=function(f){return (CARD?Promise.reject():fetch(RAW+f+t)).then(function(r){if(!r.ok) throw 0; return r.json()}).catch(function(){return fetch(f+t).then(function(r){return r.json()})})};
     get("data/status.json").then(renderStatus).catch(function(){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; });
     get("data/ecmwf.json").then(renderEC).catch(function(){ renderEC(null); }).then(function(){ done("e"); });
-    get("data/map.json").then(renderMap).catch(function(){ renderMap(null); }).then(function(){ done("m"); });
+    get("data/map.json").then(renderMap).catch(function(){ renderMap({unavailable:true}); }).then(function(){ done("m"); });
     get("data/log.json").then(renderLog).catch(function(){});
   }
   load(); setInterval(load,2*60*1000);

@@ -74,3 +74,63 @@ Secrets are not in the repo (.env, .ntfy-topic are gitignored). Do not commit an
 - Please review now against a live storm: `data/status.json`, `data/map.json`, the card (`card.png`), and the page as
   rendered in advisory stage. Design opinions on the storm-stage layout and map are welcome; the owner wants to keep
   the share card as it is (default layers), and alert rules are unchanged.
+
+## Update, Oct 6 night: second review (STORM-REVIEW-2.md) applied
+
+Codex's follow-up review was verified against the code and acted on. Its 20 added tests are in `test/check.test.mjs`;
+17 now pass as ordinary regression tests, 3 stay marked TODO (the coastline-geometry proposals, R7/R8, below).
+Four fixtures were adjusted to the fixes they test: the R6 outlook now carries an issuance line (the rule compares it
+with the storm advisory), and the R10 worker fixtures use a push-service endpoint with 65/16-byte keys (the worker now
+rejects anything else). The forced-interleaving cooldown test became a slow-read test, because the serialised worker
+can no longer interleave two reads.
+
+Fixed (no alert rule, threshold, channel or Google handling changed):
+- R1: an undelivered alert is kept as public facts only (level, change lines, headline, Google summary text). The
+  private body is rebuilt at send time; `PLAYS_JSON` text never reaches a file.
+- R2: browser delivery reports per device; a failed device is retried, delivered devices are not re-sent, a retry only
+  touches the channels that failed. Three attempts in all, then it gives up and the log says so. A new alert supersedes
+  an undelivered one and the log records that (`superseded`).
+- R3: an outlook with disturbance text outside a recognised heading, a formation-line count that does not match its
+  entries, or no entries and no explicit all-clear is "unavailable", never quiet. A forecast advisory for another storm
+  or advisory number, with an unreadable forecast line, or with no forecast lines and no ending wording is "unknown"
+  (previous forecast carried), never an empty track.
+- R4: NWS alerts are read, and pending retries run, even when both NHC sources fail; the full-outage path now goes
+  through the normal build/diff/deliver flow with the NHC parts carried. Forecast-advisory health is its own source
+  (`sources.forecast`), shown on the page.
+- R5: null/blank/"n/a" numbers are missing, never zero; a storm record that cannot be read marks the storm list
+  `incomplete (...)` instead of silently dropping the storm.
+- R6 (the part that is not a proposal): an Invest listed in an outlook issued after a storm's advisory is still an
+  Invest, so that storm is "another system"; an older outlook is just stale and the upgrade proceeds as before.
+  When a different storm takes over from the tracked one, its Invest link, Google summary and landfall record are
+  reset. Guidance files are chosen by the Invest NHC named, first.
+- R7 (not the geography): the landfall occurrence is a record bound to the storm that made it, timestamped from the
+  observation; the 48-hour hold runs from that and is never restarted by the same storm sitting inland.
+- R9: one failed NOAA map layer no longer fails the map; the text-advisory track fallback runs for failed as well as
+  empty layers; `bin` and forecast points are persisted so the map can be rebuilt during a storm-list outage; a map
+  built while sources are down never replaces a storm map with "nothing to map"; maps carry storm/advisory identity;
+  the page distinguishes "map could not be loaded" from "no system"; unknown-wind points are neutral.
+- R10: the worker only registers real push-service endpoints (Apple, FCM, Mozilla, Windows) with correctly sized keys,
+  caps request bodies, never follows redirects, times out sends, checks configuration before using the cooldown, and
+  serialises test requests per device within an isolate. Test pushes use their own notification tag.
+- R11: core sources get two bounded attempts; map, model guidance and Google share a fixed budget and are skipped when
+  it runs out; the four NWS reads and the two NHC reads run in parallel.
+- R12 (partial): right before sending, the check asks the repository whether another runner saved a newer reading
+  while this one ran, and if so sends and saves nothing. This closes most of the double-send window; it is not a
+  shared claim.
+
+Page (storm stage): source names in the health banner; a one-line note that THREAT / "Landfall expected" is this
+page's reading of the NHC track and not an official warning; the Landfall tile says "center estimated to cross the
+coast about <hour>, read from the NHC track"; the eyebrow names the tracked system; one compact row when no state has
+a watch or warning; an outlook entry shown during the storm stage is labelled "Earlier outlook, before advisories
+began" and its odds lines and signature are stripped. The share card is unchanged.
+
+Open, for the owner (not implemented):
+- R7/R8 coastline geometry: observed landfall still uses the old rough boxes while the forecast crossing uses the
+  COAST_N/COAST_W polyline; crossings interpolate toward an endpoint-specific coast value rather than intersecting
+  segments; state comes from longitude bands while the town comes from a list (the Louisiana delta can read "MS, near
+  Venice, LA"). One consistent geometry for all three is a change to alert inputs.
+- R6 ambiguity: when the Invest is not tagged in the outlook and several new storms appear, the nearest is adopted
+  with no distance limit.
+- R12 full version: a shared pre-send claim between the GitHub and Mac runners.
+- Design items not done: shorter hero, official/model map view split, map keeps zoom + Recenter, legend of visible
+  layers only.
