@@ -62,10 +62,10 @@ export function parseTWO(html) {
   const pre = preText(html);
   if (!pre || !/Tropical Weather Outlook/i.test(pre)) throw new Error('TWO text not found');
   const issued = (/^\d{3,4} (?:AM|PM) \w+ \w+ \w+ \d+ \d{4}$/m.exec(pre) || [''])[0];
-  const pct = (s) => (/near 0/i.test(s) ? 0 : +s);
+  const pct = (s) => +String(s).replace(/near/i, '').trim(); // "near 0", "near 100", "70"
   // Everything after the basin header, minus the "Active Systems" paragraph (storms with advisories are handled from CurrentStorms.json).
   const body = pre.replace(/^[\s\S]*?For the North Atlantic[^\n]*\n/i, '').replace(/^Active Systems:.*\n(?:.+\n)*\n?/im, '');
-  const re = /\* Formation chance through 48 hours\.\.\.\w+\.\.\.(near 0|\d+) percent\.\s*\* Formation chance through 7 days\.\.\.\w+\.\.\.(near 0|\d+) percent\./gi;
+  const re = /\* Formation chance through 48 hours\.\.\.\w+\.\.\.(near \d+|\d+) percent\.\s*\* Formation chance through 7 days\.\.\.\w+\.\.\.(near \d+|\d+) percent\./gi;
   let best = null, last = 0, m;
   while ((m = re.exec(body))) {
     // One disturbance = all the text since the previous disturbance's formation lines; it may run to several paragraphs.
@@ -84,6 +84,9 @@ export function parseTWO(html) {
     };
     if (!best || d.formation7d > best.formation7d) best = d;
   }
+  // Safety net: if the outlook plainly has a Gulf entry that we failed to read, that is a parse failure,
+  // not a quiet Gulf. Failing keeps the previous reading rather than announcing a false all-clear.
+  if (!best && /^[^\n]*(Gulf of (America|Mexico)|Bay of Campeche)[^\n]*:\s*$/im.test(body)) throw new Error('outlook has a Gulf entry the parser could not read');
   return best;
 }
 

@@ -4,9 +4,9 @@
     "changed": true,
     "pushed": true,
     "updated": false,
-    "alertLevel": "quiet",
+    "alertLevel": "watch",
     "formation7d": null,
-    "summary": "Alert level WATCH -> QUIET."
+    "summary": "Tracker error (fixed 1:20 PM): NHC wrote the odds as \"near 100 percent\" and the check could not read it, so it reported \"no disturbance\". Invest 92L was being tracked throughout; the 1:00 PM QUIET alert was wrong."
   },
   {
     "ts": "2026-10-06T17:32:38.706Z",
