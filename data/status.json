@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-06T01:00:25.262Z",
-  "nextCheck": "2026-10-06T01:30:00.000Z",
+  "updatedAt": "2026-10-06T01:30:07.890Z",
+  "nextCheck": "2026-10-06T02:00:00.000Z",
   "alertLevel": "watch",
   "headline": "NHC gives the Southwestern Gulf of America disturbance a 80% chance of forming within 7 days (70% within 48 hours). No advisories or forecast track yet.",
   "gulf": {
@@ -28,20 +28,5 @@
     "landfallHoldUntil": null,
     "landfallState": null
   },
-  "google": {
-    "run": "2026-10-05T18:00:00.000Z",
-    "members": 50,
-    "hits": 0,
-    "coast": {
-      "LA": 0,
-      "MS": 0,
-      "AL": 0,
-      "FL": 0
-    },
-    "eta": null,
-    "hurricane": 0,
-    "major": 0,
-    "peakMedianKt": 0,
-    "text": "None of the 50 ensemble members bring the center to the Louisiana-to-Florida coast. 0 of 50 reach hurricane strength; typical peak 0 kt."
-  }
+  "google": null
 }
