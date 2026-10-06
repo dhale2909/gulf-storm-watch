@@ -1,5 +1,14 @@
 [
   {
+    "ts": "2026-10-06T13:35:52.882Z",
+    "changed": false,
+    "pushed": false,
+    "updated": true,
+    "alertLevel": "watch",
+    "formation7d": 90,
+    "summary": "Update, below the alert threshold: 7-day odds 80% -> 90%. 48-hour odds 80% -> 90%."
+  },
+  {
     "ts": "2026-10-06T13:34:04.792Z",
     "changed": false,
     "pushed": false,
