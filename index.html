@@ -401,7 +401,7 @@ body.card .leaflet-control-container{display:none}
   var sw=function(c,t,line){return '<span><i'+(line?' class="ln" style="border-color:'+c+'"':' style="background:'+c+'"')+'></i>'+t+'</span>'};
   function initMap(){
     if(map||!window.L) return;
-    map=L.map("map",{scrollWheelZoom:false,zoomSnap:1});
+    map=L.map("map",{scrollWheelZoom:false,zoomSnap:CARD?1:0.25}); // finer zoom steps so the Gulf fills the map on a phone
     var esri="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_";
     L.tileLayer(esri+"Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Map: Esri, HERE, Garmin, &copy; OpenStreetMap contributors",maxZoom:10}).addTo(map);
     if(!CARD) L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
