@@ -155,24 +155,23 @@ const coastLonW = (lat) => interp(COAST_W, lat);
 // Where the forecast path meets the coast: the crossing point on the segment that reaches it, with its time
 // interpolated, or the first point inside the coast box if no clean crossing is found.
 function landfallPoint(path) {
-  for (let i = 0; i < path.length; i++) {
-    const b = path[i];
-    if (!coastHit(b)) continue;
-    const a = i ? path[i - 1] : null;
-    if (a && a.t && b.t) {
-      const cl = coastLat(b.lonW), cw = coastLonW(b.lat);
-      let f = null;
-      if (cl != null && a.lat < cl && b.lat >= cl) f = (cl - a.lat) / (b.lat - a.lat);
-      else if (cw != null && a.lonW > cw && b.lonW <= cw) f = (a.lonW - cw) / (a.lonW - b.lonW);
-      if (f != null && f >= 0 && f <= 1) {
-        const lat = a.lat + (b.lat - a.lat) * f, lonW = a.lonW + (b.lonW - a.lonW) * f;
-        const t = new Date(new Date(a.t).getTime() + (new Date(b.t).getTime() - new Date(a.t).getTime()) * f).toISOString();
-        return { lat, lonW, t, crossing: true };
-      }
+  // First: a clean crossing of the coastline anywhere along the path (the coast box alone is generous near the delta).
+  for (let i = 1; i < path.length; i++) {
+    const a = path[i - 1], b = path[i];
+    if (!a.t || !b.t) continue;
+    const cl = coastLat(b.lonW), cw = coastLonW(b.lat);
+    let f = null;
+    if (cl != null && a.lat < cl && b.lat >= cl) f = (cl - a.lat) / (b.lat - a.lat);
+    else if (cw != null && a.lonW > cw && b.lonW <= cw) f = (a.lonW - cw) / (a.lonW - b.lonW);
+    if (f != null && f >= 0 && f <= 1) {
+      const lat = a.lat + (b.lat - a.lat) * f, lonW = a.lonW + (b.lonW - a.lonW) * f;
+      const t = new Date(new Date(a.t).getTime() + (new Date(b.t).getTime() - new Date(a.t).getTime()) * f).toISOString();
+      if (coastHit({ lat, lonW })) return { lat, lonW, t, crossing: true };
     }
-    return { lat: b.lat, lonW: b.lonW, t: b.t, crossing: false };
   }
-  return null;
+  // Otherwise: the first forecast point inside the coast box (e.g. the path ends in Mobile Bay).
+  const b = path.find(coastHit);
+  return b ? { lat: b.lat, lonW: b.lonW, t: b.t, crossing: false } : null;
 }
 const nearestTown = (p) => TOWNS.map(([name, lat, lonW]) => [name, Math.hypot(lat - p.lat, (lonW - p.lonW) * Math.cos(p.lat * Math.PI / 180))]).sort((a, b) => a[1] - b[1])[0][0];
 const category = (kt) => (kt >= 137 ? 5 : kt >= 113 ? 4 : kt >= 96 ? 3 : kt >= 83 ? 2 : kt >= 64 ? 1 : 0);
