@@ -23,7 +23,7 @@ ENSEMBLES = [
     ("ecaie", "European AI ensemble (AIFS)", "aifs-ens/0p25/enfo", {0: 360, 6: 360, 12: 360, 18: 360}),
 ]
 MAX_HOURS = 168
-VERSION = 3  # bump to force a rebuild of data/ecmwf.json when its shape changes
+VERSION = 4  # bump to force a rebuild of data/ecmwf.json when its shape changes
 CELL = 0.25  # swath grid size, degrees
 REACH = 0.6  # a member "covers" grid cells within this many degrees of its track
 MISSING = 1e99
@@ -80,7 +80,7 @@ def arr(h, key, n):
 
 
 def read_tracks(raw):
-    """All Atlantic tracks in a track file: [{member, pts: [(hours, lat, lon, kt)]}]."""
+    """All tracks in a track file: [{member, pts: [(hours, lat, lon, kt)]}]."""
     tmp = "/tmp/_tf.bufr"
     with open(tmp, "wb") as f:
         f.write(raw)
@@ -92,8 +92,8 @@ def read_tracks(raw):
                 break
             try:
                 ec.codes_set(h, "unpack", 1)
-                if not ec.codes_get(h, "stormIdentifier").strip().endswith("L"):
-                    continue
+                # No filtering by identifier: ECMWF files this system under an East Pacific-style label ("72E")
+                # even though it sits in the Bay of Campeche. Geography decides below.
                 n = ec.codes_get(h, "numberOfSubsets")
                 members = arr(h, "ensembleMemberNumber", n)
                 periods = 0
@@ -189,7 +189,8 @@ def swaths(gulf, members):
 
 def summarize(key, label, stamp, tracks):
     init = datetime.strptime(stamp, "%Y%m%d%H").replace(tzinfo=timezone.utc)
-    gulf = [t for t in tracks if any(in_gulf(la, lo) for _, la, lo, _ in t["pts"])]
+    # Our system: tracks that start in the Gulf (a wave that only enters later is a different system).
+    gulf = [t for t in tracks if in_gulf(t["pts"][0][1], t["pts"][0][2])]
     coast = {"LA": 0, "MS": 0, "AL": 0, "FL": 0}
     etas, peaks, seen, features = [], [], set(), []
     for t in gulf:
