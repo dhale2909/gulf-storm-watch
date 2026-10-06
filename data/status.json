@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-06T18:23:14.576Z",
-  "nextCheck": "2026-10-06T18:30:00.000Z",
+  "updatedAt": "2026-10-06T18:30:13.184Z",
+  "nextCheck": "2026-10-06T19:00:00.000Z",
   "alertLevel": "watch",
   "headline": "NHC gives the Southwestern Gulf of America disturbance a 100% chance of forming within 7 days (100% within 48 hours). No advisories or forecast track yet.",
   "gulf": {
@@ -10,7 +10,7 @@
     "formation7d": 100,
     "source": "NHC outlook, 200 PM EDT Tue Oct 6 2026",
     "invest": "Invest 92L",
-    "winds": 25
+    "winds": 30
   },
   "storms": [],
   "watchesWarnings": {
