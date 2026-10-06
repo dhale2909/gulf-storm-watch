@@ -172,17 +172,6 @@ const inGulf = (p) =>
   (p.lat >= 21.5 && p.lat <= 31 && p.lonW >= 81 && p.lonW <= 98) ||
   (p.lat >= 18 && p.lat < 21.5 && p.lonW >= 90 && p.lonW <= 98); // Bay of Campeche
 
-// At or inland of the Louisiana-to-Florida Gulf coast.
-const coastHit = (p) =>
-  (p.lat >= 28.5 && p.lat <= 36 && p.lonW >= 82 && p.lonW <= 93.9) ||
-  (p.lat >= 24.3 && p.lat < 28.5 && p.lonW >= 80.8 && p.lonW <= 83.3); // FL west coast / Keys
-
-const coastState = (p) => (p.lonW > 89.5 ? 'LA' : p.lonW > 88.4 ? 'MS' : p.lonW > 87.5 ? 'AL' : 'FL');
-// Observed landfall: the center is at or inland of the coastline (rough per-stretch latitudes; "about").
-const ashore = (p) => coastHit(p) && (
-  (p.lat >= 28.5 && p.lat >= (p.lonW > 89.5 ? 29.5 : p.lonW > 87.5 ? 30.3 : p.lonW > 84 ? 30.1 : 29.0)) ||
-  (p.lat < 28.5 && p.lonW <= 82.0));
-
 const mph = (kt) => Math.round((+kt || 0) * 1.15078 / 5) * 5; // NHC public advisories round mph to the nearest 5
 // Nearest coastal town to a landfall point, for a more specific "near ..." than the state alone.
 const TOWNS = [
@@ -195,30 +184,56 @@ const TOWNS = [
   ['Tarpon Springs, FL', 28.15, 82.76], ['Tampa, FL', 27.95, 82.46], ['St. Petersburg, FL', 27.77, 82.64], ['Sarasota, FL', 27.34, 82.53],
   ['Fort Myers, FL', 26.64, 81.87], ['Naples, FL', 26.14, 81.80], ['Marco Island, FL', 25.94, 81.72], ['Key West, FL', 24.56, 81.78],
 ];
-// Rough coastline: latitude of the northern Gulf coast by longitude, and longitude of Florida's west coast by latitude.
+// One coastline for every landfall question (forecast crossing, observed landfall, state): a rough polyline of the
+// Louisiana-to-Florida Gulf shore. COAST_N is latitude by longitude along the northern coast; COAST_W is longitude
+// by latitude down Florida's west coast. Land is north of COAST_N and east of COAST_W.
 const COAST_N = [[94.5, 29.6], [93.5, 29.7], [92.0, 29.6], [91.3, 29.3], [90.5, 29.2], [89.9, 29.1], [89.4, 29.0], [89.1, 30.2], [88.6, 30.3], [88.0, 30.2], [87.5, 30.25], [86.5, 30.35], [85.7, 30.1], [85.3, 29.8], [84.9, 29.7], [84.3, 30.0], [83.6, 29.9], [83.1, 29.2], [82.8, 28.8]];
 const COAST_W = [[28.8, 82.8], [28.1, 82.8], [27.6, 82.75], [27.0, 82.45], [26.4, 81.95], [25.9, 81.7], [25.2, 81.1]];
+const COAST = [...COAST_N.map(([lonW, lat]) => ({ lonW, lat })), ...COAST_W.slice(1).map(([lat, lonW]) => ({ lonW, lat }))]; // one polyline, west to south
 const interp = (table, x) => { for (let i = 1; i < table.length; i++) { const [x0, y0] = table[i - 1], [x1, y1] = table[i]; if ((x <= x0 && x >= x1) || (x >= x0 && x <= x1)) return y0 + (y1 - y0) * (x - x0) / (x1 - x0); } return null; };
 const coastLat = (lonW) => interp(COAST_N, lonW);
 const coastLonW = (lat) => interp(COAST_W, lat);
-// Where the forecast path meets the coast: the crossing point on the segment that reaches it, with its time
-// interpolated, or the first point inside the coast box if no clean crossing is found.
+// On or inland of that coastline, within the four states (Texas and points far inland are out of scope).
+const coastHit = (p) => {
+  if (p.lat > 36 || p.lat < 24.3 || p.lonW < 80.8 || p.lonW > 93.9) return false;
+  const cl = coastLat(p.lonW);
+  if (cl != null && p.lat >= 28.8) return p.lat >= cl; // northern coast
+  const cw = coastLonW(p.lat);
+  if (cw != null) return p.lonW <= cw; // Florida's west coast
+  if (p.lat >= 28.8) return p.lonW < 82.8; // inland Florida / Georgia, east of where the tables meet
+  return p.lonW <= 82.0; // the Keys
+};
+// Observed landfall: the centre is on or inland of the coastline.
+const ashore = coastHit;
+// State at a coastal point, from the same shoreline: the state lines along the coast, with the Mississippi delta
+// (Louisiana) reaching east of the Mississippi shore's longitude.
+const coastState = (p) => (p.lonW > 89.6 || (p.lonW > 88.9 && p.lat < 30.05) ? 'LA' : p.lonW > 88.4 ? 'MS' : p.lonW > 87.5 ? 'AL' : 'FL');
+// Where a forecast leg (a -> b) meets a coastline segment (c -> d): fraction along the leg, or null.
+function legCrossing(a, b, c, d) {
+  const r = { x: b.lonW - a.lonW, y: b.lat - a.lat }, s = { x: d.lonW - c.lonW, y: d.lat - c.lat };
+  const den = r.x * s.y - r.y * s.x;
+  if (Math.abs(den) < 1e-12) return null; // parallel
+  const qp = { x: c.lonW - a.lonW, y: c.lat - a.lat };
+  const t = (qp.x * s.y - qp.y * s.x) / den, u = (qp.x * r.y - qp.y * r.x) / den;
+  return t >= 0 && t <= 1 && u >= 0 && u <= 1 ? t : null;
+}
+// Where the forecast path meets the coast: the first sea-to-land crossing of the coastline along the path, with
+// its time interpolated along that leg; or, if no clean crossing is found, the first point inside the coast.
 function landfallPoint(path) {
-  // First: a clean crossing of the coastline anywhere along the path (the coast box alone is generous near the delta).
   for (let i = 1; i < path.length; i++) {
     const a = path[i - 1], b = path[i];
-    if (!a.t || !b.t) continue;
-    const cl = coastLat(b.lonW), cw = coastLonW(b.lat);
-    let f = null;
-    if (cl != null && a.lat < cl && b.lat >= cl) f = (cl - a.lat) / (b.lat - a.lat);
-    else if (cw != null && a.lonW > cw && b.lonW <= cw) f = (a.lonW - cw) / (a.lonW - b.lonW);
-    if (f != null && f >= 0 && f <= 1) {
-      const lat = a.lat + (b.lat - a.lat) * f, lonW = a.lonW + (b.lonW - a.lonW) * f;
-      const t = new Date(new Date(a.t).getTime() + (new Date(b.t).getTime() - new Date(a.t).getTime()) * f).toISOString();
-      if (coastHit({ lat, lonW })) return { lat, lonW, t, crossing: true };
+    if (!a.t || !b.t || coastHit(a)) continue; // must start at sea
+    let best = null;
+    for (let k = 1; k < COAST.length; k++) {
+      const f = legCrossing(a, b, COAST[k - 1], COAST[k]);
+      if (f != null && (best == null || f < best)) best = f;
     }
+    if (best == null) continue;
+    const lat = a.lat + (b.lat - a.lat) * best, lonW = a.lonW + (b.lonW - a.lonW) * best;
+    const t = new Date(new Date(a.t).getTime() + (new Date(b.t).getTime() - new Date(a.t).getTime()) * best).toISOString();
+    if (lonW <= 93.9 && lonW >= 80.8) return { lat, lonW, t, crossing: true };
   }
-  // Otherwise: the first forecast point inside the coast box (e.g. the path ends in Mobile Bay).
+  // Otherwise: the first forecast point inside the coast (e.g. the path ends in Mobile Bay).
   const b = path.find(coastHit);
   return b ? { lat: b.lat, lonW: b.lonW, t: b.t, crossing: false } : null;
 }
@@ -309,7 +324,7 @@ export async function gatherAlerts(prior, gulfStorm) {
 }
 
 // Map layers from NOAA's tropical map service, as one GeoJSON collection tagged by role.
-// Storm stage: cone, forecast track and points, past track, coastal watch/warning lines.
+// Storm stage: forecast track and points, past track, coastal watch/warning lines (no cone; see the page).
 // Disturbance stage: NHC's 7-day development area, current location, and motion arrow.
 const MAPSRV = 'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer';
 
@@ -334,11 +349,11 @@ export async function gatherMap(gulf, storm) {
   const features = [];
   if (storm && /^AT[1-5]$/.test(storm.bin || '')) {
     const base = 4 + 26 * (+storm.bin[2] - 1);
-    const { lists: [pts, track, cone, ww, past], failed } = await layers([[base + 2, 'points'], [base + 3, 'track'], [base + 4, 'cone'], [base + 5, 'ww'], [base + 8, 'past']]);
-    if (failed.length === 5) throw new Error('all storm map layers unavailable');
+    // The cone is not fetched: the page draws the spread of model tracks as the uncertainty instead.
+    const { lists: [pts, track, ww, past], failed } = await layers([[base + 2, 'points'], [base + 3, 'track'], [base + 5, 'ww'], [base + 8, 'past']]);
+    if (failed.length === 4) throw new Error('all storm map layers unavailable');
     const adv = pts[0]?.properties.advisnum;
     past.forEach((f) => features.push(feat(f, 'past')));
-    cone.forEach((f) => features.push(feat(f, 'cone')));
     track.forEach((f) => features.push(feat(f, 'track')));
     ww.filter((f) => f.properties.advisnum === adv).forEach((f) => features.push(feat(f, 'ww', { kind: f.properties.tcww })));
     pts.forEach((f) => features.push(feat(f, 'point', {

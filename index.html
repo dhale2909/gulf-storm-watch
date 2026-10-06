@@ -100,6 +100,10 @@ a{color:var(--accent)}
 .legend i{display:inline-block;width:18px;height:10px;border-radius:2px;margin-right:6px;vertical-align:baseline}
 .legend i.ln{height:0;border-top:3px solid;border-radius:0;vertical-align:middle}
 .map-note{font-size:13px;color:var(--muted);max-width:80ch}
+.wlbox{background:none;border:0}
+.wl{display:inline-block;font:700 11px/1 var(--mono);padding:3px 6px;border-radius:999px;background:#0f1a24;color:#fff;border:1.5px solid #fff;white-space:nowrap;transform:translate(-50%,-50%);box-shadow:0 1px 3px rgba(0,0,0,.5)}
+.wl.hu{background:#b3261e}
+.wl.lg{transform:none;margin-right:6px;vertical-align:middle}
 .leaflet-tooltip.pt{font:500 12px var(--body);padding:3px 8px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;box-shadow:none}
 .leaflet-tooltip.pt:before{display:none}
 .xmark{font:700 20px/20px var(--display);color:var(--landfall);text-align:center;text-shadow:0 0 3px var(--panel),0 0 3px var(--panel)}
@@ -541,7 +545,7 @@ body.card .leaflet-control-container{display:none}
     var off={model:true,ens:true,ecens_m:true,ecaie_m:true}; try{ if(!CARD) off=JSON.parse(localStorage.getItem("gsw-layers-off-3"))||off; }catch(e){} // default: official layers, averages, Google and Euro typical paths
     var overlays={}, names={};
     var add=function(key,label,g){ names[label]=key; overlays[label]=g; if(!off[key]) g.addTo(map); return g; };
-    group=add("official","NHC official (area, track, cone, alerts)",L.featureGroup());
+    group=add("official","NHC official (area, track, alerts)",L.featureGroup());
     ["model","consensus","google","ens"].forEach(function(k){ modelGroups[k]=add(k,MODEL[k][3],L.layerGroup()); });
     Object.keys(EC).forEach(function(k){ ecGroups[k]=add(k,EC[k][2]+": typical path and swath",L.layerGroup()); ecGroups[k+"_m"]=add(k+"_m",EC[k][2]+": all member lines",L.layerGroup()); });
     L.control.layers(null,overlays,{collapsed:true}).addTo(map);
@@ -561,14 +565,19 @@ body.card .leaflet-control-container{display:none}
       else if(r==="area"){ risk=p.risk; l=L.geoJSON(f,{style:{color:RISK[p.risk]||RISK.Medium,weight:2*K,dashArray:CARD?"14 10":"6 4",fillOpacity:.28}}).bindTooltip("Where NHC expects development: "+esc(p.prob7)+" within 7 days",{sticky:true}); }
       else if(r==="motion") l=L.geoJSON(f,{style:{color:RISK[risk]||RISK.Medium,weight:3*K}});
       else if(r==="origin") l=L.marker([c[1],c[0]],{icon:L.divIcon({className:"xmark",html:"&#10005;",iconSize:CARD?[56,56]:[20,20]})}).bindTooltip("Disturbance now: "+esc(p.prob2)+" in 48 hours, "+esc(p.prob7)+" in 7 days");
-      else if(r==="cone") l=L.geoJSON(f,{style:{color:"#cfd8df",weight:1.2*K,fillColor:"#cfd8df",fillOpacity:.18,dashArray:CARD?"":"4 4"}}).bindTooltip("Forecast cone: probable path of the storm center",{sticky:true});
+      else if(r==="cone") l=null; // not drawn: the spread of model tracks shows the uncertainty without covering them
       else if(r==="track") l=L.geoJSON(f,{style:{color:"#fff",weight:3*K,opacity:.95}});
       else if(r==="past"){ hasPast=true; l=L.geoJSON(f,{style:{color:fg,weight:1.6*K,opacity:.85,dashArray:CARD?"2 12":"1 6",lineCap:"round"}}); }
       else if(r==="pastpt"&&p.now){ hasNow=true; l=L.circleMarker([c[1],c[0]],{radius:7*(CARD?2:1),color:"#fff",weight:2*(CARD?2:1),fillColor:"#f05b52",fillOpacity:1}).bindTooltip("Position at "+fmt(p.t)+" \u00b7 "+esc(mph(p.wind))+" mph winds"); }
       else if(r==="pastpt"){ hasPast=true; l=L.circleMarker([c[1],c[0]],{radius:2.6*(CARD?2:1),color:fg,weight:1,fillColor:fg,fillOpacity:.9}).bindTooltip("Was here "+fmt(p.t)+" \u00b7 "+esc(mph(p.wind))+" mph"); }
       else if(r==="ww"){ kinds[p.kind]=1; l=L.geoJSON(f,{style:{color:(WW[p.kind]||["#888"])[0],weight:6*K,lineCap:"butt"}}).bindTooltip((WW[p.kind]||[0,"Coastal alert"])[1],{sticky:true}); }
-      else if(r==="point") l=L.circleMarker([c[1],c[0]],{radius:(p.now?9:6.5)*(CARD?2:1),color:"#fff",weight:(p.now?3:2)*(CARD?2:1),fillColor:p.wind!=null?windColor(+p.wind||0):muted,fillOpacity:1})
-        .bindTooltip((p.now?"Now":esc(p.label))+(p.wind!=null?" \u00b7 "+esc(mph(p.wind))+" mph":"")+(p.type?" \u00b7 "+esc(p.type):""),{direction:"top",offset:[0,-8],className:"pt"});
+      else if(r==="point"){ var kt=p.wind!=null?+p.wind:null, cat=kt==null?0:kt>=137?5:kt>=113?4:kt>=96?3:kt>=83?2:kt>=64?1:0;
+        var txt=kt!=null?(cat?"Cat "+cat+" \u00b7 ":"")+mph(kt):esc(p.label);
+        // The current position is a plain marker (its wind is in the tile); forecast positions carry their wind label.
+        l=p.now?L.circleMarker([c[1],c[0]],{radius:7*(CARD?2:1),color:"#fff",weight:2*(CARD?2:1),fillColor:"#f05b52",fillOpacity:1})
+          :L.marker([c[1],c[0]],{icon:L.divIcon({className:"wlbox",iconSize:[0,0],html:'<span class="wl'+(cat?' hu':'')+'"'+(CARD?' style="font-size:24px;padding:5px 12px;border-width:3px"':'')+'>'+txt+'</span>'}),zIndexOffset:cat*10});
+        l
+        .bindTooltip((p.now?"Now":esc(p.label))+(kt!=null?" \u00b7 "+esc(mph(kt))+" mph":"")+(p.type?" \u00b7 "+esc(p.type):""),{direction:"top",offset:[0,-14],className:"pt"}); }
       if(l) (r==="model"?(modelGroups[p.group]||modelGroups.model):group).addLayer(l);
     });
     var b=L.latLngBounds([[24,-94],[31,-81]]); if(group.getLayers().length) b.extend(group.getBounds());
@@ -581,11 +590,11 @@ body.card .leaflet-control-container{display:none}
     $("map-title").textContent=kind==="storm"?"Forecast track: "+m.name:kind==="outlook"?(hasModels?"Development area and model tracks":"Development area"):"Storm map";
     $("map-src").textContent=(m&&m.source)||"NHC";
     $("map-legend").innerHTML=kind==="storm"
-      ? WIND.slice().reverse().map(function(w){return sw(w[1],w[2])}).join("")+sw(fg,"Forecast track",1)+sw(muted,"Cone / past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")+modelLegend
+      ? '<span><i class="wl lg">45</i>Forecast wind, mph (Cat = hurricane category)</span>'+sw(fg,"NHC forecast track",1)+sw(muted,"Past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")+modelLegend
       : kind==="outlook" ? sw(RISK[risk]||RISK.Medium,"7-day development area")+(hasNow?'<span><b style="color:var(--landfall)">&#9679;</b> Latest position</span>':'<span><b style="color:var(--landfall)">&#10005;</b> Disturbance now</span>')+(hasPast?sw(fg,"Where it has been",1):"")+modelLegend : "";
     $("map-note").textContent=kind==="storm"
-      ? "Dots are NHC forecast positions of the storm center with time and wind. The cone shows where the center will probably track; wind, surge and rain reach well outside it."
-      : kind==="outlook" ? "NHC has not issued a forecast track yet. The shaded area is where it expects the system to develop over the next 7 days; the track, cone and any coastal watches appear here automatically once a depression forms."
+      ? "Labels are NHC forecast positions of the storm center with the expected wind in mph; hover or tap one for the time. The spread of the model tracks shows how uncertain the path is; wind, surge and rain reach well outside the center's line."
+      : kind==="outlook" ? "NHC has not issued a forecast track yet. The shaded area is where it expects the system to develop over the next 7 days; the track and any coastal watches appear here automatically once a depression forms."
       : (m&&m.unavailable) ? "The map could not be loaded just now; it will retry on the next refresh." : "No Gulf system to map.";
     if(hasModels) $("map-note").textContent+=" Thin coloured lines are raw computer-model runs ("+(m.models||"NHC model guidance")+"). They are not a forecast, they disagree with each other, and they shift from run to run; hover or tap a line for the model name. Switch each group on or off with the layers button on the map.";
     else if(kind==="outlook") $("map-note").textContent+=" Model tracks will be drawn here once NHC designates the system as an Invest and starts publishing guidance for it.";

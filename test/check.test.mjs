@@ -28,7 +28,7 @@ const chances = '* Formation chance through 48 hours...high...70 percent.\n* For
 const FEED = 'https://www.nhc.noaa.gov/CurrentStorms.json', TWO = 'https://www.nhc.noaa.gov/text/MIATWOAT.shtml';
 const alertsURL = (s) => `https://api.weather.gov/alerts/active?area=${s}`;
 const storm = (extra = {}) => ({ id: 'al012026', name: 'Test', classification: 'TS', intensity: '50', latitudeNumeric: 20, longitudeNumeric: -85, movementDir: 20, movementSpeed: 8, lastUpdate: '2026-10-08T15:00:00Z', forecastAdvisory: { url: 'https://fixture.invalid/tcm', issuance: '2026-10-08T15:00:00Z', advNum: '3' }, ...extra });
-const TCM = '<pre>FORECAST VALID 09/1200Z 25.0N 88.0W\nFORECAST VALID 10/1200Z 30.0N 88.0W</pre>';
+const TCM = '<pre>FORECAST VALID 09/1200Z 25.0N 88.0W\nFORECAST VALID 10/1200Z 31.0N 88.0W</pre>'; // ends inland of the Alabama coast (30.2N at 88W)
 
 beforeEach(() => { responses = {}; calls = []; });
 
@@ -241,7 +241,7 @@ test('storm map falls back to the text advisory track when the map service has n
   const [st] = await m.gatherStorms(state());
   assert.equal(st.forecast.length, 2);
   const MAPSRV = 'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer';
-  for (const id of [6, 7, 8, 9, 12]) responses[`${MAPSRV}/${id}/query?where=1%3D1&outFields=*&f=geojson&geometryPrecision=2`] = { features: [] };
+  for (const id of [6, 7, 9, 12]) responses[`${MAPSRV}/${id}/query?where=1%3D1&outFields=*&f=geojson&geometryPrecision=2`] = { features: [] };
   const map = await m.gatherMap(null, { ...st, bin: 'AT1' });
   const roles = map.features.map((f) => f.properties.role);
   assert.ok(roles.includes('track') && roles.filter((r) => r === 'point').length === 3, 'track line plus now + 2 forecast points');
@@ -262,8 +262,7 @@ test('landfall uses the coast crossing: nearest town and interpolated time, not 
 // These assert desired behavior. Known failures are TODOs rather than skipped tests:
 // they execute on every npm test run and document defects pending owner/implementer fixes.
 // No production code, live requests, credentials, or alert policies are changed here.
-// gap(): still open, by owner decision (coastline geometry is a proposal; see STORM-REVIEW-2.md R7/R8). fixed(): a regression test now.
-const gap = (id, name, fn) => test(`${id}: ${name}`, { todo: 'Open: coastline geometry proposal (STORM-REVIEW-2.md R7/R8) awaiting owner decision' }, fn);
+// Every follow-up finding is fixed (the coastline geometry on the owner's decision, Oct 6 night); these are regression tests.
 const fixed = (id, name, fn) => test(`${id}: ${name}`, fn);
 const quietOutlook = () => pre('Tropical cyclone formation is not expected during the next 7 days.');
 const forecastStorm = (extra = {}) => ({ id: 'al012026', name: 'Tropical Storm Test', type: 'Tropical Storm', winds: 50, tropical: true, location: 'Gulf', movement: 'N at 5 mph', gulfRisk: 'Forecast', ...extra });
@@ -346,7 +345,7 @@ fixed('R6', 'a different primary storm must not inherit the old Invest identity 
   assert.equal(d.tracked.stormId, 'al032026'); assert.equal(d.google, null); assert.equal(d.tracked.invest, null);
 });
 
-gap('R7', 'an offshore position south of the configured coastline is not observed landfall', async () => {
+fixed('R7', 'an offshore position south of the configured coastline is not observed landfall', async () => {
   // COAST_N explicitly puts the coast at 29.6N at 92W; 29.55N is seaward of that line.
   responses[FEED] = { activeStorms: [storm({ latitudeNumeric: 29.55, longitudeNumeric: -92 })] };
   responses['https://fixture.invalid/tcm'] = '<pre>FORECAST VALID 09/1200Z 30.5N 92.0W</pre>';
@@ -364,7 +363,7 @@ fixed('R7', 'landfall occurrence uses observation time, not the polling time', (
   assert.equal(d.landfallOccurred.at, '2026-10-08T12:00:00Z');
 });
 
-gap('R8', 'oblique crossing solves the path against coastline segments, not the endpoint latitude', async () => {
+fixed('R8', 'oblique crossing solves the path against coastline segments, not the endpoint latitude', async () => {
   responses[FEED] = { activeStorms: [storm({ latitudeNumeric: 28, longitudeNumeric: -92, lastUpdate: '2026-10-08T12:00:00Z' })] };
   responses['https://fixture.invalid/tcm'] = '<pre>FORECAST VALID 09/1200Z 31.0N 84.0W</pre>';
   // At the intersection: lonW=92-8f, lat=28+3f. COAST_N segment
@@ -375,7 +374,7 @@ gap('R8', 'oblique crossing solves the path against coastline segments, not the 
   assert.ok(Math.abs(got - expected) < 1000, `crossing differs by ${Math.round((got - expected) / 60000)} min`);
 });
 
-gap('R8', 'nearest-town state and announced landfall state agree at the Louisiana delta', async () => {
+fixed('R8', 'nearest-town state and announced landfall state agree at the Louisiana delta', async () => {
   responses[FEED] = { activeStorms: [storm({ latitudeNumeric: 28, longitudeNumeric: -89.35 })] };
   responses['https://fixture.invalid/tcm'] = '<pre>FORECAST VALID 09/1200Z 29.5N 89.3W</pre>';
   const lf = (await m.gatherStorms(state()))[0].landfall;
@@ -384,8 +383,8 @@ gap('R8', 'nearest-town state and announced landfall state agree at the Louisian
 
 fixed('R9', 'text-advisory fallback survives a failing map layer, not only an empty layer', async () => {
   const MAP = 'https://mapservices.weather.noaa.gov/tropical/rest/services/tropical/NHC_tropical_weather/MapServer';
-  for (const id of [6,7,8,9,12]) responses[`${MAP}/${id}/query?where=1%3D1&outFields=*&f=geojson&geometryPrecision=2`] = { features: [] };
-  responses[`${MAP}/8/query?where=1%3D1&outFields=*&f=geojson&geometryPrecision=2`] = new Error('fixture cone unavailable');
+  for (const id of [6,7,9,12]) responses[`${MAP}/${id}/query?where=1%3D1&outFields=*&f=geojson&geometryPrecision=2`] = { features: [] };
+  responses[`${MAP}/7/query?where=1%3D1&outFields=*&f=geojson&geometryPrecision=2`] = new Error('fixture track layer unavailable');
   const map = await m.gatherMap(null, forecastStorm({ bin: 'AT1', pos: { lat: 25, lonW: 88 }, forecast: [{t:'2026-10-09T12:00:00Z', lat:30, lonW:88}] }));
   assert.ok(map.features.some((f) => f.properties.role === 'track'));
 });
