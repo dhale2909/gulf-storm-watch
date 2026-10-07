@@ -43,7 +43,7 @@ Levels: quiet / watch / threat / landfall (see `build()` in check.mjs). Alert on
 formation odds crossing 40 or 60, or moving 20+ points since the last alert; a Gulf storm forming/entering/
 dissipating; type or category change; tropical watch/warning posted or dropped for AL/FL/MS/LA; forecast landfall
 state change or timing shift >= 12 h; Invest designation; NHC unreachable twice in a row. Smaller moves are logged
-as "update". Channels: private ntfy topic (with business "play" text from a secret), public ntfy topic, browser push.
+as "update". Channels: private ntfy topic (with business "play" text from a secret) and browser push. The public ntfy topic was retired on Oct 7 2026.
 
 ## Known weak points / open questions
 - Geography is rough boxes (`inGulf`, `coastHit`, `coastState`); Florida west coast vs panhandle is crude.
@@ -54,7 +54,7 @@ as "update". Channels: private ntfy topic (with business "play" text from a secr
 - Everything in `data/` is regenerated hourly; `card.png` and `index.html` (og:image stamp) are committed hourly too.
 
 ## Running locally
-    npm ci && node check.mjs            # needs env: NTFY_TOPIC, PUBLIC_NTFY_TOPIC, PLAYS_JSON, PAGE_URL,
+    npm ci && node check.mjs            # needs env: NTFY_TOPIC, PLAYS_JSON, PAGE_URL,
                                         # PUSH_API, PUSH_ADMIN_KEY, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY (all optional;
                                         # without them it just prints what it would send)
     FIXTURES=dir NOW=2026-10-08T15:00:00Z node check.mjs   # offline: reads two.html, storms.json, tcm-<id>.html,
@@ -174,8 +174,9 @@ findings. The fixed ones below each have a regression test named by its F-number
 
 Approved by the owner and done (Oct 7): F8 (while a storm is tracked, only the entry tagged with its Invest is that
 system; another designated Invest at 40%+ is announced once, tied to that storm; other entries are listed in the Gulf
-outlook panel), F7 (the outage notice follows the stage's own source), F44 code (optional NTFY_TOKEN and
-PUBLIC_NTFY_TOKEN publish tokens; reserving the public topic on ntfy.sh is the owner's account step).
+outlook panel), F7 (the outage notice follows the stage's own source), F44 (the owner retired the public ntfy
+feed instead of reserving it: the page no longer offers it and the check no longer posts to it; NTFY_TOKEN remains as an
+optional publish token for the private topic).
 
 Open, for the owner (not implemented): alert-rule and geometry proposals F19, F31, F88 (an untagged 40%+ entry beside a
 storm is listed, not announced), F102, F107; the Euro script's own coast boxes (F68); the R6-related Invest gate (F20,

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Gulf Storm Watch: one check of NHC/NWS data for the Gulf system.
 // Reads data/status.json (prior state), writes data/status.json + data/log.json,
-// and pushes a notification through ntfy only when the picture changes.
+// and sends alerts only when the picture changes: the owner's private ntfy topic and browser notifications.
 //
-// Env: NTFY_TOPIC (private push target), PUBLIC_NTFY_TOPIC (public feed: same changes, no play text), PLAYS_JSON (optional {"watch":"...",...} action text
+// Env: NTFY_TOPIC (private push target), PLAYS_JSON (optional {"watch":"...",...} action text
 // added to notifications), PAGE_URL (link opened from the notification),
 // TEST_NOTIFY=1 (send a test push), FIXTURES=dir + NOW=iso (offline testing).
 
@@ -825,8 +825,8 @@ function minorDiff(prior, cur) {
 
 // ---------- output ----------
 
-// A reserved ntfy topic needs a publish token (sent as a Bearer header, never logged): NTFY_TOKEN for the private topic,
-// PUBLIC_NTFY_TOKEN for the public one, so nobody else can post to it (approved Oct 7 2026, review F44).
+// A reserved ntfy topic needs a publish token (sent as a Bearer header, never logged): NTFY_TOKEN for the private topic.
+// The public ntfy feed was retired by the owner on Oct 7 2026: public subscribers use browser notifications only.
 async function notify(title, message, level, topic = process.env.NTFY_TOPIC, token = process.env.NTFY_TOKEN) {
   if (!title) return true; // nothing to send on this channel
   // Not configured: nothing to retry. The body can carry the owner's private text, so it is never printed (Actions logs are public).
@@ -901,7 +901,7 @@ async function pushBrowsers(title, body, only = null) {
 
 // The alert text is built from public weather facts (the same ones the page shows). The private channel adds
 // the owner's action text from PLAYS_JSON at send time only, so it is never written to a file.
-const CHANNELS = ['private', 'browser', 'public'];
+const CHANNELS = ['private', 'browser']; // the public ntfy feed was retired Oct 7 2026; an old pending "public" retry is dropped
 export function composeMessage(ev) {
   const plays = (() => { try { return JSON.parse(process.env.PLAYS_JSON || '{}'); } catch { return {}; } })();
   const play = plays[ev.level] ? `\n\nPlay: ${plays[ev.level]}` : '';
@@ -910,7 +910,7 @@ export function composeMessage(ev) {
   return {
     level: ev.level,
     privateTitle: `Gulf Storm Watch: ${LEVEL_LABEL[ev.level]}`, privateBody: `${body}${goog}${play}`,
-    // Public subscribers get the same change, weather facts only: browser notifications and the public ntfy feed.
+    // Public subscribers (browser notifications) get the same change, weather facts only.
     publicTitle: `Daniel's Storm Page: ${LEVEL_LABEL[ev.level]}`, publicBody: body,
   };
 }
@@ -919,7 +919,7 @@ export function composeMessage(ev) {
 // failing never stops the others or the save. Returns per channel: true (delivered), false (failed, retry),
 // null (not configured / nobody to send to); browserFailed lists the devices a retry should target.
 export async function deliver(msg, { channels = CHANNELS, browserOnly = null } = {}) {
-  const r = { private: null, public: null, browser: null, browserFailed: [] };
+  const r = { private: null, browser: null, browserFailed: [] };
   if (channels.includes('private')) { try { r.private = await notify(msg.privateTitle, msg.privateBody, msg.level); } catch (e) { r.private = false; console.warn(`private push failed: ${e.message}`); } }
   if (channels.includes('browser')) {
     try {
@@ -928,7 +928,6 @@ export async function deliver(msg, { channels = CHANNELS, browserOnly = null } =
       r.browserFailed = b.failed;
     } catch (e) { r.browser = false; r.browserFailed = browserOnly || null; console.warn(`browser push failed: ${e.message}`); } // null: retry every device
   }
-  if (channels.includes('public') && process.env.PUBLIC_NTFY_TOPIC) { try { r.public = await notify(msg.publicTitle, msg.publicBody, msg.level, process.env.PUBLIC_NTFY_TOPIC, process.env.PUBLIC_NTFY_TOKEN || null); } catch (e) { r.public = false; console.warn(`public push failed: ${e.message}`); } }
   return r;
 }
 const PENDING_ATTEMPTS = 3;

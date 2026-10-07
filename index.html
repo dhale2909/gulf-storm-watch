@@ -191,12 +191,6 @@ body.card .leaflet-control-container{display:none}
   <div id="push-ios" class="sub" hidden><b>iPhone and iPad:</b> first add this page to your Home Screen: tap the Share button, then <b>Add to Home Screen</b>. Open it from the Home Screen and tap the button below there. Apple only allows notifications from pages on the Home Screen.</div>
   <p><button class="share go" id="push-on" type="button">Turn on notifications</button> <button class="share" id="push-test" type="button" hidden>Send me a test</button> <button class="share" id="push-off" type="button" hidden>Turn off</button></p>
   <p class="sub" id="push-msg"></p>
-  <details><summary class="sub">Prefer the ntfy app instead?</summary>
-    <ol class="sub">
-      <li>Install the free <b>ntfy</b> app: <a href="https://apps.apple.com/us/app/ntfy/id1625396347" target="_blank" rel="noopener">iPhone</a> or <a href="https://play.google.com/store/apps/details?id=io.heckel.ntfy" target="_blank" rel="noopener">Android</a>.</li>
-      <li>Then tap <a href="ntfy://ntfy.sh/daniels-storm-page">Subscribe in ntfy</a>, or add the topic <b class="mono">daniels-storm-page</b> in the app.</li>
-    </ol>
-  </details>
   <p class="sub">Automated alerts from public NHC and NWS data. Not an official warning service; follow local officials for decisions.</p>
   <form method="dialog"><button class="share" type="submit">Close</button></form>
 </dialog>
@@ -452,7 +446,7 @@ body.card .leaflet-control-container{display:none}
   async function pushEnable(){
     // iPhone Safari outside the Home Screen exposes no push support at all, so this comes first.
     if(IOS&&!STANDALONE){ $("push-ios").hidden=false; pmsg("Add the page to your Home Screen first (steps above), then tap this button from there."); return; }
-    if(!pushOK){ pmsg("This browser can't show notifications. Use the ntfy option below instead."); return; }
+    if(!pushOK){ pmsg("This browser can't show notifications. Try Safari on iPhone (from the Home Screen), or Chrome, Edge or Firefox."); return; }
     try{
       pmsg("Asking for permission\u2026");
       var reg=await navigator.serviceWorker.register("sw.js"); await navigator.serviceWorker.ready;
@@ -462,7 +456,7 @@ body.card .leaflet-control-container{display:none}
       var r=await fetch(PUSH_API+"/subscribe",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(sub)});
       if(!r.ok) throw new Error("registration failed");
       pushState(true); pmsg("Alerts are on for this device."); try{ localStorage.setItem("gsw-push-sync",String(Date.now())); }catch(e){}
-    }catch(e){ pmsg("Couldn't turn on notifications ("+(e&&e.message||e)+"). Try again, or use the ntfy option below."); }
+    }catch(e){ pmsg("Couldn't turn on notifications ("+(e&&e.message||e)+"). Try again in a moment."); }
   }
   async function pushDisable(){
     try{ var reg=await navigator.serviceWorker.getRegistration("sw.js"); var sub=reg&&await reg.pushManager.getSubscription();
@@ -481,7 +475,6 @@ body.card .leaflet-control-container{display:none}
     }).catch(function(){}); })();
   // A link ending in ?alerts=1 (the invite text) opens the Get alerts steps straight away.
   if(/[?&]alerts=1/.test(location.search)&&!CARD) setTimeout(function(){ $("alerts").click(); },600);
-  document.querySelectorAll('a[href^="ntfy://"]').forEach(function(a){ a.addEventListener("click",function(){ hit("ntfy-tap"); }); });
   $("alerts").addEventListener("click",function(){ hit("alerts-open");
     var on=false; try{ on=localStorage.getItem("gsw-push")==="1"; }catch(e){}
     if(IOS&&!STANDALONE) $("push-ios").hidden=false;

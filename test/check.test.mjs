@@ -131,15 +131,15 @@ test('B6: a failed private push is retried on the next run instead of being cons
   assert.equal(d.internal.pending, null);
   delete process.env.NTFY_TOPIC;
 });
-test('B6: a private-channel exception does not stop the public send or the save', async () => {
-  process.env.NTFY_TOPIC = 'fixture-private'; process.env.PUBLIC_NTFY_TOPIC = 'fixture-public';
+test('B6: a private-channel exception does not stop the save, and the retired public ntfy feed is never sent', async () => {
+  process.env.NTFY_TOPIC = 'fixture-private'; process.env.PUBLIC_NTFY_TOPIC = 'fixture-public'; // a leftover setting must do nothing
   const prior = state({ alertLevel: 'quiet', gulf: { formation7d: null, formation48: null } });
   let n = 0;
   const realFetch = globalThis.fetch;
   globalThis.fetch = async (url, o) => { if (String(url) === 'https://ntfy.sh/' && n++ === 0) throw new Error('fixture timeout'); return realFetch(url, o); };
   const d = await runMain(prior, { ntfy: 200 });
   globalThis.fetch = realFetch;
-  assert.equal(d.alertLevel, 'watch', 'state saved'); assert.equal(calls.filter((u) => u === 'https://ntfy.sh/').length, 1, 'public still sent (the private attempt threw before reaching the network)');
+  assert.equal(d.alertLevel, 'watch', 'state saved'); assert.equal(calls.filter((u) => u === 'https://ntfy.sh/').length, 0, 'nothing went to the public topic (the private attempt threw before reaching the network)');
   assert.deepEqual(d.internal.pending.failed, ['private']);
   delete process.env.NTFY_TOPIC; delete process.env.PUBLIC_NTFY_TOPIC;
 });
@@ -849,7 +849,7 @@ test("alert text: the owner's Play text and the Google line go only to the priva
     assert.doesNotMatch(msg.publicBody, /PLAY_SENTINEL|Google AI ensemble/);
     await m.deliver(msg);
     assert.match(sent.find((s) => s.topic === 'fixture-private').message, /PLAY_SENTINEL/);
-    assert.doesNotMatch(sent.find((s) => s.topic === 'fixture-public').message, /PLAY_SENTINEL/);
+    assert.deepEqual(sent.map((s) => s.topic), ['fixture-private'], 'only the private topic: the public ntfy feed is retired');
   } finally { globalThis.fetch = mock; for (const k of ['PLAYS_JSON', 'NTFY_TOPIC', 'PUBLIC_NTFY_TOPIC']) delete process.env[k]; }
 });
 test('the Google ensemble summary keeps only aggregate numbers, never member tracks', () => {
@@ -916,18 +916,16 @@ fixed('F7', "a storm-feed outage during a storm reaches the owner after two chec
     assert.equal(d.internal.downCount, 0);
   } finally { delete process.env.NTFY_TOPIC; }
 });
-fixed('F44', 'with a publish token set, the public ntfy feed is sent with it, and the private topic only with its own', async () => {
+fixed('F44', 'the public ntfy feed is retired (owner, Oct 7); the private topic carries its own token only', async () => {
   Object.assign(process.env, { NTFY_TOPIC: 'fixture-private', PUBLIC_NTFY_TOPIC: 'fixture-public', PUBLIC_NTFY_TOKEN: 'tk_fixture' });
   const sent = [], mock = globalThis.fetch;
   globalThis.fetch = async (u, o) => { if (String(u) === 'https://ntfy.sh/') { sent.push({ topic: JSON.parse(o.body).topic, auth: o.headers.Authorization }); return { ok: true, status: 200, json: async () => ({}) }; } return mock(u, o); };
   try {
     await m.deliver(m.composeMessage({ level: 'watch', changes: ['Fixture change'], headline: 'Fixture' }));
-    assert.equal(sent.find((s) => s.topic === 'fixture-public').auth, 'Bearer tk_fixture');
-    assert.equal(sent.find((s) => s.topic === 'fixture-private').auth, undefined);
-    // Only a private token set: it must never be sent to the public topic.
-    delete process.env.PUBLIC_NTFY_TOKEN; process.env.NTFY_TOKEN = 'tk_private_fixture'; sent.length = 0;
+    assert.deepEqual(sent.map((s) => s.topic), ['fixture-private'], 'leftover public settings send nothing');
+    assert.equal(sent[0].auth, undefined);
+    process.env.NTFY_TOKEN = 'tk_private_fixture'; sent.length = 0;
     await m.deliver(m.composeMessage({ level: 'watch', changes: ['Fixture change'], headline: 'Fixture' }));
-    assert.equal(sent.find((s) => s.topic === 'fixture-private').auth, 'Bearer tk_private_fixture');
-    assert.equal(sent.find((s) => s.topic === 'fixture-public').auth, undefined);
+    assert.deepEqual(sent, [{ topic: 'fixture-private', auth: 'Bearer tk_private_fixture' }]);
   } finally { globalThis.fetch = mock; for (const k of ['NTFY_TOPIC', 'PUBLIC_NTFY_TOPIC', 'PUBLIC_NTFY_TOKEN', 'NTFY_TOKEN']) delete process.env[k]; }
 });
