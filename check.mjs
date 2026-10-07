@@ -884,7 +884,8 @@ async function pushBrowsers(title, body, only = null) {
   // One stalled push service must not hold up the public feed or the save: a device still pending at the deadline counts
   // as failed, and the next check retries it.
   let timer;
-  await Promise.race([sends, new Promise((r) => { timer = setTimeout(r, Number(process.env.PUSH_DEADLINE_MS) || 60000); timer.unref?.(); })]);
+  // Not unref'd: the deadline must fire even when nothing else keeps the process alive. It is cleared right after.
+  await Promise.race([sends, new Promise((r) => { timer = setTimeout(r, Number(process.env.PUSH_DEADLINE_MS) || 60000); })]);
   clearTimeout(timer); done = true;
   for (const [k] of targets) if (!settled.has(k)) { out.failed.push(k); console.warn('browser push timed out for one device'); }
   out.failed = [...out.failed];
