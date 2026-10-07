@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-07T12:35:05.888Z",
-  "lastAttemptAt": "2026-10-07T12:35:05.888Z",
-  "nextCheck": "2026-10-07T13:05:00.000Z",
+  "updatedAt": "2026-10-07T13:05:14.727Z",
+  "lastAttemptAt": "2026-10-07T13:05:14.727Z",
+  "nextCheck": "2026-10-07T13:35:00.000Z",
   "alertLevel": "threat",
   "headline": "Tropical Storm Isaias: 40 mph, 22.0N 94.1W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Gulf Shores, AL around Fri, Oct 9, 11 PM CT (approximate).",
   "gulf": {
@@ -77,9 +77,9 @@
   ],
   "watchesWarnings": {
     "note": "",
-    "MS": {},
-    "FL": {},
     "LA": {},
+    "FL": {},
+    "MS": {},
     "AL": {}
   },
   "landfall": {
@@ -135,7 +135,7 @@
     "peakMedianKt": 106,
     "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 42, AL 7), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (34 major); typical peak 120 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-07T12:35:05.888Z"
+    "computedAt": "2026-10-07T13:05:14.727Z"
   },
   "discussion": {
     "storm": "al092026",
