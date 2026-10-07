@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-07T03:30:06.186Z",
-  "lastAttemptAt": "2026-10-07T03:30:06.186Z",
-  "nextCheck": "2026-10-07T04:00:00.000Z",
+  "updatedAt": "2026-10-07T03:40:14.579Z",
+  "lastAttemptAt": "2026-10-07T03:40:14.579Z",
+  "nextCheck": "2026-10-07T04:05:00.000Z",
   "alertLevel": "threat",
-  "headline": "Tropical Depression Nine: 35 mph, 22.1N 95.0W, Gulf, moving E at 6 mph. Forecast track reaches the coast near Pascagoula, MS around Sat, Oct 10, 1 AM CT (approximate).",
+  "headline": "Tropical Depression Nine: 35 mph, 22.1N 95.0W, Gulf, moving E at 6 mph. Forecast track reaches the coast near Pascagoula, MS around Sat, Oct 10, 2 AM CT (approximate).",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -78,13 +78,13 @@
         }
       ],
       "forecastStale": false,
-      "gulfRisk": "Forecast track reaches the coast near Pascagoula, MS around Sat, Oct 10, 1 AM CT (approximate)"
+      "gulfRisk": "Forecast track reaches the coast near Pascagoula, MS around Sat, Oct 10, 2 AM CT (approximate)"
     }
   ],
   "watchesWarnings": {
     "note": "",
-    "AL": {},
     "FL": {},
+    "AL": {},
     "MS": {},
     "LA": {}
   },
@@ -141,6 +141,24 @@
     "peakMedianKt": 105,
     "text": "37 of 50 ensemble members forecast a track so far. 37 of 37 bring the center to the Louisiana-to-Florida coast (FL 16, AL 15, MS 5, LA 1), typically around Sat, Oct 10, 1 AM CT. 37 of 37 reach hurricane strength (22 major); typical peak 120 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-07T03:30:06.186Z"
+    "computedAt": "2026-10-07T03:40:14.579Z"
+  },
+  "discussion": {
+    "storm": "al092026",
+    "url": "https://www.nhc.noaa.gov/text/MIATCDAT4.shtml",
+    "issuedAt": "2026-10-07T03:00:00.000Z",
+    "number": 2,
+    "issued": "1000 PM CDT Tue Oct 06 2026",
+    "paragraphs": [
+      "The convective organization of the depression has not changed much since the prior advisory. Much of the associated deep convection is displaced slightly to the north of the estimated surface center, but recently a new convective burst has emerged closer to this location. The initial intensity is held at 30 kt for now, consistent with the latest T2.0 Dvorak classification from TAFB. An ASCAT-C pass is expected to arrive shortly after this advisory issuance and will be helpful in reassessing the position and intensity of the system.",
+      "The depression is moving slowly eastward (080/4 kt) within weak steering currents to the south of an upper trough over the southeastern United States. The track models are in good agreement that the system should move eastward to east-northeastward through Thursday while passing to the north of the Yucatan Peninsula. While the center is forecast to remain well offshore, its passage will likely produce gusty winds and heavy rainfall for portions of the Yucatan Peninsula. A turn toward the northeast and north is predicted by Friday as the system moves within the flow between a shortwave trough over Texas and a strengthening ridge over the western Atlantic. There remains significant along- and cross-track spread in the track guidance regarding this northward turn, with the AI-based models on the right side of the envelope and generally faster than the physics-based guidance. The updated NHC forecast is slower than the previous one from 48-96 h to bring it closer to the latest corrected consensus (HCCA), but remains on the fast and right side of the latest models. Users should closely monitor forecast updates given the below-average confidence in this forecast.",
+      "High oceanic heat content, moist mid-levels, and upper-level divergence should allow the compact system to intensify during the next few days. The only limiting factor appears to be southwesterly vertical wind shear, which is forecast to strengthen later this week as the system approaches the northern Gulf Coast. Most skillful models show the system becoming a hurricane over the central Gulf, and the latest forecast shows a similar rate of intensification and peak intensity as the prior forecast, generally following the more aggressive Google DeepMind and HCCA aids. Due to strong shear, it is likely that the system peaks in strength before reaching the coast as a hurricane. The cyclone is also expected to grow in size as it approaches the northern Gulf Coast, and the anticipated convective and motion asymmetries will likely cause rain and wind impacts to extend far from the center on the eastern side of the storm."
+    ],
+    "keyMessages": [
+      "There is an increasing risk of dangerous wind and storm surge impacts along portions of the northern Gulf Coast, and watches could be required on Wednesday. Residents from Louisiana to the Florida Panhandle should closely monitor the latest forecast updates and ensure they have their hurricane plan in place.",
+      "The system will bring areas of heavy rainfall to the central U.S. Gulf coast Friday into the weekend. Flash and urban flooding, along with isolated river flooding, will be possible.",
+      "Yucatan Peninsula of Mexico: The depression is expected to strengthen and could bring gusty winds and areas of heavy rain to the western portion of the Yucatan Peninsula in a couple of days."
+    ],
+    "forecaster": "Reinhart"
   }
 }
