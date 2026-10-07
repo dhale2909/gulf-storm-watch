@@ -251,20 +251,6 @@ body.card .leaflet-control-container{display:none}
     </div>
   </section>
 
-  <section class="panel">
-    <header><h2>Coastal watches and warnings</h2><span class="tag">NWS</span></header>
-    <div class="coast" id="coast"></div>
-    <div id="coast-note" style="font-size:13px;color:var(--muted)"></div>
-  </section>
-
-  <section class="panel" id="nhc-panel" hidden>
-    <header><h2>NHC key messages</h2><span class="tag" id="nhc-tag">NHC</span></header>
-    <ol class="keymsg" id="nhc-keys"></ol>
-    <details class="fold" id="nhc-fold">
-      <summary>Read the forecaster's discussion</summary>
-      <div class="disc" id="nhc-disc"></div>
-    </details>
-  </section>
 
   <section class="panel">
     <header><h2 id="map-title">Storm map</h2><span class="tag" id="map-src">NHC</span></header>
@@ -286,6 +272,21 @@ body.card .leaflet-control-container{display:none}
       <a href="https://deepmind.google.com/science/weatherlab" target="_blank" rel="noopener">Google Weather Lab (AI ensemble)</a>
       <a href="https://arctic.som.ou.edu/tburg/products/realtime/tropical/" target="_blank" rel="noopener">Tomer Burg model plots</a>
     </div>
+    </details>
+  </section>
+
+  <section class="panel">
+    <header><h2>Coastal watches and warnings</h2><span class="tag">NWS</span></header>
+    <div class="coast" id="coast"></div>
+    <div id="coast-note" style="font-size:13px;color:var(--muted)"></div>
+  </section>
+
+  <section class="panel" id="nhc-panel" hidden>
+    <header><h2>NHC key messages</h2><span class="tag" id="nhc-tag">NHC</span></header>
+    <ol class="keymsg" id="nhc-keys"></ol>
+    <details class="fold" id="nhc-fold">
+      <summary>Read the forecaster's discussion</summary>
+      <div class="disc" id="nhc-disc"></div>
     </details>
   </section>
 
