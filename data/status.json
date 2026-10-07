@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-07T22:35:06.373Z",
-  "lastAttemptAt": "2026-10-07T22:35:06.373Z",
+  "updatedAt": "2026-10-07T22:58:33.946Z",
+  "lastAttemptAt": "2026-10-07T22:58:33.946Z",
   "nextCheck": "2026-10-07T23:05:00.000Z",
   "alertLevel": "threat",
   "headline": "Tropical Storm Isaias: 65 mph, 22.7N 92.9W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 10 PM CT (approximate). Tropical alerts in effect: AL (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); FL (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); MS (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); LA (Storm Surge Watch, Tropical Storm Watch).",
@@ -78,27 +78,6 @@
   ],
   "watchesWarnings": {
     "note": "",
-    "MS": {
-      "level": "watch",
-      "text": "Hurricane Watch, Storm Surge Watch, Tropical Storm Watch",
-      "counties": {
-        "28039": [
-          "TWA"
-        ],
-        "28041": [
-          "TWA"
-        ],
-        "28045": [
-          "TWA"
-        ],
-        "28047": [
-          "HWA"
-        ],
-        "28059": [
-          "HWA"
-        ]
-      }
-    },
     "LA": {
       "level": "watch",
       "text": "Storm Surge Watch, Tropical Storm Watch",
@@ -113,6 +92,56 @@
           "TWA"
         ],
         "22103": [
+          "TWA"
+        ]
+      }
+    },
+    "FL": {
+      "level": "watch",
+      "text": "Hurricane Watch, Storm Surge Watch, Tropical Storm Watch",
+      "counties": {
+        "12005": [
+          "HWA",
+          "TWA"
+        ],
+        "12013": [
+          "TWA"
+        ],
+        "12033": [
+          "HWA"
+        ],
+        "12037": [
+          "TWA"
+        ],
+        "12045": [
+          "TWA",
+          "HWA"
+        ],
+        "12059": [
+          "TWA"
+        ],
+        "12063": [
+          "TWA"
+        ],
+        "12065": [
+          "TWA"
+        ],
+        "12077": [
+          "TWA"
+        ],
+        "12091": [
+          "HWA"
+        ],
+        "12113": [
+          "HWA"
+        ],
+        "12129": [
+          "TWA"
+        ],
+        "12131": [
+          "HWA"
+        ],
+        "12133": [
           "TWA"
         ]
       }
@@ -171,53 +200,24 @@
         ]
       }
     },
-    "FL": {
+    "MS": {
       "level": "watch",
       "text": "Hurricane Watch, Storm Surge Watch, Tropical Storm Watch",
       "counties": {
-        "12005": [
-          "TWA",
+        "28039": [
+          "TWA"
+        ],
+        "28041": [
+          "TWA"
+        ],
+        "28045": [
+          "TWA"
+        ],
+        "28047": [
           "HWA"
         ],
-        "12013": [
-          "TWA"
-        ],
-        "12033": [
+        "28059": [
           "HWA"
-        ],
-        "12037": [
-          "TWA"
-        ],
-        "12045": [
-          "TWA",
-          "HWA"
-        ],
-        "12059": [
-          "TWA"
-        ],
-        "12063": [
-          "TWA"
-        ],
-        "12065": [
-          "TWA"
-        ],
-        "12077": [
-          "TWA"
-        ],
-        "12091": [
-          "HWA"
-        ],
-        "12113": [
-          "HWA"
-        ],
-        "12129": [
-          "TWA"
-        ],
-        "12131": [
-          "HWA"
-        ],
-        "12133": [
-          "TWA"
         ]
       }
     }
@@ -277,7 +277,7 @@
     "peakMedianKt": 106,
     "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 43, AL 6), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (35 major); typical peak 120 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-07T22:35:06.373Z"
+    "computedAt": "2026-10-07T22:58:33.946Z"
   },
   "discussion": {
     "storm": "al092026",
