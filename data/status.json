@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-07T18:35:06.718Z",
-  "lastAttemptAt": "2026-10-07T18:35:06.718Z",
+  "updatedAt": "2026-10-07T18:56:19.049Z",
+  "lastAttemptAt": "2026-10-07T18:56:19.049Z",
   "nextCheck": "2026-10-07T19:05:00.000Z",
   "alertLevel": "threat",
   "headline": "Tropical Storm Isaias: 50 mph, 22.6N 93.4W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 11 PM CT (approximate). Tropical alerts in effect: AL (Hurricane Watch, Storm Surge Watch); FL (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); MS (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); LA (Storm Surge Watch, Tropical Storm Watch).",
@@ -78,21 +78,6 @@
   ],
   "watchesWarnings": {
     "note": "",
-    "MS": {
-      "level": "watch",
-      "text": "Hurricane Watch, Storm Surge Watch, Tropical Storm Watch",
-      "counties": {
-        "28045": [
-          "TWA"
-        ],
-        "28047": [
-          "HWA"
-        ],
-        "28059": [
-          "HWA"
-        ]
-      }
-    },
     "LA": {
       "level": "watch",
       "text": "Storm Surge Watch, Tropical Storm Watch",
@@ -119,6 +104,21 @@
           "HWA"
         ],
         "01097": [
+          "HWA"
+        ]
+      }
+    },
+    "MS": {
+      "level": "watch",
+      "text": "Hurricane Watch, Storm Surge Watch, Tropical Storm Watch",
+      "counties": {
+        "28045": [
+          "TWA"
+        ],
+        "28047": [
+          "HWA"
+        ],
+        "28059": [
           "HWA"
         ]
       }
@@ -220,7 +220,7 @@
     "peakMedianKt": 106,
     "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 43, AL 6), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (35 major); typical peak 120 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-07T18:35:06.718Z"
+    "computedAt": "2026-10-07T18:56:19.049Z"
   },
   "discussion": {
     "storm": "al092026",
