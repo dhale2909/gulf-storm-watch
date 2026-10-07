@@ -161,6 +161,8 @@ body.cardx #card,body.cardx #map{height:628px}
 .c-city{font:600 32px var(--body);color:#cfd8df;white-space:nowrap;text-shadow:0 0 4px #0d151c,0 0 4px #0d151c,0 0 8px #0d151c}
 .c-city i{display:inline-block;width:11px;height:11px;border-radius:50%;background:#93a3b0;margin:0 9px;vertical-align:middle}
 .c-city .l{display:inline-block;transform:translateX(-100%)}
+.gulf-name span{display:inline-block;transform:translate(-50%,-50%);font:italic 500 13px/1.2 var(--body);color:#7d8087;white-space:nowrap;letter-spacing:.04em}
+body.card .gulf-name span{font-size:28px}
 
 body.card .xmark{font-size:56px;line-height:56px}
 body.card .leaflet-control-container{display:none}
@@ -623,7 +625,22 @@ body.card .leaflet-control-container{display:none}
     if(map||!window.L) return;
     map=L.map("map",{scrollWheelZoom:false,zoomSnap:CARDX?0.5:CARD?1:0.25}); // finer zoom steps so the Gulf fills the map on a phone
     var esri="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_";
-    L.tileLayer(esri+"Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Map: Esri, HERE, Garmin, &copy; OpenStreetMap contributors",maxZoom:10}).addTo(map);
+    // Esri's dark base map prints sea names into its tiles ("Gulf of Mexico"). Each tile is cleaned as it loads: water-name
+    // text shares the water's slight blue tint while land and borders are neutral grey, so only bluish light pixels (and
+    // their soft edges) are painted back to water. The page then labels the Gulf itself, as the Gulf of America.
+    var scrub=function(c){ var g=c.getContext("2d"), im=g.getImageData(0,0,256,256), d=im.data, core=new Uint8Array(65536), i, x, y, k;
+      for(i=0;i<65536;i++){ k=i*4; if(d[k+2]-d[k]>=4&&(d[k]+d[k+1]+d[k+2])>198) core[i]=1; }
+      for(y=0;y<256;y++) for(x=0;x<256;x++){ i=y*256+x; k=i*4; if(!(d[k+2]-d[k]>=3&&(d[k]+d[k+1]+d[k+2])>114)) continue;
+        var near=core[i]; for(var dy=-2;dy<=2&&!near;dy++) for(var dx=-2;dx<=2&&!near;dx++){ var xx=x+dx, yy=y+dy; if(xx>=0&&yy>=0&&xx<256&&yy<256&&core[yy*256+xx]) near=1; }
+        if(near){ d[k]=34; d[k+1]=35; d[k+2]=39; } }
+      g.putImageData(im,0,0); };
+    var CleanTiles=L.TileLayer.extend({ createTile:function(coords,done){ var c=document.createElement("canvas"), img=new Image(); c.width=c.height=256;
+      img.crossOrigin="anonymous";
+      img.onload=function(){ c.getContext("2d").drawImage(img,0,0); try{ scrub(c); }catch(e){} done(null,c); };
+      img.onerror=function(e){ done(e,c); }; img.src=this.getTileUrl(coords); return c; } });
+    new CleanTiles(esri+"Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Map: Esri, HERE, Garmin, &copy; OpenStreetMap contributors",maxZoom:10}).addTo(map);
+    map.createPane("water").style.zIndex=340;
+    L.marker([25.4,-92.6],{pane:"water",interactive:false,keyboard:false,icon:L.divIcon({className:"gulf-name",html:"<span>Gulf of America</span>",iconSize:[0,0]})}).addTo(map);
     if(!CARD) L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
     // The card is viewed at thumbnail size, so it gets a few large city labels instead of the fine map text.
     // On the wide X card (zoom 5.5) Houston's label would run into New Orleans, and Cancun sits under the advisory label.
