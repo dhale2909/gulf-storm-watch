@@ -8,7 +8,7 @@ import path from 'node:path';
 
 process.env.NOW = '2026-10-08T15:00:00Z';
 delete process.env.FIXTURES;
-for (const k of ['NTFY_TOPIC', 'PUBLIC_NTFY_TOPIC', 'PLAYS_JSON', 'PUSH_API', 'PUSH_ADMIN_KEY', 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'TEST_PUSH', 'TEST_NOTIFY']) delete process.env[k];
+for (const k of ['NTFY_TOPIC', 'PUBLIC_NTFY_TOPIC', 'NTFY_TOKEN', 'PUBLIC_NTFY_TOKEN', 'PLAYS_JSON', 'PUSH_API', 'PUSH_ADMIN_KEY', 'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'TEST_PUSH', 'TEST_NOTIFY']) delete process.env[k];
 
 let responses = {}, calls = [];
 globalThis.fetch = async (url) => {
@@ -868,4 +868,66 @@ test('outlook-stage map: Atlantic development areas touching the Gulf only, neve
   responses[MAPQ(2)] = { features: [] }; responses[MAPQ(398)] = { features: [] };
   const map = await m.gatherMap({ area: 'Gulf of Mexico', source: 'NHC outlook' }, null);
   assert.equal(map.kind, 'outlook'); assert.equal(map.features.filter((f) => f.properties.role === 'area').length, 1);
+});
+
+// ---- Owner-approved changes, Oct 7 2026 (review items F8, F7, F44) ----
+fixed('F8', 'while a storm is tracked, only the outlook entry tagged with its Invest is that system; another designated Invest at 40%+ is announced once', async () => {
+  const prior = state({ alertLevel: 'threat', gulf: { area: '', formation7d: null, formation48: null }, storms: [forecastStorm({ id: 'al092026', pos: { lat: 22, lonW: 94 } })],
+    landfall: { state: 'AL', eta: '2026-10-10T08:00:00Z', near: 'Mobile, AL' }, internal: { failCount: 0, othersAlerted: [] },
+    tracked: { invest: 'Invest 92L', stormId: 'al092026', name: 'Tropical Storm Test', lastPos: { lat: 22, lonW: 94 }, since: '2026-10-08T03:00:00Z' } });
+  const two = (head, p7) => '<pre>Tropical Weather Outlook\n1000 AM CDT Thu Oct 8 2026\n\nFor the North Atlantic...\n\n' + head + ':\nAnother low.\n* Formation chance through 48 hours...low...20 percent.\n* Formation chance through 7 days...medium...' + p7 + ' percent.</pre>';
+  const run = async (p, head, p7) => { responses[TWO] = two(head, p7); responses[FEED] = { activeStorms: [storm({ id: 'al092026', latitudeNumeric: 22, longitudeNumeric: -94 })] }; responses['https://fixture.invalid/tcm'] = TCM;
+    const d = await runMain(p); return { d, summary: JSON.parse(await readFile('data/log.json', 'utf8'))[0].summary }; };
+  let r = await run(prior, 'Eastern Gulf of America (AL93)', 30);
+  assert.equal(r.d.tracked.invest, 'Invest 92L'); assert.equal(r.d.gulf.formation7d, null, 'the other entry is not the tracked system');
+  assert.doesNotMatch(r.summary, /designated|odds|Another Gulf system/);
+  r = await run(r.d, 'Eastern Gulf of America (AL93)', 50);
+  assert.match(r.summary, /Another Gulf system: Invest 93L \(Eastern Gulf of America\) has a 50% chance of forming within 7 days/);
+  r = await run(r.d, 'Eastern Gulf of America (AL93)', 60);
+  assert.doesNotMatch(r.summary, /Another Gulf system|odds/, 'announced once');
+  r = await run(r.d, 'Northwestern Gulf of America', 70);
+  assert.doesNotMatch(r.summary, /Another Gulf system|designated|odds/, 'an untagged entry beside a storm is only listed');
+  r = await run(r.d, 'Western Gulf of America (AL92)', 90);
+  assert.equal(r.d.gulf.formation7d, 90, 'the entry tagged with our Invest is still our system');
+  // Invest numbers are reused: an AL93 beside a later storm is a new system and is announced.
+  const later = { ...r.d, storms: [forecastStorm({ id: 'al122026', pos: { lat: 22, lonW: 94 } })], tracked: { invest: 'Invest 97L', stormId: 'al122026', name: 'Tropical Storm Later', lastPos: { lat: 22, lonW: 94 }, since: '2026-10-08T03:00:00Z' },
+    internal: { ...r.d.internal, othersAlerted: ['Invest 93L@al092026'] } };
+  responses[TWO] = two('Northeastern Gulf of America (AL93)', 70); responses[FEED] = { activeStorms: [storm({ id: 'al122026', latitudeNumeric: 22, longitudeNumeric: -94 })] }; responses['https://fixture.invalid/tcm'] = TCM;
+  const d2 = await runMain(later);
+  assert.match(JSON.parse(await readFile('data/log.json', 'utf8'))[0].summary, /Another Gulf system: Invest 93L/);
+  assert.deepEqual(d2.internal.othersAlerted, ['Invest 93L@al122026'], 'only this storm\'s announcements are remembered');
+  // When the storm leaves and the Invest announced beside it takes over, it is not "designated" a second time.
+  const cur = m.build(d2, { area: 'Northeastern Gulf of America', formation7d: 70, formation48: 20, invest: 'Invest 93L', source: 'x' }, [], ww());
+  assert.doesNotMatch(m.diff(d2, cur).join(' | '), /designated/);
+});
+fixed('F7', "a storm-feed outage during a storm reaches the owner after two checks, even while the outlook still loads", async () => {
+  process.env.NTFY_TOPIC = 'fixture-private';
+  try {
+    const prior = state({ alertLevel: 'threat', gulf: { area: '', formation7d: null, formation48: null }, storms: [forecastStorm({ pos: { lat: 25, lonW: 88 } })], tracked: { stormId: 'al012026' }, landfall: { state: 'AL', eta: '2026-10-10T08:00:00Z', near: 'Mobile, AL' } });
+    responses[TWO] = quietOutlook();
+    let d = await runMain(prior, { feedFails: true });
+    assert.equal(d.internal.downCount, 1); assert.equal(calls.filter((u) => u === 'https://ntfy.sh/').length, 0);
+    d = await runMain(d, { feedFails: true });
+    assert.equal(d.internal.downCount, 2); assert.equal(calls.filter((u) => u === 'https://ntfy.sh/').length, 1, 'one private notice');
+    assert.equal(JSON.parse(await readFile('data/log.json', 'utf8'))[0].outagePush, true);
+    // An unreadable outlook during the storm stage is not an outage of the storm's own source.
+    responses[FEED] = { activeStorms: [storm({ latitudeNumeric: 25, longitudeNumeric: -88 })] }; responses['https://fixture.invalid/tcm'] = TCM;
+    d = await runMain(d, { twoFails: true }); d = await runMain(d, { twoFails: true });
+    assert.equal(d.internal.downCount, 0);
+  } finally { delete process.env.NTFY_TOPIC; }
+});
+fixed('F44', 'with a publish token set, the public ntfy feed is sent with it, and the private topic only with its own', async () => {
+  Object.assign(process.env, { NTFY_TOPIC: 'fixture-private', PUBLIC_NTFY_TOPIC: 'fixture-public', PUBLIC_NTFY_TOKEN: 'tk_fixture' });
+  const sent = [], mock = globalThis.fetch;
+  globalThis.fetch = async (u, o) => { if (String(u) === 'https://ntfy.sh/') { sent.push({ topic: JSON.parse(o.body).topic, auth: o.headers.Authorization }); return { ok: true, status: 200, json: async () => ({}) }; } return mock(u, o); };
+  try {
+    await m.deliver(m.composeMessage({ level: 'watch', changes: ['Fixture change'], headline: 'Fixture' }));
+    assert.equal(sent.find((s) => s.topic === 'fixture-public').auth, 'Bearer tk_fixture');
+    assert.equal(sent.find((s) => s.topic === 'fixture-private').auth, undefined);
+    // Only a private token set: it must never be sent to the public topic.
+    delete process.env.PUBLIC_NTFY_TOKEN; process.env.NTFY_TOKEN = 'tk_private_fixture'; sent.length = 0;
+    await m.deliver(m.composeMessage({ level: 'watch', changes: ['Fixture change'], headline: 'Fixture' }));
+    assert.equal(sent.find((s) => s.topic === 'fixture-private').auth, 'Bearer tk_private_fixture');
+    assert.equal(sent.find((s) => s.topic === 'fixture-public').auth, undefined);
+  } finally { globalThis.fetch = mock; for (const k of ['NTFY_TOPIC', 'PUBLIC_NTFY_TOPIC', 'PUBLIC_NTFY_TOKEN', 'NTFY_TOKEN']) delete process.env[k]; }
 });

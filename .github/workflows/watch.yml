@@ -38,6 +38,8 @@ jobs:
           PLAYS_JSON: ${{ secrets.PLAYS_JSON }}
           PAGE_URL: ${{ vars.PAGE_URL }}
           PUBLIC_NTFY_TOPIC: ${{ vars.PUBLIC_NTFY_TOPIC }}
+          NTFY_TOKEN: ${{ secrets.NTFY_TOKEN }}
+          PUBLIC_NTFY_TOKEN: ${{ secrets.PUBLIC_NTFY_TOKEN }}
           PUSH_API: ${{ vars.PUSH_API }}
           PUSH_ADMIN_KEY: ${{ secrets.PUSH_ADMIN_KEY }}
           VAPID_PUBLIC_KEY: ${{ vars.VAPID_PUBLIC_KEY }}

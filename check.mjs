@@ -762,7 +762,9 @@ export function diff(prior, cur) {
   }
 
   // Announced once: an Invest number already known for the tracked system is not a new designation.
-  if (cur.gulf?.invest && cur.gulf.invest !== prior.gulf?.invest && cur.gulf.invest !== prior.tracked?.invest) ch.push(`NHC designated the system ${cur.gulf.invest}`);
+  // An Invest already announced as another system beside the storm is not announced again when it takes over.
+  const announcedBeside = (prior.internal?.othersAlerted || []).some((id) => id.split('@')[0] === cur.gulf?.invest);
+  if (cur.gulf?.invest && cur.gulf.invest !== prior.gulf?.invest && cur.gulf.invest !== prior.tracked?.invest && !announcedBeside) ch.push(`NHC designated the system ${cur.gulf.invest}`);
 
   // Another system announced below as a coastal threat is not also announced as a new Gulf system.
   const othersNew = (cur.others || []).filter((o) => o.threat && !(prior.internal?.othersAlerted || []).includes(o.id));
@@ -823,13 +825,15 @@ function minorDiff(prior, cur) {
 
 // ---------- output ----------
 
-async function notify(title, message, level, topic = process.env.NTFY_TOPIC) {
+// A reserved ntfy topic needs a publish token (sent as a Bearer header, never logged): NTFY_TOKEN for the private topic,
+// PUBLIC_NTFY_TOKEN for the public one, so nobody else can post to it (approved Oct 7 2026, review F44).
+async function notify(title, message, level, topic = process.env.NTFY_TOPIC, token = process.env.NTFY_TOKEN) {
   if (!title) return true; // nothing to send on this channel
   // Not configured: nothing to retry. The body can carry the owner's private text, so it is never printed (Actions logs are public).
   if (!topic) { console.log(`[no ntfy topic configured; not sent] ${title}`); return null; }
   const r = await fetch('https://ntfy.sh/', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     body: JSON.stringify({
       topic, title, message,
       priority: level === 'landfall' ? 5 : 4, // high priority throughout: default-priority pushes were not reliably announced on iPhone
@@ -924,7 +928,7 @@ export async function deliver(msg, { channels = CHANNELS, browserOnly = null } =
       r.browserFailed = b.failed;
     } catch (e) { r.browser = false; r.browserFailed = browserOnly || null; console.warn(`browser push failed: ${e.message}`); } // null: retry every device
   }
-  if (channels.includes('public') && process.env.PUBLIC_NTFY_TOPIC) { try { r.public = await notify(msg.publicTitle, msg.publicBody, msg.level, process.env.PUBLIC_NTFY_TOPIC); } catch (e) { r.public = false; console.warn(`public push failed: ${e.message}`); } }
+  if (channels.includes('public') && process.env.PUBLIC_NTFY_TOPIC) { try { r.public = await notify(msg.publicTitle, msg.publicBody, msg.level, process.env.PUBLIC_NTFY_TOPIC, process.env.PUBLIC_NTFY_TOKEN || null); } catch (e) { r.public = false; console.warn(`public push failed: ${e.message}`); } }
   return r;
 }
 const PENDING_ATTEMPTS = 3;
@@ -978,6 +982,10 @@ async function main() {
   if (feedRes.status === 'fulfilled') { storms = feedRes.value; stormsIncomplete = storms.incomplete || []; } else { stormsOK = false; console.warn(`NHC storm feed unavailable: ${feedRes.reason?.message || feedRes.reason}`); }
   const outage = !outlookOK && !stormsOK;
   const failCount = outage ? (prior?.internal?.failCount || 0) + 1 : 0;
+  // The source the current reading depends on: the storm feed while a storm is tracked, the outlook otherwise. Two
+  // checks in a row without it is an outage the owner hears about (approved Oct 7 2026, review F7).
+  const stageSource = prior?.storms?.length ? 'storm feed' : 'outlook';
+  const downCount = outage || (stageSource === 'storm feed' ? !stormsOK : !outlookOK) ? (prior?.internal?.downCount || 0) + 1 : 0;
 
   // ---- one tracked system (P3): keep following the same Invest / storm; anything else is "another system" ----
   const prevTracked = prior?.tracked || (prior?.gulf?.invest ? { invest: prior.gulf.invest, stormId: null } : prior?.storms?.[0] ? { invest: null, stormId: prior.storms[0].id } : null);
@@ -1007,6 +1015,10 @@ async function main() {
   // A failed source carries that part of the previous reading forward, flagged, rather than treating it as absent.
   if (!outlookOK) gulf = prior?.gulf?.area ? { ...prior.gulf, stale: true } : null;
   if (!stormsOK) storms = carriedStorms();
+  // While a storm is the tracked system, an outlook entry is that system only if it carries the tracked Invest's tag.
+  // Every other entry is another system: it never alerts as ours or takes on our identity, baseline or Google summary
+  // (approved Oct 7 2026, review F8).
+  if (outlookOK && storms.length && gulf && !(prevTracked?.invest && gulf.investHint === prevTracked.invest)) { gulf = null; otherEntries = entries; }
 
   // A tracked system that vanishes from both NHC feeds at once is more often a publication gap (outlook dropped
   // before the first advisory appears, or the reverse) than a real all-clear. Hold the previous reading for one
@@ -1066,17 +1078,28 @@ async function main() {
   const status = build(priorForBuild, gulf, storms, ww);
   if (outage && !prior) status.headline = 'No data yet: NHC could not be reached.';
   const primary = storms[0] || null;
-  status.tracked = primary ? { invest: replaced ? null : prevTracked?.invest || null, stormId: primary.id, name: primary.name, lastPos: primary.pos || lastPos }
+  // since: when this storm was first tracked (an outlook issued after it cannot be listing the storm itself).
+  const sameStorm0 = !!primary && prevTracked?.stormId === primary.id;
+  status.tracked = primary ? { invest: replaced ? null : prevTracked?.invest || null, stormId: primary.id, name: primary.name, lastPos: primary.pos || lastPos,
+      since: (sameStorm0 ? prior?.tracked?.since || prior?.storms?.[0]?.advisoryAt : primary.advisoryAt) || NOW.toISOString() }
     : gulf ? { invest: gulf.invest || prevTracked?.invest || null, stormId: null, name: gulf.invest || gulf.area, lastPos: models?.history?.length ? (() => { const c = models.history[models.history.length - 1].geometry.coordinates; return { lat: c[1], lonW: -c[0] }; })() : lastPos }
     : null;
   // Other Gulf systems: listed, and announced once if they become a coastal threat. They never replace the tracked one.
   status.others = [
     ...[...storms.slice(1), ...sideStorms].map((o) => ({ id: o.id, name: o.name, threat: !!(o.tropical && o.landfall), detail: o.landfall ? `is forecast to reach the coast near ${o.landfall.near || o.landfall.state} around ${fmtCT(o.landfall.eta)}` : `is in the Gulf (${mph(o.winds)} mph)` })),
-    ...otherEntries.map((e) => ({ id: e.investHint || e.area, name: e.investHint ? `${e.investHint} (${e.area})` : e.area, threat: false, detail: `${e.formation7d}% chance of forming within 7 days` })),
+    // A disturbance beside a tracked storm is announced once: when NHC has designated it (another Invest than ours) and gives
+    // it 40% or more over 7 days, in an outlook issued after the storm was first tracked. Untagged entries are only listed.
+    // Invest numbers are reused within and across seasons, so the id is tied to the storm it sits beside.
+    ...otherEntries.map((e) => ({ id: e.investHint ? `${e.investHint}@${status.tracked?.stormId || ''}` : e.area, name: e.investHint ? `${e.investHint} (${e.area})` : e.area, kind: 'outlook', odds: e.formation7d,
+      threat: !!(primary && e.investHint && e.investHint !== status.tracked.invest && e.formation7d >= 40 && e.issuedAt && Date.parse(e.issuedAt) > Date.parse(status.tracked.since)),
+      detail: `has a ${e.formation7d}% chance of forming within 7 days` })),
   ];
   if (sideStorms.length) status.headline += ` Also in the Gulf: ${sideStorms.map((o) => `${o.name} (${mph(o.winds)} mph; ${lcFirst(o.gulfRisk)})`).join('; ')}.`;
-  status.internal.othersAlerted = [...new Set([...(prior?.internal?.othersAlerted || []), ...status.others.filter((o) => o.threat).map((o) => o.id)])];
+  // Storm ids are unique; an Invest announced beside a storm is remembered only while that storm is tracked.
+  const keepAlerted = (id) => !id.includes('@') || id.endsWith(`@${status.tracked?.stormId || ''}`);
+  status.internal.othersAlerted = [...new Set([...(prior?.internal?.othersAlerted || []).filter(keepAlerted), ...status.others.filter((o) => o.threat).map((o) => o.id)])];
   status.internal.failCount = failCount;
+  status.internal.downCount = downCount;
   status.internal.vanishedChecks = holding ? vanishedBefore + 1 : 0;
   // Source health, each part on its own: the forecast advisory is tracked separately from the storm list it came from.
   status.sources = {
@@ -1138,8 +1161,11 @@ async function main() {
   } else if (pend && !Array.isArray(pend.changes)) {
     status.internal.pending = null; console.warn('discarded an undelivered alert kept in an old format');
   } else status.internal.pending = pend;
-  // NHC unreachable twice in a row: tell the owner (private channel only; the public feeds stay weather-only).
-  if (outage && failCount === 2) { try { outagePush = await notify('Gulf Storm Watch: data outage', 'NHC data has been unreachable for two checks in a row. The dashboard is showing the last good reading.', 'watch'); } catch (e) { console.warn(`outage push failed: ${e.message}`); } }
+  // The stage's NHC source unreachable twice in a row: tell the owner (private channel only; the public feeds stay weather-only).
+  if (downCount === 2 && !(await remoteIsNewer(prior))) { // the other runner may already have counted this outage
+    const what = outage ? 'NHC data has' : `The NHC ${stageSource} has`;
+    try { outagePush = await notify('Gulf Storm Watch: data outage', `${what} been unreachable for two checks in a row. The dashboard is showing the last good reading.`, 'watch'); } catch (e) { console.warn(`outage push failed: ${e.message}`); }
+  }
 
   const minor = changed ? [] : minorDiff(prior, status);
   const summary = changed ? changes.join('. ') + '.'
