@@ -158,6 +158,9 @@ body.cardx #card,body.cardx #map{height:628px}
 body.card .xmark{font-size:56px;line-height:56px}
 body.card .leaflet-control-container{display:none}
 .fold summary{cursor:pointer;font-size:13px;color:var(--accent);list-style:none}
+.keymsg{margin:0 0 12px;padding-left:22px;display:grid;gap:10px;font-size:15px;line-height:1.5}
+.keymsg li::marker{font-family:var(--mono);font-weight:700;color:var(--lvl,var(--accent))}
+.disc{max-width:72ch;font-size:14px;line-height:1.6;color:var(--fg)}.disc p{margin:12px 0}.disc .by{color:var(--muted);font-size:13px}
 .fold summary::-webkit-details-marker{display:none}
 .fold summary::before{content:"\25B8  "} .fold[open] summary::before{content:"\25BE  "}
 .fold>div{margin-top:8px}
@@ -252,6 +255,15 @@ body.card .leaflet-control-container{display:none}
     <header><h2>Coastal watches and warnings</h2><span class="tag">NWS</span></header>
     <div class="coast" id="coast"></div>
     <div id="coast-note" style="font-size:13px;color:var(--muted)"></div>
+  </section>
+
+  <section class="panel" id="nhc-panel" hidden>
+    <header><h2>NHC key messages</h2><span class="tag" id="nhc-tag">NHC</span></header>
+    <ol class="keymsg" id="nhc-keys"></ol>
+    <details class="fold" id="nhc-fold">
+      <summary>Read the forecaster's discussion</summary>
+      <div class="disc" id="nhc-disc"></div>
+    </details>
   </section>
 
   <section class="panel">
@@ -356,7 +368,7 @@ body.card .leaflet-control-container{display:none}
   if(CARD){ document.body.classList.add("card"); if(CARDX) document.body.classList.add("cardx"); $("card-map").appendChild($("map")); }
   var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
   var fmtHour=function(iso){ var d=new Date(iso); if(isNaN(d)) return "\u2014"; d=new Date(Math.round(d.getTime()/36e5)*36e5); return fmt(d.toISOString()); };
-  var ctShort=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric"}); };
+  var ctShort=function(iso){ return new Date(Math.round(new Date(iso).getTime()/36e5)*36e5).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric"}); };
   var shareText="";
   var STATE_NAME={AL:"Alabama",FL:"Florida",MS:"Mississippi",LA:"Louisiana"};
   var mph=function(kt){ return Math.round((+kt||0)*1.15078/5)*5; }; // public wording in mph, as NHC's advisories do
@@ -509,6 +521,16 @@ body.card .leaflet-control-container{display:none}
       ? '<div class="st all"><b>No tropical watches or warnings</b><span>None reported for Alabama, Florida, Mississippi or Louisiana. Official NWS alerts: '+STATES.map(function(s){return '<a href="https://alerts.weather.gov/search?area='+s+'" target="_blank" rel="noopener">'+s+'</a>'}).join(" \u00b7 ")+'</span></div>'
       : STATES.map(function(s){var v=ww[s]||{}; var c=v.level==="warning"?"var(--landfall)":v.level==="watch"?"var(--threat)":"var(--line)";
       return '<div class="st" style="--stc:'+c+'"><b>'+s+'</b><span>'+esc(v.text||(unavail.indexOf(s)>=0?"NWS not reachable; previous reading shown":"No tropical watch or warning reported"))+'</span><a href="https://alerts.weather.gov/search?area='+s+'" target="_blank" rel="noopener" style="font-size:12px">Official NWS alerts</a></div>'}).join("");
+    // NHC's own words: Key Messages up front, the forecaster's reasoning behind a fold.
+    var D=d.discussion;
+    $("nhc-panel").hidden=!(D&&((D.keyMessages||[]).length||(D.paragraphs||[]).length));
+    if(D){
+      $("nhc-panel").style.setProperty("--lvl","var(--"+lvl+")");
+      $("nhc-tag").textContent="Discussion "+(D.number||"")+(D.issuedAt?" \u00b7 "+fmt(D.issuedAt):"")+(D.stale?" \u00b7 previous":"");
+      $("nhc-keys").innerHTML=(D.keyMessages||[]).map(function(k){return "<li>"+esc(k)+"</li>"}).join("");
+      $("nhc-keys").hidden=!(D.keyMessages||[]).length;
+      $("nhc-disc").innerHTML=(D.paragraphs||[]).map(function(p){return "<p>"+esc(p)+"</p>"}).join("")+'<p class="by">'+(D.forecaster?"Forecaster "+esc(D.forecaster)+" \u00b7 ":"")+'<a href="'+esc(D.url)+'" target="_blank" rel="noopener">Full text on nhc.noaa.gov</a></p>';
+    }
     $("coast-note").textContent=(anyWW?"Tropical watches or warnings are in effect; tap a state for the official product. ":"")+(unavail.length?"NWS could not be reached for "+unavail.join(", ")+"; showing the previous reading.":"");
     var G=d.google;
     $("goog-text").classList.toggle("empty",!G); $("goog-bars").hidden=!G;

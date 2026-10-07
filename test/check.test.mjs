@@ -461,3 +461,19 @@ test('landfall carries the forecast wind at the crossing, interpolated between t
   assert.ok(st.landfall.windKt >= 76 && st.landfall.windKt <= 78, `about 87% of the way from 60 to 80 kt, got ${st.landfall.windKt}`);
   assert.equal(m.parseTCM('<pre>FORECAST VALID 09/1200Z 25.0N 88.0W</pre>', '2026-10-08T15:00:00Z')[0].wind, undefined, 'no wind line: no wind, still a valid point');
 });
+
+// ---- schedule and discussion ----
+test('checks are due at 5 and 35 past the hour', () => {
+  assert.equal(m.nextCheckAt(new Date('2026-10-07T03:00:30Z')), '2026-10-07T03:05:00.000Z');
+  assert.equal(m.nextCheckAt(new Date('2026-10-07T03:05:00Z')), '2026-10-07T03:35:00.000Z');
+  assert.equal(m.nextCheckAt(new Date('2026-10-07T03:20:00Z')), '2026-10-07T03:35:00.000Z');
+  assert.equal(m.nextCheckAt(new Date('2026-10-07T03:50:00Z')), '2026-10-07T04:05:00.000Z');
+});
+test('the NHC discussion yields its reasoning and numbered Key Messages, and rejects another advisory', () => {
+  const tcd = '<pre>Tropical Depression Nine Discussion Number   2\nNWS National Hurricane Center Miami FL       AL092026\n1000 PM CDT Tue Oct 06 2026\n \nFirst paragraph\nwraps here.\n\nSecond paragraph.\n\n \nKey Messages:\n \n1. Risk of dangerous wind and\nsurge.\n \n2. Heavy rain.\n \n \nFORECAST POSITIONS AND MAX WINDS\n\nINIT  07/0300Z 22.1N  95.0W   30 KT  35 MPH\n\n$$\nForecaster Reinhart</pre>';
+  const d = m.parseTCD(tcd, { id: 'al092026', advNum: '002' });
+  assert.equal(d.number, 2); assert.deepEqual(d.paragraphs, ['First paragraph wraps here.', 'Second paragraph.']);
+  assert.deepEqual(d.keyMessages, ['Risk of dangerous wind and surge.', 'Heavy rain.']); assert.equal(d.forecaster, 'Reinhart');
+  assert.equal(m.parseTCD(tcd, { id: 'al092026', advNum: '003' }), null, 'a discussion for another advisory is not this one');
+  assert.equal(m.parseTCD('<html>busy</html>'), null);
+});

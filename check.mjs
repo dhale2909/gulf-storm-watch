@@ -170,12 +170,41 @@ export function parseTCM(html, issuanceISO, expect = {}) {
   return pts;
 }
 
+// Forecast discussion (TCD) -> { number, issued, paragraphs, keyMessages, forecaster }, or null if unreadable or for
+// another storm/advisory. Display only: nothing in it drives an alert.
+export function parseTCD(html, expect = {}) {
+  const pre = preText(html);
+  if (!pre || !/Discussion Number/i.test(pre)) return null;
+  const idm = /\b(AL\d{6})\b/i.exec(pre);
+  if (expect.id && idm && idm[1].toLowerCase() !== String(expect.id).toLowerCase()) return null;
+  const num = /Discussion Number\s+(\d+)/i.exec(pre);
+  if (expect.advNum && num && +num[1] !== +expect.advNum) return null;
+  const issued = (/^\d{3,4} (?:AM|PM) [A-Z]{3,4} \w+ \w+ \d+ \d{4}$/m.exec(pre) || [''])[0];
+  const lines = pre.replace(/\r/g, '').split('\n');
+  const start = lines.findIndex((l) => /^\d{3,4} (?:AM|PM) /.test(l)) + 1;
+  const keyAt = lines.findIndex((l) => /^\s*Key Messages:/i.test(l));
+  const fcstAt = lines.findIndex((l) => /^\s*FORECAST POSITIONS AND MAX WINDS/i.test(l));
+  const end = keyAt > 0 ? keyAt : fcstAt > 0 ? fcstAt : lines.length;
+  const paras = (txt) => txt.split(/\n\s*\n/).map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const paragraphs = start > 0 ? paras(lines.slice(start, end).join('\n')) : [];
+  let keyMessages = [];
+  if (keyAt > 0) {
+    const block = lines.slice(keyAt + 1, fcstAt > keyAt ? fcstAt : lines.length).join('\n');
+    keyMessages = block.split(/\n\s*(?=\d+\.\s)/).map((p) => p.replace(/\s+/g, ' ').trim()).filter((p) => /^\d+\.\s/.test(p)).map((p) => p.replace(/^\d+\.\s*/, ''));
+  }
+  if (!paragraphs.length && !keyMessages.length) return null;
+  const fc = /Forecaster\s+(.+?)\s*$/im.exec(pre);
+  return { number: num ? +num[1] : null, issued, paragraphs, keyMessages, forecaster: fc ? fc[1].trim() : '' };
+}
+
 // ---------- geography (deliberately rough boxes) ----------
 
 const inGulf = (p) =>
   (p.lat >= 21.5 && p.lat <= 31 && p.lonW >= 81 && p.lonW <= 98) ||
   (p.lat >= 18 && p.lat < 21.5 && p.lonW >= 90 && p.lonW <= 98); // Bay of Campeche
 
+// Checks run at 5 and 35 past the hour, so an advisory NHC posts on the hour is picked up within minutes.
+export const nextCheckAt = (now) => new Date((Math.floor((now.getTime() - 300e3) / 1800e3) + 1) * 1800e3 + 300e3).toISOString();
 const mph = (kt) => Math.round((+kt || 0) * 1.15078 / 5) * 5; // NHC public advisories round mph to the nearest 5
 // Nearest coastal town to a landfall point, for a more specific "near ..." than the state alone.
 const TOWNS = [
@@ -245,7 +274,8 @@ function landfallPoint(path) {
 const nearestTown = (p) => TOWNS.map(([name, lat, lonW]) => [name, Math.hypot(lat - p.lat, (lonW - p.lonW) * Math.cos(p.lat * Math.PI / 180))]).sort((a, b) => a[1] - b[1])[0][0];
 const category = (kt) => (kt >= 137 ? 5 : kt >= 113 ? 4 : kt >= 96 ? 3 : kt >= 83 ? 2 : kt >= 64 ? 1 : 0);
 const compass = (deg) => ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'][Math.round(deg / 22.5) % 16];
-const fmtCT = (iso) => new Date(iso).toLocaleString('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric' }) + ' CT';
+// Rounded to the nearest hour: these are estimates, and the page rounds the same way.
+const fmtCT = (iso) => new Date(Math.round(new Date(iso).getTime() / 3600e3) * 3600e3).toLocaleString('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric' }) + ' CT';
 
 // ---------- gather ----------
 
@@ -304,7 +334,8 @@ export async function gatherStorms(prior) {
         : track.length ? 'Forecast track stays off the AL/FL/MS/LA coast through the forecast period' : 'No forecast track in the latest advisory',
     });
   }
-  return Object.assign(out.sort((a, b) => (a.landfall ? 0 : 1) - (b.landfall ? 0 : 1) || b.winds - a.winds), { incomplete });
+  const discussions = Object.fromEntries(feed.activeStorms.filter((s) => s.forecastDiscussion?.url).map((s) => [s.id, s.forecastDiscussion]));
+  return Object.assign(out.sort((a, b) => (a.landfall ? 0 : 1) - (b.landfall ? 0 : 1) || b.winds - a.winds), { incomplete, discussions });
 }
 
 export async function gatherAlerts(prior, gulfStorm) {
@@ -601,7 +632,7 @@ export function build(prior, gulf, storms, ww) {
   return {
     updatedAt: NOW.toISOString(), // time of the last successful reading (an outage keeps the old value; see lastAttemptAt)
     lastAttemptAt: NOW.toISOString(),
-    nextCheck: new Date((Math.floor(NOW.getTime() / 1800e3) + 1) * 1800e3).toISOString(), // GitHub checks on the hour, the Mac backup on the half hour
+    nextCheck: nextCheckAt(NOW), // GitHub checks at :05, the Mac backup at :35
     alertLevel, headline,
     gulf: gulf || { area: '', formation48: null, formation7d: null, source: 'NHC outlook', text: storm ? 'NHC is issuing advisories on this system; see the storm panel.' : '' },
     // forecastStale and pos stay so the page and diff can see them; bin and the forecast points stay so the map can be
@@ -686,8 +717,12 @@ function minorDiff(prior, cur) {
   const ps = new Map((prior.storms || []).map((s) => [s.id, s]));
   for (const s of cur.storms) {
     const p = ps.get(s.id);
+    if (p && p.advisory && s.advisory && p.advisory !== s.advisory) notes.push(`${s.advisory} issued`);
     if (p && p.type === s.type && (p.category || 0) === (s.category || 0) && p.winds !== s.winds) notes.push(`${s.name} winds ${mph(p.winds)} -> ${mph(s.winds)} mph`);
   }
+  const pl = prior.landfall, cl = cur.landfall;
+  if (pl && cl && pl.state === cl.state && pl.eta !== cl.eta && Math.abs(new Date(pl.eta) - new Date(cl.eta)) >= 3600e3) notes.push(`forecast landfall near ${cl.near || cl.state} now ${fmtCT(cl.eta)} (was ${fmtCT(pl.eta)})`);
+  if (pl && cl && pl.near && cl.near && pl.near !== cl.near && pl.state === cl.state) notes.push(`forecast landfall now near ${cl.near} (was ${pl.near})`);
   return notes;
 }
 
@@ -933,6 +968,15 @@ async function main() {
   status.google = await optional('Google ensemble', gatherGoogle(storms[0], status.tracked?.invest || explicitInvest))
     .then((g) => (g ? { ...g, system: systemKey, computedAt: NOW.toISOString() } : carryGoogle())) // no fresh file this check: keep a recent summary for the same system
     .catch((e) => { console.warn(`Google ensemble unavailable: ${e.message}`); return carryGoogle(); });
+  // NHC's forecast discussion and Key Messages for the tracked storm (page only; never an alert input).
+  status.discussion = null;
+  const dsc = feedRes.status === 'fulfilled' && primary ? (feedRes.value.discussions || {})[primary.id] : null;
+  if (dsc?.url) {
+    status.discussion = await optional('NHC discussion', getOpt(`tcd-${primary.id}.html`, dsc.url).then((h) => parseTCD(h, { id: primary.id, advNum: dsc.advNum })))
+      .then((d) => (d ? { storm: primary.id, url: dsc.url, issuedAt: dsc.issuance || null, ...d } : null))
+      .catch((e) => { console.warn(`NHC discussion unavailable: ${e.message}`); return null; });
+  }
+  if (!status.discussion && primary && prior?.discussion?.storm === primary.id) status.discussion = { ...prior.discussion, stale: true };
   const changes = diff(prior, status);
   const changed = changes.length > 0;
   if (changed) { status.internal.baseline7d = status.gulf.formation7d; status.internal.baseline48 = status.gulf.formation48; }
