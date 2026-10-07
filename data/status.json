@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-07T17:44:18.838Z",
-  "lastAttemptAt": "2026-10-07T17:44:18.838Z",
-  "nextCheck": "2026-10-07T18:05:00.000Z",
+  "updatedAt": "2026-10-07T18:05:11.987Z",
+  "lastAttemptAt": "2026-10-07T18:05:11.987Z",
+  "nextCheck": "2026-10-07T18:35:00.000Z",
   "alertLevel": "threat",
-  "headline": "Tropical Storm Isaias: 45 mph, 22.4N 93.6W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 11 PM CT (approximate). Tropical alerts in effect: AL (Hurricane Watch, Storm Surge Watch); FL (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); MS (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); LA (Storm Surge Watch, Tropical Storm Watch).",
+  "headline": "Tropical Storm Isaias: 50 mph, 22.6N 93.4W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 11 PM CT (approximate). Tropical alerts in effect: AL (Hurricane Watch, Storm Surge Watch); FL (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); MS (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); LA (Storm Surge Watch, Tropical Storm Watch).",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -17,17 +17,17 @@
       "bin": "AT4",
       "name": "Tropical Storm Isaias",
       "type": "Tropical Storm",
-      "winds": 40,
+      "winds": 45,
       "category": 0,
-      "location": "22.4N 93.6W, Gulf",
+      "location": "22.6N 93.4W, Gulf",
       "movement": "ENE at 9 mph",
       "advisory": "NHC advisory 4",
       "advisoryAt": "2026-10-07T15:00:00.000Z",
       "pos": {
-        "lat": 22.4,
-        "lonW": 93.6
+        "lat": 22.6,
+        "lonW": 93.4
       },
-      "posAt": "2026-10-07T15:00:00.000Z",
+      "posAt": "2026-10-07T18:00:00.000Z",
       "forecast": [
         {
           "t": "2026-10-08T00:00:00.000Z",
@@ -93,18 +93,6 @@
         ]
       }
     },
-    "AL": {
-      "level": "watch",
-      "text": "Hurricane Watch, Storm Surge Watch",
-      "counties": {
-        "01097": [
-          "HWA"
-        ],
-        "01003": [
-          "HWA"
-        ]
-      }
-    },
     "FL": {
       "level": "watch",
       "text": "Hurricane Watch, Storm Surge Watch, Tropical Storm Watch",
@@ -155,6 +143,18 @@
           "TWA"
         ]
       }
+    },
+    "AL": {
+      "level": "watch",
+      "text": "Hurricane Watch, Storm Surge Watch",
+      "counties": {
+        "01003": [
+          "HWA"
+        ],
+        "01097": [
+          "HWA"
+        ]
+      }
     }
   },
   "landfall": {
@@ -182,8 +182,8 @@
     "stormId": "al092026",
     "name": "Tropical Storm Isaias",
     "lastPos": {
-      "lat": 22.4,
-      "lonW": 93.6
+      "lat": 22.6,
+      "lonW": 93.4
     },
     "since": "2026-10-07T09:00:00.000Z"
   },
@@ -212,7 +212,7 @@
     "peakMedianKt": 106,
     "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 42, AL 7), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (34 major); typical peak 120 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-07T17:44:18.838Z"
+    "computedAt": "2026-10-07T18:05:11.987Z"
   },
   "discussion": {
     "storm": "al092026",
