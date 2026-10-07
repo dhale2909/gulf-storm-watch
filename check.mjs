@@ -466,8 +466,9 @@ export function parseAdeck(text) {
   const tracks = [];
   for (const [tech, t] of latest) {
     if (cycleMs(init) - cycleMs(t.date) > 12 * 3600e3) continue; // stale run
-    tracks.push({ tech, group: modelGroup(tech), name: (MODEL_NAMES.find(([re]) => re.test(tech)) || [0, tech])[1],
-      coords: [...t.pts.entries()].sort((a, b) => a[0] - b[0]).map(([, p]) => p) });
+    const pts = [...t.pts.entries()].sort((a, b) => a[0] - b[0]);
+    tracks.push({ tech, group: modelGroup(tech), name: (MODEL_NAMES.find(([re]) => re.test(tech)) || [0, tech])[1], init: t.date,
+      coords: pts.map(([, p]) => p), times: pts.map(([tau]) => new Date(cycleMs(t.date) + tau * 3600e3).toISOString()) });
   }
   return { init, origin, tracks };
 }
@@ -517,10 +518,48 @@ async function gatherModels(gulf, storm, invest) {
     const run = new Date(cycleMs(d.init)).toLocaleString('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric' }) + ' CT';
     return {
       invest, winds: history.winds, history: history.features, label: `${d.tracks.length} model tracks, latest run ${run}`,
-      features: d.tracks.map((t) => ({ type: 'Feature', geometry: { type: 'LineString', coordinates: t.coords }, properties: { role: 'model', tech: t.tech, name: t.name, group: t.group } })),
+      features: d.tracks.map((t) => ({ type: 'Feature', geometry: { type: 'LineString', coordinates: t.coords }, properties: { role: 'model', tech: t.tech, name: t.name, group: t.group, init: t.init, times: t.times } })),
     };
   }
   return null;
+}
+
+// "Daniel's Average": one line averaging the map's default tracks (NHC official, each consensus / ensemble-mean family
+// once, Google DeepMind, and the two Euro typical paths) at matching valid times. Each track is first shifted to start
+// at the storm's current position, the shift fading out over 48 hours (as NHC's interpolated aids do), so the line
+// starts on the storm. It runs while at least 60% of the tracks (and 3 or more) still have a position. Display only.
+const AVG_FAMILIES = [[/^TVC/, 'TVCN consensus'], [/^HCCA$/, 'HCCA consensus'], [/^GFEX$/, 'GFS/European consensus'], [/^AEM/, 'GEFS ensemble mean'], [/^CEM/, 'Canadian ensemble mean'], [/^(EEM|EMN)/, 'European ensemble mean (NHC file)'], [/^GDM/, 'Google DeepMind AI']];
+export function danielsAverage({ start, official = [], models = [], euro = [] }) {
+  if (!start || !Number.isFinite(Date.parse(start.t))) return null;
+  const t0 = Date.parse(start.t);
+  const trim = (pts) => { const a = pts.filter((p) => Number.isFinite(p.t) && Number.isFinite(p.lat) && Number.isFinite(p.lonW)).sort((x, y) => x.t - y.t);
+    while (a.length > 1 && a[a.length - 1].lat === a[a.length - 2].lat && a[a.length - 1].lonW === a[a.length - 2].lonW) a.pop(); // a track held at its end point
+    return a; };
+  const tracks = [];
+  if (official.length) tracks.push({ name: 'NHC official', pts: trim([{ t: t0, lat: start.lat, lonW: start.lonW }, ...official.map((q) => ({ t: Date.parse(q.t), lat: q.lat, lonW: q.lonW }))]) });
+  for (const [re, name] of AVG_FAMILIES) {
+    const fam = models.filter((f) => re.test(f.tech || '') && Array.isArray(f.times) && f.times.length === f.coords.length)
+      .sort((a, b) => (b.init || '').localeCompare(a.init || '') || (/[N]$|^HCCA$|^GFEX$/.test(b.tech) ? 1 : 0) - (/[N]$|^HCCA$|^GFEX$/.test(a.tech) ? 1 : 0));
+    if (fam[0]) tracks.push({ name, pts: trim(fam[0].coords.map(([lon, lat], i) => ({ t: Date.parse(fam[0].times[i]), lat, lonW: -lon }))) });
+  }
+  for (const e of euro) tracks.push({ name: e.name, pts: trim(e.coords.map(([lon, lat], i) => ({ t: Date.parse(e.run) + e.hours[i] * 3600e3, lat, lonW: -lon }))) });
+  const at = (pts, t) => { if (!pts.length || t < pts[0].t || t > pts[pts.length - 1].t) return null;
+    for (let i = 1; i < pts.length; i++) if (t <= pts[i].t) { const a = pts[i - 1], b = pts[i], f = (t - a.t) / (b.t - a.t || 1); return { lat: a.lat + (b.lat - a.lat) * f, lonW: a.lonW + (b.lonW - a.lonW) * f }; }
+    return pts.length === 1 && pts[0].t === t ? pts[0] : null; };
+  const usable = tracks.filter((k) => k.pts.length >= 2 && at(k.pts, t0));
+  if (usable.length < 3) return null;
+  for (const k of usable) { const p = at(k.pts, t0); k.dLat = start.lat - p.lat; k.dLon = start.lonW - p.lonW; }
+  const need = Math.max(3, Math.ceil(0.6 * usable.length));
+  const path = [{ t: new Date(t0).toISOString(), lat: start.lat, lonW: start.lonW, n: usable.length }];
+  for (let h = 6; h <= 168; h += 6) {
+    const t = t0 + h * 3600e3, fade = Math.max(0, 1 - h / 48);
+    const ps = usable.map((k) => { const p = at(k.pts, t); return p && { lat: p.lat + k.dLat * fade, lonW: p.lonW + k.dLon * fade }; }).filter(Boolean);
+    if (ps.length < need) break;
+    path.push({ t: new Date(t).toISOString(), lat: +(ps.reduce((a, p) => a + p.lat, 0) / ps.length).toFixed(2), lonW: +(ps.reduce((a, p) => a + p.lonW, 0) / ps.length).toFixed(2), n: ps.length });
+  }
+  if (path.length < 3) return null;
+  const hit = landfallPoint(path);
+  return { path, members: usable.map((k) => k.name), landfall: hit ? { state: coastState(hit), near: nearestTown(hit), eta: hit.t, lat: +hit.lat.toFixed(2), lonW: +hit.lonW.toFixed(2) } : null };
 }
 
 // Google DeepMind Weather Lab 50-member ensemble. Used under Google's Real-Time Weather Forecasting
@@ -915,6 +954,7 @@ async function main() {
   // Coastal watches and warnings come from NWS, a different service: read them whatever NHC did.
   const ww = await gatherAlerts(prior, storms.length > 0);
 
+  const primary0 = () => storms[0] || null;
   // Optional layers, each bounded by the time budget: if a service is slow or down, keep the last map and carry on.
   const explicitInvest = gulf?.investHint || (!replaced && prevTracked?.invest) || null;
   let map = await optional('map layers', gatherMap(gulf, storms[0])).catch((e) => { console.warn(`map layers unavailable: ${e.message}`); return null; });
@@ -930,6 +970,16 @@ async function main() {
       .map((f) => (map.kind === 'storm' && f.properties.role === 'pastpt' ? { ...f, properties: { ...f.properties, now: false } } : f));
     map.features = [...models.features, ...base, ...hist];
     map.models = models.label;
+  }
+  // Daniel's Average (storm stage): official track + default model tracks + the Euro typical paths from the last Euro run.
+  if (map && map.kind === 'storm' && primary0()?.pos && primary0()?.advisoryAt) {
+    const s0 = primary0();
+    const ec = await readJSON('data/ecmwf.json', { ensembles: [] });
+    const euro = (ec.ensembles || []).filter((e) => NOW - Date.parse(e.run) < 24 * 3600e3).flatMap((e) => e.features.filter((f) => f.properties.role === 'ecmean' && Array.isArray(f.properties.hours))
+      .map((f) => ({ name: e.key === 'ecaie' ? 'Euro AI ensemble typical path' : 'Euro ensemble typical path', run: e.run, hours: f.properties.hours, coords: f.geometry.coordinates })));
+    const models = map.features.filter((f) => f.properties.role === 'model').map((f) => ({ tech: f.properties.tech, init: f.properties.init, times: f.properties.times, coords: f.geometry.coordinates }));
+    const avg = danielsAverage({ start: { t: s0.advisoryAt, lat: s0.pos.lat, lonW: s0.pos.lonW }, official: s0.forecastStale ? [] : s0.forecast || [], models, euro });
+    if (avg) map.features.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: avg.path.map((p) => [-p.lonW, p.lat]) }, properties: { role: 'daniel', members: avg.members, landfall: avg.landfall, times: avg.path.map((p) => p.t) } });
   }
   if (gulf && gulf.investHint) gulf.invest = gulf.investHint; // NHC names the Invest in the outlook heading: that is the identity
   else if (gulf && models?.invest) { gulf.invest = models.invest; }

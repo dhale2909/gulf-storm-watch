@@ -117,6 +117,7 @@ a{color:var(--accent)}
 .credit a:hover{opacity:1}.credit img{height:24px;width:auto}
 #ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 6px);transform:translate(-50%,0);z-index:2000;padding:6px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--fg);font:600 13px var(--body);opacity:0;transition:opacity .15s;pointer-events:none}
 #ptr.show{opacity:1}
+.dan-note{font-size:14px;margin:6px 0 2px;color:var(--fg)}.dan-note b{color:#2ee6d6}
 .leaflet-tooltip.pt{font:500 12px var(--body);padding:3px 8px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;box-shadow:none}
 .leaflet-tooltip.pt:before{display:none}
 .xmark{font:700 20px/20px var(--display);color:var(--landfall);text-align:center;text-shadow:0 0 3px var(--panel),0 0 3px var(--panel)}
@@ -259,6 +260,7 @@ body.card .leaflet-control-container{display:none}
     <div id="map"></div>
     <div class="legend" id="map-legend"></div>
     <div class="legend" id="ec-legend"></div>
+    <div class="dan-note" id="dan-note" hidden></div>
     <details class="fold">
       <summary>About the lines on this map</summary>
       <div class="map-note" id="map-note"></div>
@@ -552,7 +554,8 @@ body.card .leaflet-control-container{display:none}
     $("log").innerHTML=rows.length?rows.map(function(x){return '<div class="log-row"><span class="mono">'+fmt(x.ts)+'</span><span>'+esc(x.summary)+'</span><span class="chg" data-c="'+(x.changed?1:0)+'" data-u="'+(x.updated?1:0)+'">'+(x.changed?(x.pushed?"ALERT SENT":"ALERT"):x.updated?"update":"no change")+'</span></div>'}).join(""):'<div class="empty">No checks logged yet.</div>';
   }
   // ----- map: development area before formation; cone, track and coastal alerts after -----
-  var map, group, modelGroups={}, lastBounds;
+  var map, group, modelGroups={}, danielGroup, lastBounds;
+  var DAN="#2ee6d6"; // Daniel's Average: a colour no other line uses
   var RISK={Low:"#e8c547",Medium:"#ef8f2b",High:"#d64545"};
   var WW={HWR:["#d6202a","Hurricane warning"],HWA:["#f08ad0","Hurricane watch"],TWR:["#2456d6","Tropical storm warning"],TWA:["#e6c800","Tropical storm watch"]};
   var WIND=[[96,"#b3261e","Major hurricane"],[64,"#d8631c","Hurricane"],[34,"#ef8f2b","Tropical storm"],[0,"#e8c547","Depression"]];
@@ -599,6 +602,7 @@ body.card .leaflet-control-container{display:none}
     var add=function(key,label,g){ names[label]=key; overlays[label]=g; if(!off[key]) g.addTo(map); return g; };
     group=add("official","NHC official (area, track, alerts)",L.featureGroup());
     ["model","consensus","google","ens"].forEach(function(k){ modelGroups[k]=add(k,MODEL[k][3],L.layerGroup()); });
+    danielGroup=add("daniel","Daniel's Average",L.layerGroup());
     Object.keys(EC).forEach(function(k){ ecGroups[k]=add(k,EC[k][2]+": typical path",L.layerGroup()); ecGroups[k+"_s"]=add(k+"_s",EC[k][2]+": shaded spread",L.layerGroup()); ecGroups[k+"_m"]=add(k+"_m",EC[k][2]+": all member lines",L.layerGroup()); });
     L.control.layers(null,overlays,{collapsed:true}).addTo(map);
     var remember=function(e){ off[names[e.name]]=e.type==="overlayremove"; try{ localStorage.setItem("gsw-layers-off-3",JSON.stringify(off)); }catch(x){} };
@@ -607,11 +611,17 @@ body.card .leaflet-control-container{display:none}
   }
   function renderMap(m){
     initMap(); if(!map) return;
-    group.clearLayers(); Object.keys(modelGroups).forEach(function(k){modelGroups[k].clearLayers()});
+    group.clearLayers(); Object.keys(modelGroups).forEach(function(k){modelGroups[k].clearLayers()}); if(danielGroup) danielGroup.clearLayers();
     var fg=getComputedStyle(document.documentElement).getPropertyValue("--fg").trim()||"#13202b";
     var muted=getComputedStyle(document.documentElement).getPropertyValue("--muted").trim()||"#5b6b78";
-    var fs=(m&&m.features)||[], kinds={}, mods={}, risk, hasPast=false, hasNow=false, maxCat=0;
+    var fs=(m&&m.features)||[], kinds={}, mods={}, risk, hasPast=false, hasNow=false, maxCat=0, dan=null;
     fs.forEach(function(f){ var p=f.properties||{}, r=p.role, c=f.geometry.coordinates, l;
+      if(r==="daniel"){ dan=p;
+        var tip="Daniel's Average of "+(p.members||[]).length+" tracks: "+esc((p.members||[]).join(", "))+(p.landfall?". Reaches the coast near "+esc(p.landfall.near)+" about "+esc(ctShort(p.landfall.eta)):"");
+        danielGroup.addLayer(L.geoJSON(f,{style:{color:"#0d151c",weight:7*K,opacity:.75}}));
+        danielGroup.addLayer(L.geoJSON(f,{style:{color:DAN,weight:3.6*K,opacity:1,dashArray:CARD?"26 14":"10 7"}}).bindTooltip(tip,{sticky:true}));
+        if(p.landfall&&p.landfall.lat!=null) danielGroup.addLayer(L.circleMarker([p.landfall.lat,-p.landfall.lonW],{radius:6*(CARD?2:1),color:DAN,weight:3*(CARD?2:1),fillColor:"#0d151c",fillOpacity:1}).bindTooltip("Daniel's Average reaches the coast near "+esc(p.landfall.near)+" about "+esc(ctShort(p.landfall.eta))));
+        return; }
       if(r==="model"){ mods[p.group]=1; var ms=MODEL[p.group]||MODEL.model;
         l=L.geoJSON(f,{style:{color:ms[0],weight:ms[1]*K,opacity:ms[2]}}).bindTooltip(esc(p.name)+" ("+esc(p.tech)+")",{sticky:true}); }
       else if(r==="area"){ risk=p.risk; l=L.geoJSON(f,{style:{color:RISK[p.risk]||RISK.Medium,weight:2*K,dashArray:CARD?"14 10":"6 4",fillOpacity:.28}}).bindTooltip("Where NHC expects development: "+esc(p.prob7)+" within 7 days",{sticky:true}); }
@@ -641,13 +651,16 @@ body.card .leaflet-control-container{display:none}
     var modelLegend=["model","consensus","google","ens"].map(function(k){return mods[k]?sw(MODEL[k][0],MODEL[k][3],1):""}).join("");
     $("map-title").textContent=kind==="storm"?"Forecast track: "+m.name:kind==="outlook"?(hasModels?"Development area and model tracks":"Development area"):"Storm map";
     $("map-src").textContent=(m&&m.source)||"NHC";
+    $("dan-note").hidden=!dan;
+    if(dan) $("dan-note").innerHTML="<b>Daniel\u2019s Average</b> of "+(dan.members||[]).length+" tracks"+(dan.landfall?" reaches the coast near <b>"+esc(dan.landfall.near)+"</b> about "+esc(ctShort(dan.landfall.eta)):" stays off the AL\u2013FL coast")+".";
     $("map-legend").innerHTML=kind==="storm"
-      ? '<span><i class="wl lg">45</i>Forecast wind, mph</span>'+(maxCat?'<span>'+[1,2,3,4,5].map(function(c){return '<i class="wl lg c'+c+'">'+c+'</i>'}).join("")+'Hurricane category</span>':'')+sw(fg,"NHC forecast track",1)+sw(muted,"Past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")+modelLegend
+      ? '<span><i class="wl lg">45</i>Forecast wind, mph</span>'+(maxCat?'<span>'+[1,2,3,4,5].map(function(c){return '<i class="wl lg c'+c+'">'+c+'</i>'}).join("")+'Hurricane category</span>':'')+sw(fg,"NHC forecast track",1)+sw(muted,"Past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")+(dan?sw(DAN,"Daniel's Average",1):"")+modelLegend
       : kind==="outlook" ? sw(RISK[risk]||RISK.Medium,"7-day development area")+(hasNow?'<span><b style="color:var(--landfall)">&#9679;</b> Latest position</span>':'<span><b style="color:var(--landfall)">&#10005;</b> Disturbance now</span>')+(hasPast?sw(fg,"Where it has been",1):"")+modelLegend : "";
     $("map-note").textContent=kind==="storm"
       ? "Labels are NHC forecast positions of the storm center with the expected wind in mph; hover or tap one for the time. The spread of the model tracks shows how uncertain the path is; wind, surge and rain reach well outside the center's line."
       : kind==="outlook" ? "NHC has not issued a forecast track yet. The shaded area is where it expects the system to develop over the next 7 days; the track and any coastal watches appear here automatically once a depression forms."
       : (m&&m.unavailable) ? "The map could not be loaded just now; it will retry on the next refresh." : "No Gulf system to map.";
+    if(dan) $("map-note").textContent+=" The dashed aqua line is Daniel\u2019s Average: the average of "+(dan.members||[]).join(", ")+", matched at the same forecast times every 6 hours. Each track is first shifted to start at the storm\u2019s current position (the shift fades out over 48 hours), and the line ends where fewer than 60% of them still have a position. It is a simple average of guidance, not a forecast.";
     if(hasModels) $("map-note").textContent+=" Thin coloured lines are raw computer-model runs ("+(m.models||"NHC model guidance")+"). They are not a forecast, they disagree with each other, and they shift from run to run; hover or tap a line for the model name. Switch each group on or off with the layers button on the map.";
     else if(kind==="outlook") $("map-note").textContent+=" Model tracks will be drawn here once NHC designates the system as an Invest and starts publishing guidance for it.";
   }

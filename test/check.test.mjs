@@ -477,3 +477,20 @@ test('the NHC discussion yields its reasoning and numbered Key Messages, and rej
   assert.equal(m.parseTCD(tcd, { id: 'al092026', advNum: '003' }), null, 'a discussion for another advisory is not this one');
   assert.equal(m.parseTCD('<html>busy</html>'), null);
 });
+
+// ---- Daniel's Average ----
+test("Daniel's Average starts on the storm, matches tracks by valid time and stops when too few remain", () => {
+  const t = (h) => new Date(Date.parse('2026-10-08T00:00:00Z') + h * 3600e3).toISOString();
+  const line = (lon0, n, init) => ({ coords: Array.from({ length: n }, (_, i) => [-(lon0 - i * 0.5), 22 + i]), times: Array.from({ length: n }, (_, i) => t(init + i * 12)), init: '2026100800' });
+  const avg = m.danielsAverage({
+    start: { t: t(0), lat: 22, lonW: 95 },
+    official: [{ t: t(24), lat: 24, lonW: 94 }, { t: t(48), lat: 26, lonW: 93 }],
+    models: [{ tech: 'TVCN', ...line(95, 6, 0) }, { tech: 'HCCA', ...line(95.4, 6, 0) }, { tech: 'GDMN', ...line(94.6, 4, 0) },
+      { tech: 'AEMN', ...line(95, 6, -6), init: '2026100718' }, { tech: 'AEMI', ...line(99, 6, 0), init: '2026100718' }],
+    euro: [{ name: 'Euro ensemble typical path', run: t(-6), hours: [0, 12, 24, 36, 48, 60], coords: line(95, 6, -6).coords }],
+  });
+  assert.equal(avg.path[0].lat, 22); assert.equal(avg.path[0].lonW, 95, 'starts on the storm');
+  assert.deepEqual(avg.members, ['NHC official', 'TVCN consensus', 'HCCA consensus', 'GEFS ensemble mean', 'Google DeepMind AI', 'Euro ensemble typical path'], 'one track per family: AEMN, not AEMI');
+  assert.ok(avg.path.length >= 5 && avg.path.length <= 11, 'stops when fewer than 60% of tracks remain');
+  assert.equal(m.danielsAverage({ start: { t: t(0), lat: 22, lonW: 95 }, official: [], models: [], euro: [] }), null, 'needs at least three tracks');
+});

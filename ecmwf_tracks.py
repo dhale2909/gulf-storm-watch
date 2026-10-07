@@ -23,7 +23,7 @@ ENSEMBLES = [
     ("ecaie", "European AI ensemble (AIFS)", "aifs-ens/0p25/enfo", {0: 360, 6: 360, 12: 360, 18: 360}),
 ]
 MAX_HOURS = 168
-VERSION = 5  # bump to force a rebuild of data/ecmwf.json when its shape changes
+VERSION = 6  # bump to force a rebuild of data/ecmwf.json when its shape changes
 CELL = 0.25  # swath grid size, degrees
 REACH = 0.6  # a member "covers" grid cells within this many degrees of its track
 MISSING = 1e99
@@ -140,15 +140,17 @@ def mean_track(gulf, members):
         for hours in range(end[0] + 6, last_hour + 1, 6):
             by_hour.setdefault(hours, {}).setdefault(t["member"], (end[1], end[2]))
     need = max(5, 0.6 * members)
-    line = []
+    line, kept = [], []
     for hours in sorted(by_hour):
         pos = list(by_hour[hours].values())
         if len(pos) >= need:
             line.append([round(median(p[1] for p in pos), 1), round(median(p[0] for p in pos), 1)])
+            kept.append(hours)
     if len(line) < 3:
-        return None
+        return None, None
     # Light smoothing: membership changes hour to hour, which makes the raw average wobble.
-    return [line[0]] + [[round((a[0] + b[0] + c[0]) / 3, 1), round((a[1] + b[1] + c[1]) / 3, 1)] for a, b, c in zip(line, line[1:], line[2:])] + [line[-1]]
+    smooth = [line[0]] + [[round((a[0] + b[0] + c[0]) / 3, 1), round((a[1] + b[1] + c[1]) / 3, 1)] for a, b, c in zip(line, line[1:], line[2:])] + [line[-1]]
+    return smooth, kept  # kept: forecast hour of each point, so the line can be lined up with other tracks by time
 
 
 def swaths(gulf, members):
@@ -209,9 +211,9 @@ def summarize(key, label, stamp, tracks):
             coast[coast_state(hit[2])] += 1
             etas.append(hit[0])
     # Cleaner default view: one average line and a shaded swath; member lines stay available behind a switch.
-    mean = mean_track(gulf, len(seen))
+    mean, hours = mean_track(gulf, len(seen))
     if mean:
-        features.append({"type": "Feature", "geometry": {"type": "LineString", "coordinates": mean}, "properties": {"role": "ecmean", "ens": key, "members": len(seen)}})
+        features.append({"type": "Feature", "geometry": {"type": "LineString", "coordinates": mean}, "properties": {"role": "ecmean", "ens": key, "members": len(seen), "hours": hours}})
     for level, rects in swaths(gulf, len(seen)):
         features.append({"type": "Feature", "geometry": {"type": "MultiPolygon", "coordinates": rects}, "properties": {"role": "ecswath", "ens": key, "level": level}})
     return {
