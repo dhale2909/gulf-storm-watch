@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-07T14:39:25.759Z",
-  "lastAttemptAt": "2026-10-07T14:39:25.759Z",
-  "nextCheck": "2026-10-07T15:05:00.000Z",
+  "updatedAt": "2026-10-07T15:05:12.860Z",
+  "lastAttemptAt": "2026-10-07T15:05:12.860Z",
+  "nextCheck": "2026-10-07T15:35:00.000Z",
   "alertLevel": "threat",
-  "headline": "Tropical Storm Isaias: 40 mph, 22.0N 94.1W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Gulf Shores, AL around Fri, Oct 9, 11 PM CT (approximate).",
+  "headline": "Tropical Storm Isaias: 45 mph, 22.4N 93.6W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 11 PM CT (approximate). Tropical alerts in effect: FL (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch).",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -17,77 +17,80 @@
       "bin": "AT4",
       "name": "Tropical Storm Isaias",
       "type": "Tropical Storm",
-      "winds": 35,
+      "winds": 40,
       "category": 0,
-      "location": "22.0N 94.1W, Gulf",
+      "location": "22.4N 93.6W, Gulf",
       "movement": "ENE at 9 mph",
-      "advisory": "NHC advisory 3",
-      "advisoryAt": "2026-10-07T09:00:00.000Z",
+      "advisory": "NHC advisory 4",
+      "advisoryAt": "2026-10-07T15:00:00.000Z",
       "pos": {
-        "lat": 22,
-        "lonW": 94.1
+        "lat": 22.4,
+        "lonW": 93.6
       },
-      "posAt": "2026-10-07T09:00:00.000Z",
+      "posAt": "2026-10-07T15:00:00.000Z",
       "forecast": [
         {
-          "t": "2026-10-07T18:00:00.000Z",
-          "lat": 22.2,
-          "lonW": 92.9,
+          "t": "2026-10-08T00:00:00.000Z",
+          "lat": 22.7,
+          "lonW": 92.4,
           "wind": 50
         },
         {
-          "t": "2026-10-08T06:00:00.000Z",
-          "lat": 22.7,
-          "lonW": 91.4,
+          "t": "2026-10-08T12:00:00.000Z",
+          "lat": 23.4,
+          "lonW": 90.8,
           "wind": 65
         },
         {
-          "t": "2026-10-08T18:00:00.000Z",
-          "lat": 23.9,
-          "lonW": 89.7,
+          "t": "2026-10-09T00:00:00.000Z",
+          "lat": 24.6,
+          "lonW": 89.2,
           "wind": 80
         },
         {
-          "t": "2026-10-09T06:00:00.000Z",
-          "lat": 25.5,
-          "lonW": 88.5,
+          "t": "2026-10-09T12:00:00.000Z",
+          "lat": 26.6,
+          "lonW": 88.1,
           "wind": 95
         },
         {
-          "t": "2026-10-09T18:00:00.000Z",
-          "lat": 27.7,
-          "lonW": 87.7,
+          "t": "2026-10-10T00:00:00.000Z",
+          "lat": 29.2,
+          "lonW": 87.5,
           "wind": 90
         },
         {
-          "t": "2026-10-10T06:00:00.000Z",
-          "lat": 30.8,
-          "lonW": 87.7,
-          "wind": 75
+          "t": "2026-10-10T12:00:00.000Z",
+          "lat": 32.2,
+          "lonW": 87.6,
+          "wind": 45
         },
         {
-          "t": "2026-10-11T06:00:00.000Z",
-          "lat": 38.2,
+          "t": "2026-10-11T12:00:00.000Z",
+          "lat": 38,
           "lonW": 87.5,
-          "wind": 25
+          "wind": 20
         }
       ],
       "forecastStale": false,
-      "gulfRisk": "Forecast track reaches the coast near Gulf Shores, AL around Fri, Oct 9, 11 PM CT (approximate)"
+      "gulfRisk": "Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 11 PM CT (approximate)"
     }
   ],
   "watchesWarnings": {
     "note": "",
-    "FL": {},
-    "AL": {},
     "LA": {},
+    "AL": {},
+    "FL": {
+      "level": "watch",
+      "text": "Hurricane Watch, Storm Surge Watch, Tropical Storm Watch"
+    },
     "MS": {}
   },
   "landfall": {
     "state": "AL",
-    "eta": "2026-10-10T03:47:36.774Z",
-    "near": "Gulf Shores, AL",
-    "windKt": 80
+    "eta": "2026-10-10T04:11:09.767Z",
+    "near": "Orange Beach, AL",
+    "windKt": 75
   },
   "landfallOccurred": null,
   "internal": {
@@ -108,8 +111,8 @@
     "stormId": "al092026",
     "name": "Tropical Storm Isaias",
     "lastPos": {
-      "lat": 22,
-      "lonW": 94.1
+      "lat": 22.4,
+      "lonW": 93.6
     },
     "since": "2026-10-07T09:00:00.000Z"
   },
@@ -138,24 +141,25 @@
     "peakMedianKt": 106,
     "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 42, AL 7), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (34 major); typical peak 120 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-07T14:39:25.759Z"
+    "computedAt": "2026-10-07T15:05:12.860Z"
   },
   "discussion": {
     "storm": "al092026",
     "url": "https://www.nhc.noaa.gov/text/MIATCDAT4.shtml",
-    "issuedAt": "2026-10-07T09:00:00.000Z",
-    "number": 3,
-    "issued": "400 AM CDT Wed Oct 07 2026",
+    "issuedAt": "2026-10-07T15:00:00.000Z",
+    "number": 4,
+    "issued": "1000 AM CDT Wed Oct 07 2026",
     "paragraphs": [
-      "Satellite imagery depicts a bursting pattern with the tropical cyclone this morning, with cloud top temperatures below -85 C in the deep convection close to the estimated center. Earlier, an 0307 UTC ASCAT-C pass suggested the low-level circulation was still rather broad, with a peak wind retrieval of only 31 kt. However, the bursting convection already appears to be tightening up the circulation somewhat, with a nearby surface observation from a buoy north of the center recently reporting a sustained 10 m adjusted wind of 35 kt. This information is enough to upgrade the depression to Tropical Storm Isaias for this advisory. This initial intensity will be 35 kt, which also agrees with the 06 UTC Dvorak fix of T2.5/35 kt. Both Air Force Reserve and NOAA Hurricane Hunter reconnaissance missions are scheduled to sample the tropical storm later today.",
-      "Isaias is estimated to be moving east-northeastward this morning at 075/7 kt. This general motion should continue today as the storm's steering is influenced by a zonally oriented mid-level trough currently draped along the northern Gulf coast. Over time, this trough is expected to be reinforced by another short-wave that is moving across the Rocky Mountains, with the trough ultimately sharpening up northwest of Isaias over Texas. At the same time, a subtropical ridge centered south of Bermuda is expected to shift westward, helping to enhance the deep-layer southerly flow over the eastern Gulf. Thus, Isaias is expected to turn northeastward and then northward on Thursday and Friday, making its approach to the northern Gulf coast in 60-72 h. As mentioned in the previous discussion, there remains quite a bit of along and across-track spread in the track guidance, with the AI-model guidance remaining on the east side, and physics-based models on the west side of the guidance envelope. The NHC track forecast continues to favor more of the eastward solutions, but not quite as far east as the latest HFIP Corrected Consensus Approach (HCCA) or Google DeepMind ensemble mean (GDMI). This latest track is a eastward shift compared to the previous forecast, but given large amount of across- and along-track spread users should continue to monitor forecast updates given the below-average track confidence.",
-      "The short-term environment near Isaias is rather favorable, with very warm 30-31 C sea-surface temperatures, plenty of deep-layer moisture, with light to moderate shear diagnosed between 10-15 kt by SHIPS guidance. While it is difficult to get an exact gauge on the tropical storm's core structure since there have not been any recent microwave images, it is worth noting both the 00 UTC HAFS-A/B runs appeared to initialize with a broad structure similar to what was noted in the earlier ASCAT pass. Despite their initial broad structure, these hurricane-regional models show Isaias developing an inner-core rather quickly later today. There was a notable increase in the intensity aid guidance this forecast cycle, and the NHC intensity forecast is being raised accordingly, now showing Isaias reaching a peak intensity of 95 kt in 48 h while it is over the central Gulf. Vertical wind shear then increases quite dramatically in the final 24 hours before the cyclone reaches the northern Gulf coast, though it is looking more likely that Isaias will be a significant hurricane when it reaches the coast. Near landfall, Isaias will also be interacting with the short-wave trough, likely leading to an expanding wind field. Additional convective and motion asymmetries will likely cause rain and wind impacts to extend far from the center on the eastern side of the storm."
+      "Isaias has gotten better organized during the past several hours with a large area of deep convection near and northeast of the center. Recent Air Force Hurricane Hunter data indicate that the center is re-forming a bit to the north of the previous advisory nearer to the mid-level center, with an estimated pressure of 1000 mb derived from dropsonde data. The initial wind speed is set to 40 kt in consideration of increase in satellite organization and the 4-mb dropsonde pressure fall, close to the UW-CIMSS SATCON values and many of the other objective estimates.",
+      "The storm is moving east-northeast at 7 kt. The motion should gradually bend northward and increase during the next few days as a trough along the northwestern Gulf coast amplifies and the subtropical ridge east of Florida builds westward. This pattern should cause a fast-moving Isaias to approach the northern Gulf coast by Friday afternoon. Model guidance continues to be somewhat split, with the AI-based models generally on the right side of the model envelope, and the physics based models on the left side. The new NHC forecast is nudged a bit eastward, but isn't as far east as the latest HFIP Corrected Consensus Approach (HCCA) or Google DeepMind ensemble mean (GDMI). It is worth noting that many of the stronger solutions tend to be on the eastern half of the guidance and faster, which necessitates a variety of watches at this time.",
+      "With the center re-formation, the low- and mid-level centers appear to be coming into better alignment. This structural change could facilitate rapid intensification during the next day or two given light-to-moderate shear along the forecast track, near-record SSTs for this time of the year and a very moist environment. Near landfall, increasing shear could cause some weakening, but it isn't certain how fast the winds will diminish. Regardless, Isaias should be growing in size as it approaches the northern Gulf coast due to a trough interaction. The latest guidance is very close to the last NHC intensity forecast, so little changes were made, and the NHC prediction is just below the corrected-consensus HCCA."
     ],
     "keyMessages": [
-      "There is an increasing risk of dangerous wind and storm surge impacts along portions of the northern Gulf Coast. Residents from Louisiana to the Florida Panhandle should closely monitor the latest forecast updates and ensure they have their hurricane plan in place. Hurricane and Storm Surge Watches will likely be required for a portion of the northern Gulf coast later today.",
-      "Tropical Storm Isaias will bring areas of heavy rainfall to the central U.S. Gulf coast and much of the Southeast Friday into the weekend. Flash and urban flooding, along with isolated river flooding, will be possible.",
-      "Yucatan Peninsula of Mexico: Tropical Storm Isaias is expected to strengthen and could bring gusty winds and areas of heavy rain to the western portion of the Yucatan Peninsula over the next day or two."
+      "Isaias is expected to strengthen into a strong hurricane before approaching the northern Gulf Coast on Friday. There is an increasing risk of life-threatening storm surge along portions of the northern Gulf coast, and a Storm Surge Watch has been issued from The Mouth of the Mississippi River to Yankeetown Florida. Residents in the watch area should follow advice given by local officials and evacuate if told to do so.",
+      "The risk of damaging hurricane force-winds is increasing over portions of the Florida Panhandle, southern Alabama, and Mississippi. A Hurricane Watch has been issued from Bay St. Louis, Mississippi, to Indian Pass, Florida. Residents in these areas should prepare for the possibility of long-duration power outages.",
+      "Isaias will bring areas of heavy rainfall to the central U.S. Gulf coast and much of the Southeast Friday into the weekend. Flash and urban flooding, along with isolated river flooding, will be possible.",
+      "Isaias could bring gusty winds and areas of heavy rain to the western portion of the Yucatan Peninsula over the next day or so."
     ],
-    "forecaster": "Papin"
+    "forecaster": "Blake"
   }
 }
