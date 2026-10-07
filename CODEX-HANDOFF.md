@@ -172,8 +172,13 @@ findings. The fixed ones below each have a regression test named by its F-number
   GitHub is unreachable and reports what it did (F74, F79); `scripts/mac-run.sh` is the Mac runner's source, with time
   limits on every step and a runner git identity (F9, F71, F96 in part). Test gaps closed: F80-F90, F93, F94.
 
-Open, for the owner (not implemented): alert-rule and geometry proposals F7, F8, F19, F31, F88, F102, F107; the Euro
-script's own coast boxes (F68); the R6-related Invest gate (F20, deferred with R6 until after the storm); public-feed and
-worker hardening that needs account settings (F44, and a Cloudflare rate-limit rule for F43); share-card content (alerts
-on the landfall line, F49) and credits on the card (F95); the owner's commit email (F96).
+Approved by the owner and done (Oct 7): F8 (while a storm is tracked, only the entry tagged with its Invest is that
+system; another designated Invest at 40%+ is announced once, tied to that storm; other entries are listed in the Gulf
+outlook panel), F7 (the outage notice follows the stage's own source), F44 code (optional NTFY_TOKEN and
+PUBLIC_NTFY_TOKEN publish tokens; reserving the public topic on ntfy.sh is the owner's account step).
+
+Open, for the owner (not implemented): alert-rule and geometry proposals F19, F31, F88 (an untagged 40%+ entry beside a
+storm is listed, not announced), F102, F107; the Euro script's own coast boxes (F68); the R6-related Invest gate (F20,
+deferred with R6 until after the storm); a Cloudflare rate-limit rule for F43; share-card content (alerts on the
+landfall line, F49) and credits on the card (F95); the owner's commit email (F96).
 
