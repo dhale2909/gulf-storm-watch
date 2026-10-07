@@ -786,7 +786,13 @@ body.card .leaflet-control-container{display:none}
     var RAW="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/main/";
     var json=function(base,f){return fetch(base+f+t,{cache:"no-store"}).then(function(r){if(!r.ok) throw 0; return r.json()})};
     var stamp=function(d){return d?Date.parse(d.lastAttemptAt||d.updatedAt||0)||0:0};
-    var bases=CARD?[""]:[RAW,""];
+    // A third copy, never stale: the newest commit's own files (raw files addressed by commit are not cached the way main/
+    // is, so a Mac check shows within seconds, not up to 5 minutes later). One small GitHub API request per refresh; if it
+    // is refused (rate limit) the page simply uses the other two copies.
+    var head=CARD?Promise.resolve(null):fetch("https://api.github.com/repos/dhale2909/gulf-storm-watch/commits/main",{headers:{Accept:"application/vnd.github.sha"},cache:"no-cache"})
+      .then(function(r){return r.ok?r.text():null}).then(function(s){return /^[0-9a-f]{40}$/.test((s||"").trim())?s.trim():null}).catch(function(){return null});
+    head.then(function(sha){
+    var bases=CARD?[""]:[RAW,""].concat(sha?["https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/"+sha+"/"]:[]);
     Promise.allSettled(bases.map(function(b){return json(b,"data/status.json").then(function(d){return {base:b,d:d}})})).then(function(rs){
       var best=null; rs.forEach(function(r){ if(r.status==="fulfilled"&&(!best||stamp(r.value.d)>stamp(best.d))) best=r.value; });
       if(!best){ if(!shownAt){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; } else if(lastStatus) freshness(lastStatus,true); return; }
@@ -796,6 +802,7 @@ body.card .leaflet-control-container{display:none}
       get("data/ecmwf.json").then(renderEC).catch(function(){ renderEC(null); }).then(function(){ done("e"); });
       get("data/map.json").then(renderMap).catch(function(){ renderMap({unavailable:true}); }).then(function(){ done("m"); });
       get("data/log.json").then(renderLog).catch(function(){});
+    });
     });
   }
   var shownAt=0; load(); setInterval(load,2*60*1000);
