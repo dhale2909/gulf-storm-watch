@@ -692,16 +692,25 @@ body.card .leaflet-control-container{display:none}
   function load(){
     satStill();
     var t="?t="+Date.now();
-    // Read straight from the repository so a slow or failed site rebuild never leaves the reading stale;
-    // fall back to the copy published with the page.
+    // Two copies of the data: the repository's file server (updated by every check, but it can hand out a copy up to
+    // 5 minutes old and ignores the ?t= tag) and the site itself (updated only by the GitHub checks). Ask both and use
+    // whichever reading is newer; the map, log and Euro layer then come from that same copy.
     var RAW="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/main/";
-    var get=function(f){return (CARD?Promise.reject():fetch(RAW+f+t)).then(function(r){if(!r.ok) throw 0; return r.json()}).catch(function(){return fetch(f+t).then(function(r){return r.json()})})};
-    get("data/status.json").then(renderStatus).catch(function(){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; });
-    get("data/ecmwf.json").then(renderEC).catch(function(){ renderEC(null); }).then(function(){ done("e"); });
-    get("data/map.json").then(renderMap).catch(function(){ renderMap({unavailable:true}); }).then(function(){ done("m"); });
-    get("data/log.json").then(renderLog).catch(function(){});
+    var json=function(base,f){return fetch(base+f+t,{cache:"no-store"}).then(function(r){if(!r.ok) throw 0; return r.json()})};
+    var stamp=function(d){return d?Date.parse(d.lastAttemptAt||d.updatedAt||0)||0:0};
+    var bases=CARD?[""]:[RAW,""];
+    Promise.allSettled(bases.map(function(b){return json(b,"data/status.json").then(function(d){return {base:b,d:d}})})).then(function(rs){
+      var best=null; rs.forEach(function(r){ if(r.status==="fulfilled"&&(!best||stamp(r.value.d)>stamp(best.d))) best=r.value; });
+      if(!best){ if(!shownAt){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; } return; }
+      if(stamp(best.d)<shownAt) return; // never step back to an older reading than the one on screen
+      shownAt=stamp(best.d); renderStatus(best.d);
+      var get=function(f){return json(best.base,f).catch(function(){return json(best.base===RAW?"":RAW,f)})};
+      get("data/ecmwf.json").then(renderEC).catch(function(){ renderEC(null); }).then(function(){ done("e"); });
+      get("data/map.json").then(renderMap).catch(function(){ renderMap({unavailable:true}); }).then(function(){ done("m"); });
+      get("data/log.json").then(renderLog).catch(function(){});
+    });
   }
-  load(); setInterval(load,2*60*1000);
+  var shownAt=0; load(); setInterval(load,2*60*1000);
   // Also refresh the moment the page is brought back into view.
   document.addEventListener("visibilitychange",function(){ if(!document.hidden) load(); });
 })();
