@@ -118,7 +118,8 @@ a{color:var(--accent)}
 .credit a:hover{opacity:1}.credit img{height:24px;width:auto}
 #ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 6px);transform:translate(-50%,0);z-index:2000;padding:6px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--fg);font:600 13px var(--body);opacity:0;transition:opacity .15s;pointer-events:none}
 #ptr.show{opacity:1}
-.dan-foot{margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}.dan-foot b{color:#2ee6d6;font-weight:600}
+/* Home Screen app: the status bar is see-through, so content scrolling under the clock gets a solid backdrop. */
+body::before{content:"";position:fixed;left:0;right:0;top:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:1500;pointer-events:none}
 .dan-note{font-size:14px;margin:6px 0 2px;color:var(--fg)}.dan-note b{color:#2ee6d6}
 .leaflet-tooltip.pt{font:500 12px var(--body);padding:3px 8px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;box-shadow:none}
 .leaflet-tooltip.pt:before{display:none}
@@ -227,7 +228,6 @@ body.card .leaflet-control-container{display:none}
       <div class="eyebrow">Landfall</div>
       <div class="val sm" id="st-lf">—</div>
       <div class="sub" id="st-lf-sub"></div>
-      <div class="sub dan-foot" id="st-lf-dan" hidden></div>
     </div>
     <div class="tile stage-form">
       <div class="eyebrow">7-day formation</div>
@@ -695,8 +695,8 @@ body.card .leaflet-control-container{display:none}
     var modelLegend=["model","consensus","google","ens"].map(function(k){return mods[k]?sw(MODEL[k][0],MODEL[k][3],1):""}).join("");
     $("map-title").textContent=kind==="storm"?"Forecast track: "+m.name:kind==="outlook"?(hasModels?"Development area and model tracks":"Development area"):"Storm map";
     $("map-src").textContent=(m&&m.source)||"NHC";
-    $("dan-note").hidden=!dan; $("st-lf-dan").hidden=!dan;
-    if(dan) $("st-lf-dan").innerHTML="<b>Daniel\u2019s Average:</b> "+(dan.landfall?"near "+esc(dan.landfall.near):"stays off the AL\u2013FL coast");
+    // Daniel's Average is summarised once, under the map (the owner removed the Landfall-tile footnote, Oct 7).
+    $("dan-note").hidden=!dan;
     if(dan) $("dan-note").innerHTML="<b>Daniel\u2019s Average</b> of "+(dan.members||[]).length+" tracks"+(dan.landfall?" reaches the coast near <b>"+esc(dan.landfall.near)+"</b> about "+esc(lfTime(dan.landfall.eta)):" stays off the AL\u2013FL coast")+".";
     $("map-legend").innerHTML=kind==="storm"
       ? '<span><i class="wl lg">45</i>Forecast wind, mph</span>'+(maxCat?'<span>'+[1,2,3,4,5].map(function(c){return '<i class="wl lg c'+c+'">'+c+'</i>'}).join("")+'Hurricane category</span>':'')+sw(fg,"NHC forecast track",1)+sw(muted,"Past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")+(dan?sw(DAN,"Daniel's Average",1):"")+modelLegend
