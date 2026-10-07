@@ -60,7 +60,9 @@ jobs:
         if: ${{ !inputs.test_notify }}
         continue-on-error: true
         timeout-minutes: 4
-        run: pip install -q playwright && playwright install --with-deps chromium >/dev/null && python card_shot.py
+        # The runner's preinstalled Chrome: reinstalling Playwright's browser and its system packages each run took from
+        # 30 s to over 4 minutes depending on GitHub's package mirrors.
+        run: pip install -q playwright && CARD_BROWSER=chrome python card_shot.py
       - name: Publish the preview images and give them a fresh address
         if: ${{ !inputs.test_notify }}
         continue-on-error: true
