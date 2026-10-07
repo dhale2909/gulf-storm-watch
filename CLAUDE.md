@@ -56,6 +56,9 @@ the raw URL. The page reads both the raw copy and the site copy and shows the ne
   bottom right. Keep the 4:3 card for Messages. Daniel's Average stays on the card.
 - Map: no cone. Forecast points are wind-only pills in mph: black below hurricane strength, then Cat 1 deep yellow,
   Cat 2 orange, Cat 3 red, Cat 4 dark red, Cat 5 purple. Euro shading and individual member lines are off by default.
+  Tropical storm and hurricane watches/warnings are faint county shading with thin borders (the counties the NWS alerts
+  name, outlines from `geo/gulf-counties.json`); NHC's coastal line stays only, as a soft band, where no county is
+  listed. Storm surge areas are not drawn.
   Layer choices are remembered per device.
 - Daniel's Average: dashed aqua line (#2ee6d6) averaging NHC official, one track per consensus / ensemble-mean family,
   Google DeepMind and the two Euro typical paths, matched by valid time (see `danielsAverage` in check.mjs). Keep the

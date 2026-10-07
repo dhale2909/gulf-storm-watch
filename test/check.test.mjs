@@ -929,3 +929,29 @@ fixed('F44', 'the public ntfy feed is retired (owner, Oct 7); the private topic 
     assert.deepEqual(sent, [{ topic: 'fixture-private', auth: 'Bearer tk_private_fixture' }]);
   } finally { globalThis.fetch = mock; for (const k of ['NTFY_TOPIC', 'PUBLIC_NTFY_TOPIC', 'PUBLIC_NTFY_TOKEN', 'NTFY_TOKEN']) delete process.env[k]; }
 });
+
+// ---- Watch and warning areas (owner's choice, Oct 7 2026): faint county shading instead of a line along the coast ----
+test('watch counties: read from the NWS alerts (warnings first, surge and tests left out)', async () => {
+  const alert = (event, same, extra = {}) => ({ properties: { event, status: 'Actual', messageType: 'Alert', geocode: { SAME: same }, ...extra } });
+  responses[alertsURL('MS')] = { features: [alert('Hurricane Watch', ['028045', '028047']), alert('Tropical Storm Warning', ['028047']), alert('Storm Surge Watch', ['028059']), alert('Hurricane Warning', ['028059'], { status: 'Test' })] };
+  for (const s of ['AL', 'FL', 'LA']) responses[alertsURL(s)] = { features: [] };
+  const ww = await m.gatherAlerts(state(), true);
+  assert.deepEqual(ww.MS.counties, { 28045: ['HWA'], 28047: ['HWA', 'TWR'] });
+  assert.equal(ww.MS.text, 'Hurricane Watch, Storm Surge Watch, Tropical Storm Warning', 'the alert text is unchanged');
+});
+test('watch counties are shaded on the map; the NHC line stays only where no county is listed; none listed keeps the line', async () => {
+  for (const id of [6, 7, 12]) responses[MAPQ(id)] = { features: [] };
+  // Hurricane watch along the coast from Hancock County, MS to Walton County, FL.
+  responses[MAPQ(9)] = { features: [{ geometry: { type: 'LineString', coordinates: [[-89.4, 30.25], [-88.9, 30.35], [-88.4, 30.4], [-87.5, 30.27], [-86.4, 30.38]] }, properties: { advisnum: '4', tcww: 'HWA' } }] };
+  const storm0 = forecastStorm({ bin: 'AT1', pos: { lat: 25, lonW: 88 }, forecast: [{ t: '2026-10-09T12:00:00Z', lat: 30, lonW: 88 }] });
+  const wwStates = { ...ww(), MS: { level: 'watch', text: 'Hurricane Watch', counties: { 28045: ['HWA'], 28047: ['TWR', 'HWA'] } } };
+  let map = await m.gatherMap(null, storm0, wwStates);
+  const shaded = map.features.filter((f) => f.properties.role === 'wwcounty');
+  assert.deepEqual(shaded.map((f) => f.properties.name).sort(), ['Hancock County', 'Harrison County']);
+  assert.equal(shaded.find((f) => f.properties.name === 'Harrison County').properties.kind, 'TWR', 'warning before watch');
+  const pieces = map.features.filter((f) => f.properties.role === 'ww');
+  assert.equal(pieces.length, 1); assert.ok(pieces[0].geometry.coordinates[0][0] > -89, 'the line starts where the shaded counties end');
+  map = await m.gatherMap(null, storm0, ww());
+  assert.equal(map.features.filter((f) => f.properties.role === 'wwcounty').length, 0);
+  assert.equal(map.features.filter((f) => f.properties.role === 'ww')[0].geometry.coordinates.length, 5, 'no counties listed: the whole line');
+});

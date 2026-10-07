@@ -631,6 +631,8 @@ body.card .leaflet-control-container{display:none}
       L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city"+(c[3]?" left":""),html:c[3]?'<span class="l">'+c[0]+"<i></i></span>":"<i></i>"+c[0],iconSize:[0,0],iconAnchor:c[3]?[-14,20]:[14,20]})}).addTo(map); });
     // European ensemble lines sit in their own pane under everything else, each with an on/off switch.
     map.createPane("ec").style.zIndex=350;
+    // Watch and warning areas: faint fills just above the Euro spread, under every line and label.
+    map.createPane("zones").style.zIndex=360;
     // Every kind of line gets its own on/off switch in the layers button; choices are remembered on this device.
     // Individual member lines start switched off to keep the map readable.
     // Default: official layers, averages, Google and Euro typical paths. Member lines and the Euro shading start off.
@@ -658,7 +660,7 @@ body.card .leaflet-control-container{display:none}
     group.clearLayers(); Object.keys(modelGroups).forEach(function(k){modelGroups[k].clearLayers()}); if(danielGroup) danielGroup.clearLayers();
     var fg=getComputedStyle(document.documentElement).getPropertyValue("--fg").trim()||"#13202b";
     var muted=getComputedStyle(document.documentElement).getPropertyValue("--muted").trim()||"#5b6b78";
-    var fs=(m&&m.features)||[], kinds={}, mods={}, risk, hasPast=false, hasNow=false, maxCat=0, dan=null;
+    var fs=(m&&m.features)||[], kinds={}, mods={}, risk, hasPast=false, hasNow=false, maxCat=0, dan=null, counties=0;
     fs.forEach(function(f){ var p=f.properties||{}, r=p.role, c=f.geometry.coordinates, l;
       if(r==="daniel"){ dan=p;
         var tip="Daniel's Average of "+(p.members||[]).length+" tracks: "+esc((p.members||[]).join(", "))+(p.landfall?". Reaches the coast near "+esc(p.landfall.near)+" about "+esc(lfTime(p.landfall.eta)):"");
@@ -676,7 +678,12 @@ body.card .leaflet-control-container{display:none}
       else if(r==="past"){ hasPast=true; l=L.geoJSON(f,{style:{color:fg,weight:1.6*K,opacity:.85,dashArray:CARD?"2 12":"1 6",lineCap:"round"}}); }
       else if(r==="pastpt"&&p.now){ hasNow=true; l=L.circleMarker([c[1],c[0]],{radius:7*(CARD?2:1),color:"#fff",weight:2*(CARD?2:1),fillColor:"#f05b52",fillOpacity:1}).bindTooltip("Position at "+fmt(p.t)+" \u00b7 "+esc(mph(p.wind))+" mph winds"); }
       else if(r==="pastpt"){ hasPast=true; l=L.circleMarker([c[1],c[0]],{radius:2.6*(CARD?2:1),color:fg,weight:1,fillColor:fg,fillOpacity:.9}).bindTooltip("Was here "+fmt(p.t)+" \u00b7 "+esc(mph(p.wind))+" mph"); }
-      else if(r==="ww"){ kinds[p.kind]=1; l=L.geoJSON(f,{style:{color:(WW[p.kind]||["#888"])[0],weight:6*K,lineCap:"butt"}}).bindTooltip((WW[p.kind]||[0,"Coastal alert"])[1],{sticky:true}); }
+      // Watches and warnings are faint shading, like the Euro spread: the counties and parishes each one names, filled lightly
+      // with thin borders, and a soft band along any stretch of coast with no counties listed yet (another country, or an
+      // NWS office that has not issued its products).
+      else if(r==="wwcounty"){ kinds[p.kind]=1; counties++; var zc=(WW[p.kind]||["#888"])[0];
+        l=L.geoJSON(f,{pane:"zones",style:{color:zc,weight:1*K,opacity:.55,fillColor:zc,fillOpacity:.22}}).bindTooltip(esc(p.name)+": "+(p.kinds||[p.kind]).map(function(k,i){var t=(WW[k]||[0,"Coastal alert"])[1]; return i?t.toLowerCase():t}).join(" and "),{sticky:true}); }
+      else if(r==="ww"){ kinds[p.kind]=1; l=L.geoJSON(f,{pane:"zones",style:{color:(WW[p.kind]||["#888"])[0],weight:10*K,opacity:.25,lineCap:"round",lineJoin:"round"}}).bindTooltip((WW[p.kind]||[0,"Coastal alert"])[1],{sticky:true}); }
       else if(r==="point"){ var kt=p.wind!=null?+p.wind:null, cat=kt==null?0:kt>=137?5:kt>=113?4:kt>=96?3:kt>=83?2:kt>=64?1:0;
         var txt=kt!=null?mph(kt):esc(p.label); if(cat>maxCat) maxCat=cat;
         // The current position is a plain marker (its wind is in the tile); forecast positions carry their wind label.
@@ -699,13 +706,14 @@ body.card .leaflet-control-container{display:none}
     $("dan-note").hidden=!dan;
     if(dan) $("dan-note").innerHTML="<b>Daniel\u2019s Average</b> of "+(dan.members||[]).length+" tracks"+(dan.landfall?" reaches the coast near <b>"+esc(dan.landfall.near)+"</b> about "+esc(lfTime(dan.landfall.eta)):" stays off the AL\u2013FL coast")+".";
     $("map-legend").innerHTML=kind==="storm"
-      ? '<span><i class="wl lg">45</i>Forecast wind, mph</span>'+(maxCat?'<span>'+[1,2,3,4,5].map(function(c){return '<i class="wl lg c'+c+'">'+c+'</i>'}).join("")+'Hurricane category</span>':'')+sw(fg,"NHC forecast track",1)+sw(muted,"Past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")+(dan?sw(DAN,"Daniel's Average",1):"")+modelLegend
+      ? '<span><i class="wl lg">45</i>Forecast wind, mph</span>'+(maxCat?'<span>'+[1,2,3,4,5].map(function(c){return '<i class="wl lg c'+c+'">'+c+'</i>'}).join("")+'Hurricane category</span>':'')+sw(fg,"NHC forecast track",1)+sw(muted,"Past track",1)+Object.keys(kinds).map(function(k){return WW[k]?'<span><i style="background:'+WW[k][0]+';opacity:.45"></i>'+WW[k][1]+' area</span>':""}).join("")+(dan?sw(DAN,"Daniel's Average",1):"")+modelLegend
       : kind==="outlook" ? sw(RISK[risk]||RISK.Medium,"7-day development area")+(hasNow?'<span><b style="color:var(--landfall)">&#9679;</b> Latest position</span>':'<span><b style="color:var(--landfall)">&#10005;</b> Disturbance now</span>')+(hasPast?sw(fg,"Where it has been",1):"")+modelLegend : "";
     $("map-note").textContent=kind==="storm"
       ? "Labels are NHC forecast positions of the storm center with the expected wind in mph; hover or tap one for the time. The spread of the model tracks shows how uncertain the path is; wind, surge and rain reach well outside the center's line."
       : kind==="outlook" ? "NHC has not issued a forecast track yet. The shaded area is where it expects the system to develop over the next 7 days; the track and any coastal watches appear here automatically once a depression forms."
       : (m&&m.unavailable) ? "The map could not be loaded just now; it will retry on the next refresh."
       : (lastStatus&&lastStatus.landfallOccurred&&!(lastStatus.storms||[]).length) ? "NHC is no longer issuing advisories on this system, so there is no forecast track to map." : "No Gulf system to map.";
+    if(counties) $("map-note").textContent+=" Shaded counties and parishes are under an NWS tropical storm or hurricane watch or warning; hover or tap one for its name.";
     if(dan) $("map-note").textContent+=" The dashed aqua line is Daniel\u2019s Average: the average of "+(dan.members||[]).join(", ")+", matched at the same forecast times every 6 hours. Each track is first shifted to start at the storm\u2019s current position (the shift fades out over 48 hours), and the line ends where fewer than 60% of them still have a position. It is a simple average of guidance, not a forecast.";
     if(hasModels) $("map-note").textContent+=" Thin coloured lines are raw computer-model runs ("+(m.models||"NHC model guidance")+"). They are not a forecast, they disagree with each other, and they shift from run to run; hover or tap a line for the model name. Switch each group on or off with the layers button on the map.";
     else if(kind==="outlook") $("map-note").textContent+=" Model tracks will be drawn here once NHC designates the system as an Invest and starts publishing guidance for it.";

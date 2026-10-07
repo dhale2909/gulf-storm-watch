@@ -383,7 +383,15 @@ export async function gatherAlerts(prior, gulfStorm) {
       const events = [...new Set(actual.map((f) => f.properties?.event).filter((e) => TROPICAL_EVENTS.test(e || '')))];
       // Florida also has an Atlantic coast; only count its alerts while a Gulf storm exists.
       if (!events.length || (st === 'FL' && !gulfStorm)) ww[st] = {};
-      else ww[st] = { level: events.some((e) => /Warning$/.test(e)) ? 'warning' : 'watch', text: events.sort().join(', ') };
+      else {
+        // The counties and parishes each tropical storm or hurricane product names, for the map (SAME code = "0" + county FIPS).
+        const counties = {};
+        for (const f of actual) {
+          const k = WIND_KIND[f.properties?.event];
+          if (k) for (const code of f.properties?.geocode?.SAME || []) { const fips = String(code).slice(-5); if (/^\d{5}$/.test(fips) && !(counties[fips] ||= []).includes(k)) counties[fips].push(k); }
+        }
+        ww[st] = { level: events.some((e) => /Warning$/.test(e)) ? 'warning' : 'watch', text: events.sort().join(', '), ...(Object.keys(counties).length ? { counties } : {}) };
+      }
     } catch (e) {
       console.warn(`alerts for ${st} unavailable: ${e.message}`);
       ww[st] = prior?.watchesWarnings?.[st] || {}; // keep what we knew; never clear a warning on a failed read
@@ -414,15 +422,56 @@ async function layers(specs) {
 }
 
 const flat = (c) => (typeof c[0] === 'number' ? [c] : c.flatMap(flat));
+
+// Counties and parishes under each NWS tropical storm or hurricane watch or warning, shaded faintly on the map (owner's
+// choice, Oct 7 2026). The county list comes from the alerts already read (their SAME county codes), the outlines from a
+// Census file kept in the repo. Storm surge products are left out to keep the map calm.
+const WIND_KIND = { 'Hurricane Warning': 'HWR', 'Tropical Storm Warning': 'TWR', 'Hurricane Watch': 'HWA', 'Tropical Storm Watch': 'TWA' };
+const WIND_RANK = ['HWR', 'TWR', 'HWA', 'TWA']; // warnings before watches
+let countyShapes = null;
+const loadCounties = async () => countyShapes
+  || (countyShapes = new Map(JSON.parse(await readFile(new URL('./geo/gulf-counties.json', import.meta.url), 'utf8')).features.map((f) => [f.id, f])));
+async function watchCounties(ww) {
+  const kinds = new Map(); // county FIPS -> every product naming it
+  for (const st of STATES) for (const [fips, ks] of Object.entries(ww?.[st]?.counties || {})) kinds.set(fips, [...new Set([...(kinds.get(fips) || []), ...ks])]);
+  if (!kinds.size) return [];
+  const shapes = await loadCounties();
+  return [...kinds].filter(([fips]) => shapes.has(fips)).map(([fips, ks]) => {
+    ks.sort((x, y) => WIND_RANK.indexOf(x) - WIND_RANK.indexOf(y)); // one shape per county, in its most serious product's colour
+    const f = shapes.get(fips);
+    return { type: 'Feature', geometry: f.geometry, properties: { role: 'wwcounty', kind: ks[0], kinds: ks, name: f.properties.name } };
+  });
+}
+// The parts of NHC's coastal watch/warning line that no shaded county covers (other countries, or an NWS office that has
+// not issued its products yet): kept as line pieces, so nothing under a watch goes unmarked.
+function uncoveredParts(line, counties) {
+  const boxes = counties.map((z) => {
+    const pts = flat(z.geometry.coordinates);
+    return [Math.min(...pts.map((p) => p[0])) - 0.15, Math.min(...pts.map((p) => p[1])) - 0.15, Math.max(...pts.map((p) => p[0])) + 0.15, Math.max(...pts.map((p) => p[1])) + 0.15];
+  });
+  const covered = (p) => boxes.some(([x0, y0, x1, y1]) => p[0] >= x0 && p[0] <= x1 && p[1] >= y0 && p[1] <= y1);
+  const parts = [];
+  for (const coords of line.geometry.type === 'MultiLineString' ? line.geometry.coordinates : [line.geometry.coordinates]) {
+    const c = coords.map(covered);
+    let run = [];
+    for (let i = 1; i < coords.length; i++) {
+      if (!c[i - 1] || !c[i]) { if (!run.length) run.push(coords[i - 1]); run.push(coords[i]); }
+      else if (run.length) { parts.push(run); run = []; }
+    }
+    if (run.length) parts.push(run);
+  }
+  return parts.map((coordinates) => ({ ...line, geometry: { type: 'LineString', coordinates } }));
+}
 const touchesGulf = (f) => flat(f.geometry.coordinates).some(([lon, lat]) => inGulf({ lat, lonW: -lon }));
 const feat = (f, role, props = {}) => ({ type: 'Feature', geometry: f.geometry, properties: { role, ...props } });
 
-export async function gatherMap(gulf, storm) {
+export async function gatherMap(gulf, storm, wwStates = null) {
   const features = [];
   if (storm && /^AT[1-5]$/.test(storm.bin || '')) {
     const base = 4 + 26 * (+storm.bin[2] - 1);
     // The cone is not fetched: the page draws the spread of model tracks as the uncertainty instead.
     const { lists: [pts, track, ww, past], failed } = await layers([[base + 2, 'points'], [base + 3, 'track'], [base + 5, 'ww'], [base + 8, 'past']]);
+    const counties = await watchCounties(wwStates).catch((e) => { console.warn(`watch counties unavailable: ${e.message}`); return []; }); // then the line alone
     // With every layer down the text advisory still gives the current track (below); only without one is there no map.
     if (failed.length === 4 && (storm.forecastStale || !storm.forecast?.length || !storm.pos)) throw new Error('all storm map layers unavailable');
     const adv = pts[0]?.properties.advisnum;
@@ -430,7 +479,11 @@ export async function gatherMap(gulf, storm) {
     const wwAdv = adv ?? ww.map((f) => f.properties.advisnum).filter((a) => a != null).sort((a, b) => parseInt(b, 10) - parseInt(a, 10))[0];
     past.forEach((f) => features.push(feat(f, 'past')));
     track.forEach((f) => features.push(feat(f, 'track')));
-    ww.filter((f) => f.properties.advisnum === wwAdv).forEach((f) => features.push(feat(f, 'ww', { kind: f.properties.tcww })));
+    const wwNow = ww.filter((f) => f.properties.advisnum === wwAdv);
+    if (counties.length) {
+      features.push(...counties);
+      wwNow.forEach((f) => uncoveredParts(f, counties).forEach((part) => features.push(feat(part, 'ww', { kind: f.properties.tcww }))));
+    } else wwNow.forEach((f) => features.push(feat(f, 'ww', { kind: f.properties.tcww })));
     pts.forEach((f) => features.push(feat(f, 'point', {
       label: `${f.properties.datelbl} ${f.properties.timezone || ''}`.trim(), wind: f.properties.maxwind,
       type: f.properties.tcdvlp, cat: f.properties.ssnum, now: f.properties.tau === 0,
@@ -1043,7 +1096,7 @@ async function main() {
   const primary0 = () => storms[0] || null;
   // Optional layers, each bounded by the time budget: if a service is slow or down, keep the last map and carry on.
   const explicitInvest = gulf?.investHint || (!replaced && prevTracked?.invest) || null;
-  let map = await optional('map layers', gatherMap(gulf, storms[0])).catch((e) => { console.warn(`map layers unavailable: ${e.message}`); return null; });
+  let map = await optional('map layers', gatherMap(gulf, storms[0], ww)).catch((e) => { console.warn(`map layers unavailable: ${e.message}`); return null; });
   const models = await optional('model guidance', gatherModels(gulf, storms[0], explicitInvest)).catch((e) => { console.warn(`model guidance unavailable: ${e.message}`); return undefined; });
   if (map && map.kind === 'none' && carrying) map = null; // never replace a storm map with "nothing to map" while the feeds are down
   if (map && models) {
