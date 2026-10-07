@@ -1,0 +1,43 @@
+
+000
+ABNT20 KNHC 222101
+TWOAT 
+
+Special Tropical Weather Outlook
+NWS National Hurricane Center Miami FL
+500 PM EDT Sat Jun 22 2024
+
+For the North Atlantic...Caribbean Sea and the Gulf of Mexico:
+
+Special Tropical Weather Outlook to update the discussion of the 
+low pressure area in the Gulf of Mexico (AL93).
+
+Southwestern Gulf of Mexico (AL93):
+Updated: Reports from an Air Force Reserve Hurricane Hunter 
+aircraft show that the broad low pressure area over the southwestern 
+Gulf of Mexico does not have a well-defined circulation. 
+Environmental conditions appear to have become a little more 
+marginal for development of this system as it moves slowly 
+northwestward, but a tropical depression could still form before the 
+system reaches the coast of northeastern Mexico Sunday night.  
+Regardless of development, heavy rainfall is likely to cause 
+localized flooding across portions of northeastern Mexico and Deep 
+South Texas through the end of the weekend.  Another Air Force 
+Reserve Hurricane Hunter aircraft is scheduled to investigate the 
+system on Sunday, if necessary.
+* Formation chance through 48 hours...medium...40 percent.
+* Formation chance through 7 days...medium...40 percent.
+
+Near the Georgia Coast (AL92):
+Showers and thunderstorms associated with a low pressure system 
+centered just inland over southeastern Georgia have decreased 
+during the past several hours.  The low is expected to drift slowly 
+north-northeastward near the coasts of Georgia and southern South 
+Carolina through tonight before dissipating by Sunday.  Tropical 
+cyclone formation is not expected.
+* Formation chance through 48 hours...low...near 0 percent.
+* Formation chance through 7 days...low...near 0 percent.
+
+$$
+Forecaster Beven
+

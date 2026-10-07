@@ -6,3 +6,6 @@ node_modules/
 .env
 *.zip
 storm-page-card-for-x.png
+card.png
+card-x.png
+REVIEW-*.md

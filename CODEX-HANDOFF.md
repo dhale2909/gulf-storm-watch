@@ -134,3 +134,46 @@ Open, for the owner (not implemented):
 - R12 full version: a shared pre-send claim between the GitHub and Mac runners.
 - Design items not done: shorter hero, official/model map view split, map keeps zoom + Recenter, legend of visible
   layers only.
+
+## Full review, Oct 7 2026
+
+A multi-agent review (15 finders, every finding traced and challenged by two independent verifiers) confirmed 79
+findings. The fixed ones below each have a regression test named by its F-number in `test/check.test.mjs` (or
+`test/test_ecmwf.py`); every one of those tests fails on the code before the fix.
+
+- Outlook parser: plain "Gulf" headings and bodies (NHC wording since 2025) are Gulf entries, but not the Gulf Stream or
+  another gulf (F1); the whole Active Systems block is skipped, including a Potential Tropical Cyclone's paragraph and its
+  formation lines (F2); a special outlook's opening sentence is not orphan text (F3); the product ends at "&&" or "$$"
+  (F4). NHC's JSON codes: PC is a Potential Tropical Cyclone, PTC a post-tropical one (F105).
+- Storm feed: advisories are fetched in parallel (F12); a new storm near the Gulf whose forecast cannot be read is
+  "relevance unknown" and holds the previous reading for up to six checks (F6); the one-check hold no longer needs the
+  outlook (F101); an empty track is published as empty (F5); an inland center has no forecast landfall, says "inland",
+  and reaching land is not "no longer reaches the coast" (F28, F33); the fix keeps its own time for Daniel's Average
+  (F100); advisory numbers are written one way (F110); NWS Test/Exercise/Cancel messages are ignored (F104); Florida
+  alerts count while a side storm exists (F21); the map falls back to the text advisory when every layer fails (F17) and
+  keeps watch lines without the points layer (F34); landfall wind stays on NHC's 5-kt steps (F35).
+- Decisions: odds baselines restart with a new odds series (F18); a landfall is announced when its record is made, not
+  when a storm returns (F22); a second storm is announced once (F23); landfalls are compared only for the same storm
+  (F24); proper nouns keep their case (F25); a known Invest number is kept when guidance has nothing usable (F10);
+  Invest files in January also try last year (F98); Daniel's Average anchors a run filed after the fix (F29);
+  `updatedAt` freezes only when the defining source is carried, and the Mac catch-up reads `lastAttemptAt` (F16).
+- Delivery: browser sends have a 20 s timeout and a 60 s overall deadline (F9); an unconfigured ntfy topic is "not
+  configured", never retried, and never prints the private body (F47, F91); devices whose keys cannot be encrypted to
+  are pruned (F45); TEST_PUSH is payload-free (F38). Worker: real curve points only (F45), no write for an unchanged
+  re-registration, tap counters capped per day, a clear 503 when storage is full (F43), counts read from metadata (F48).
+- Page and service worker: safe-area padding in the Home Screen app (F59), og:description cadence (F64), legend pills
+  (F60), iOS Home Screen steps first (F36), subscription renewal in sw.js plus a daily re-registration (F37), a landfall-
+  hold view (F50), log badges per channel and for retries (F51), viewer-zone times for Daniel's Average (F52), freshness
+  after a failed refresh (F56), only real layer choices stored (F61), X-card labels (F63), Euro note in UTC (F99), "as
+  of" with minutes (F97), card lines that end at their own edge (F58, and the overflow part of F49).
+- Euro script: one track per member and system across ECMWF's duplicate identifiers (F66); the typical path ends when
+  fewer than 60% of members still have the storm (F67); a 150 s download budget, and a stall is not "unpublished" (F71).
+- Runners: share images on the `cards` branch instead of main (F76); save.sh keeps a reading as a local commit when
+  GitHub is unreachable and reports what it did (F74, F79); `scripts/mac-run.sh` is the Mac runner's source, with time
+  limits on every step and a runner git identity (F9, F71, F96 in part). Test gaps closed: F80-F90, F93, F94.
+
+Open, for the owner (not implemented): alert-rule and geometry proposals F7, F8, F19, F31, F88, F102, F107; the Euro
+script's own coast boxes (F68); the R6-related Invest gate (F20, deferred with R6 until after the storm); public-feed and
+worker hardening that needs account settings (F44, and a Cloudflare rate-limit rule for F43); share-card content (alerts
+on the landfall line, F49) and credits on the card (F95); the owner's commit email (F96).
+

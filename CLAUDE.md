@@ -12,19 +12,24 @@ changes. This repository is public: never commit secrets, the private ntfy topic
 - `ecmwf_tracks.py`: Euro ensemble (ECENS) and Euro AI ensemble (AIFS) tracks from ECMWF open data -> `data/ecmwf.json`.
   Runs after the check, so the check reads the previous Euro file.
 - `card_shot.py`: screenshots `index.html?card=1` (card.png, 1200x900, Messages) and `?card=x` (card-x.png, 1200x628, X).
+  `scripts/save-cards.sh` publishes both on the `cards` branch (one commit, replaced each run, so the images never pile
+  up in main's history); og:image and twitter:image point there. The images are not tracked on main.
 - `index.html`: the whole page (no build step). `sw.js`: push notifications. `push/worker.js`: Cloudflare Worker that
   stores browser-push subscriptions (deploy with `npx wrangler deploy` from `push/`).
 - Runners: GitHub workflow `watch.yml`, started at :05 past each hour by cron-job.org; Mac backup (launchd
-  `com.dhale.gulf-storm-watch` -> `~/.gulf-storm-watch/run.sh`) at :35, plus a :13 catch-up if GitHub's check is late.
-  Mac commits are `[skip ci]`. `scripts/save.sh` commits data and discards a run if another runner saved newer data.
+  `com.dhale.gulf-storm-watch` -> `~/.gulf-storm-watch/run.sh`, a copy of `scripts/mac-run.sh`) at :35, plus a :13
+  catch-up if GitHub's last check attempt (`lastAttemptAt`) is 20+ minutes old. Mac commits are `[skip ci]`.
+  `scripts/save.sh` commits data, discards a run if another runner saved newer data, and keeps a reading as a local
+  commit when GitHub is unreachable (the next pull replays it). `updatedAt` is the last fully fresh reading.
 - `pages.yml` runs `npm test` and deploys the site on every push to main.
 
 ## Commands
 
 ```bash
-npm test                                   # regression suite (node:test, network mocked)
+npm test                                   # regression suites (node:test + Python unittest, network mocked)
 npm run stats                              # alert sign-ups and taps by day (reads .env)
 FORCE=1 bash ~/.gulf-storm-watch/run.sh    # run a full check now from the Mac
+cp scripts/mac-run.sh ~/.gulf-storm-watch/run.sh   # install the Mac runner after changing it
 gh workflow run watch.yml --repo dhale2909/gulf-storm-watch   # run a check on GitHub (also redraws the card)
 git fetch -q && git show origin/main:data/status.json          # what was actually saved
 ```

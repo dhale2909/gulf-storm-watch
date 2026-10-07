@@ -1,0 +1,25 @@
+
+000
+ABNT20 KNHC 112336
+TWOAT 
+
+Tropical Weather Outlook
+NWS National Hurricane Center Miami FL
+800 PM EDT Sun Aug 11 2024
+
+For the North Atlantic...Caribbean Sea and the Gulf of Mexico:
+
+Active Systems: 
+The National Hurricane Center is issuing advisories on Potential 
+Tropical Cyclone Five, located over the central tropical Atlantic. 
+* Formation chance through 48 hours...high...80 percent.
+* Formation chance through 7 days...high...90 percent.
+
+&&
+Public Advisories on Potential Tropical Cyclone Five are issued 
+under WMO header WTNT35 KNHC and under AWIPS header MIATCPAT5. 
+Forecast/Advisories on Potential Tropical Cyclone Five are issued 
+under WMO header WTNT25 KNHC and under AWIPS header MIATCMAT5.
+
+$$
+Forecaster Papin

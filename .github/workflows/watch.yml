@@ -61,16 +61,18 @@ jobs:
         continue-on-error: true
         timeout-minutes: 4
         run: pip install -q playwright && playwright install --with-deps chromium >/dev/null && python card_shot.py
-      - name: Give the preview image a fresh address
+      - name: Publish the preview images and give them a fresh address
         if: ${{ !inputs.test_notify }}
         continue-on-error: true
-        # Phones cache link-preview images by address, so each redraw gets a new one. Only when a card was actually drawn.
+        # The images live on their own one-commit branch ("cards"), replaced each time, so they never pile up in the
+        # repository's history. Phones cache link-preview images by address, so each new image gets a new one; only when
+        # the images were actually drawn and published (the step stops at the first failing command).
         run: |
-          test -n "$(git status --porcelain card.png)" && sed -i -E 's#(main/card\.png)(\?v=[0-9]+)?"#\1?v='"$(date +%s)"'"#' index.html || true
-          test -n "$(git status --porcelain card-x.png)" && sed -i -E 's#(main/card-x\.png)(\?v=[0-9]+)?"#\1?v='"$(date +%s)"'"#' index.html || true
+          bash scripts/save-cards.sh
+          sed -i -E 's#(cards/card(-x)?\.png)(\?v=[0-9]+)?"#\1?v='"$(date +%s)"'"#' index.html
       - name: Save the optional assets
         if: ${{ !inputs.test_notify }}
-        run: bash scripts/save.sh data card.png card-x.png index.html
+        run: bash scripts/save.sh data index.html
 
   # Publish the refreshed card and data. Shares the "pages" queue with pages.yml so publishes never collide.
   publish:

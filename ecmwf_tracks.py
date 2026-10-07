@@ -9,11 +9,11 @@ drawn on the map for context only and never used for alerts.
 import json
 import os
 import sys
+import time
+import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
 from statistics import median
-
-import eccodes as ec
 
 OUT = "data/ecmwf.json"
 BASE = "https://data.ecmwf.int/forecasts"
@@ -23,12 +23,14 @@ ENSEMBLES = [
     ("ecaie", "European AI ensemble (AIFS)", "aifs-ens/0p25/enfo", {0: 360, 6: 360, 12: 360, 18: 360}),
 ]
 MAX_HOURS = 168
-VERSION = 6  # bump to force a rebuild of data/ecmwf.json when its shape changes
+VERSION = 7  # bump to force a rebuild of data/ecmwf.json when its shape or method changes
 CELL = 0.25  # swath grid size, degrees
 REACH = 0.6  # a member "covers" grid cells within this many degrees of its track
 MISSING = 1e99
 KT = 1.94384
 NOW = datetime.now(timezone.utc)
+# One wall-clock budget for every download: a stalled server must not hold up the share card or the Mac's next check.
+DEADLINE = time.monotonic() + float(os.environ.get("ECMWF_BUDGET", 150))
 
 
 # Rough boxes, as in check.mjs.
@@ -49,9 +51,19 @@ def coast_state(lon):
 
 
 def fetch(url):
+    left = DEADLINE - time.monotonic()
+    if left < 5:
+        raise TimeoutError("time budget used up")
     req = urllib.request.Request(url, headers={"User-Agent": "gulf-storm-watch"})
-    with urllib.request.urlopen(req, timeout=120) as r:
-        return r.read()
+    with urllib.request.urlopen(req, timeout=min(60, left)) as r:
+        chunks = []
+        while True:
+            if time.monotonic() > DEADLINE:  # the socket timeout bounds each read, not a slow trickle
+                raise TimeoutError("time budget used up")
+            b = r.read(1 << 16)
+            if not b:
+                return b"".join(chunks)
+            chunks.append(b)
 
 
 def latest_run(path, lengths, have):
@@ -65,8 +77,10 @@ def latest_run(path, lengths, have):
         url = f"{BASE}/{cycle:%Y%m%d}/{cycle:%H}z/{path}/{stamp}0000-{lengths[cycle.hour]}h-enfo-tf.bufr"
         try:
             return stamp, fetch(url)
-        except Exception:
+        except urllib.error.HTTPError:  # not published (yet): try the cycle before
             cycle -= timedelta(hours=6)
+        # Anything else (a stall, the budget, no network) is not "not published": stop and keep what we have,
+        # rather than quietly publishing an older run as the latest.
     return None, None
 
 
@@ -81,6 +95,9 @@ def arr(h, key, n):
 
 def read_tracks(raw):
     """All tracks in a track file: [{member, pts: [(hours, lat, lon, kt)]}]."""
+    global ec
+    import eccodes as ec  # here, so the track logic below can be tested without eccodes installed
+
     tmp = "/tmp/_tf.bufr"
     with open(tmp, "wb") as f:
         f.write(raw)
@@ -124,28 +141,51 @@ def read_tracks(raw):
     return tracks
 
 
+def merge_members(tracks):
+    """One track per member and system. ECMWF files the same storm under several identifiers ("09L", "72E", "71L"),
+    often with one copy cut short: copies that agree (within a degree at every common hour) are joined hour by hour,
+    the longest copy's position winning. A member's genuinely different system stays a separate track."""
+    out = []
+    for member in sorted({t["member"] for t in tracks}):
+        merged = []
+        for t in sorted((t for t in tracks if t["member"] == member), key=lambda t: -len(t["pts"])):
+            for m in merged:
+                common = [p for p in t["pts"] if p[0] in m]
+                if common and all(abs(m[p[0]][1] - p[1]) <= 1 and abs(m[p[0]][2] - p[2]) <= 1 for p in common):
+                    for p in t["pts"]:
+                        m.setdefault(p[0], p)
+                    break
+            else:
+                merged.append({p[0]: p for p in t["pts"]})
+        out += [{"member": member, "pts": sorted(m.values())} for m in merged]
+    return out
+
+
 def mean_track(gulf, members):
-    """Typical member position (median) at each forecast hour, where most members have a storm at that hour.
+    """Typical member position (median) at each forecast hour, while most members still have a storm.
 
     A member whose track has ended (landfall, or the model losing the system over water) is held at its
-    last position, so the line runs to where the typical member finishes instead of stopping early
-    or being dragged around by whichever members happen to remain.
+    last position, so the median is not dragged around by whichever members happen to remain. The line
+    ends once fewer than 60% of the members still have the storm: held positions keep the median steady,
+    but they are not forecasts, so they never extend the line.
     """
-    by_hour = {}
+    by_hour, live = {}, {}
     last_hour = max(t["pts"][-1][0] for t in gulf) if gulf else 0
     for t in gulf:
         for hours, la, lo, _ in t["pts"]:
             by_hour.setdefault(hours, {}).setdefault(t["member"], (la, lo))
+            live.setdefault(hours, set()).add(t["member"])
         end = t["pts"][-1]
         for hours in range(end[0] + 6, last_hour + 1, 6):
             by_hour.setdefault(hours, {}).setdefault(t["member"], (end[1], end[2]))
     need = max(5, 0.6 * members)
     line, kept = [], []
     for hours in sorted(by_hour):
+        if len(live.get(hours, ())) < need:
+            break
         pos = list(by_hour[hours].values())
-        if len(pos) >= need:
-            line.append([round(median(p[1] for p in pos), 1), round(median(p[0] for p in pos), 1)])
-            kept.append(hours)
+        line.append([round(median(p[1] for p in pos), 1), round(median(p[0] for p in pos), 1)])
+        kept.append(hours)
     if len(line) < 3:
         return None, None
     # Light smoothing: membership changes hour to hour, which makes the raw average wobble.
@@ -192,7 +232,7 @@ def swaths(gulf, members):
 def summarize(key, label, stamp, tracks):
     init = datetime.strptime(stamp, "%Y%m%d%H").replace(tzinfo=timezone.utc)
     # Our system: tracks that start in the Gulf (a wave that only enters later is a different system).
-    gulf = [t for t in tracks if in_gulf(t["pts"][0][1], t["pts"][0][2])]
+    gulf = merge_members([t for t in tracks if in_gulf(t["pts"][0][1], t["pts"][0][2])])
     coast = {"LA": 0, "MS": 0, "AL": 0, "FL": 0}
     etas, peaks, seen, features = [], [], set(), []
     for t in gulf:

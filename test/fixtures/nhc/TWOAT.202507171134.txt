@@ -1,0 +1,31 @@
+
+000
+ABNT20 KNHC 171134
+TWOAT 
+
+Tropical Weather Outlook
+NWS National Hurricane Center Miami FL
+800 AM EDT Thu Jul 17 2025
+
+For the North Atlantic...Caribbean Sea and the Gulf of America:
+
+Northern Gulf Coast (AL93):
+Satellite, surface, and radar data indicate that the broad low 
+pressure area over northern Gulf is located just south of the coast 
+of Mississippi. The associated shower and thunderstorm activity 
+remains disorganized and located mainly to the west and southwest 
+of the center. Some development could occur before the system moves 
+westward into Louisiana later today or tonight, although the 
+chances of the system developing into a tropical depression are low.
+
+Regardless of development, heavy rainfall could produce localized 
+flash flooding over portions of the north-central Gulf Coast through 
+Friday. For additional information, please refer to products issued 
+by the Weather Prediction Center and your local National Weather 
+Service office.
+* Formation chance through 48 hours...low...30 percent.
+* Formation chance through 7 days...low...30 percent.
+
+$$
+Forecaster Beven
+

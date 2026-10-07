@@ -13,15 +13,15 @@
 <meta name="apple-mobile-web-app-title" content="Storm Page">
 <title>Daniel's Storm Page</title>
 <meta property="og:title" content="Daniel's Storm Page">
-<meta property="og:description" content="Live Gulf storm tracking: NHC outlook, forecast track and model guidance, checked every hour.">
+<meta property="og:description" content="Live Gulf storm tracking: NHC outlook, forecast track and model guidance, checked every 30 minutes.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/main/card.png?v=1791381977">
+<meta property="og:image" content="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/cards/card.png?v=1791382220">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="900">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Daniel's Storm Page">
 <meta name="twitter:description" content="Live Gulf storm tracking: NHC track, model guidance and alerts to your phone.">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/main/card-x.png?v=1791381977">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/cards/card-x.png?v=1791382220">
 <meta name="twitter:image:alt" content="Map of the storm's NHC forecast track across the Gulf with forecast winds and model tracks.">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -39,7 +39,7 @@
 }
 
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;padding:0 16px 32px}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;padding:env(safe-area-inset-top,0px) 16px calc(32px + env(safe-area-inset-bottom,0px))} /* the Home Screen app draws under the status bar */
 .wrap{max-width:1080px;margin:0 auto;display:grid;gap:20px}
 h1,h2{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.1}
 h1{font-size:clamp(28px,5vw,40px);font-weight:700;letter-spacing:.01em}
@@ -112,6 +112,7 @@ a{color:var(--accent)}
 .catb{display:inline-block;vertical-align:middle;margin-left:8px;padding:3px 8px;border-radius:6px;font:700 12px/1 var(--mono);letter-spacing:.06em;color:#fff;background:#d8402a}
 .catb.c1{background:#e3b321;color:#1a1a1a}.catb.c2{background:#ef8f2b;color:#1a1a1a}.catb.c4{background:#a3151e}.catb.c5{background:#7b2aa8}
 .wl.lg{transform:none;margin-right:4px;vertical-align:middle;min-width:14px;text-align:center}
+.legend i.wl{width:auto;height:auto;border-radius:999px} /* legend pills keep the map pill's size, not the 18x10 swatch */
 .credit{display:flex;justify-content:center;padding:18px 0 28px}
 .credit a{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;text-decoration:none;opacity:.8}
 .credit a:hover{opacity:1}.credit img{height:24px;width:auto}
@@ -155,6 +156,7 @@ body.cardx #card,body.cardx #map{height:628px}
 #c-l1 .nm{font-size:68px;line-height:1.05}
 #c-l2{font:500 34px/42px var(--body);color:#c3ced6}
 #c-l2:empty{display:none}
+#c-l2,#c-l3{overflow:hidden;text-overflow:ellipsis} /* each line ends at its own edge, never under the wind block */
 .c-city{font:600 32px var(--body);color:#cfd8df;white-space:nowrap;text-shadow:0 0 4px #0d151c,0 0 4px #0d151c,0 0 8px #0d151c}
 .c-city i{display:inline-block;width:11px;height:11px;border-radius:50%;background:#93a3b0;margin:0 9px;vertical-align:middle}
 .c-city .l{display:inline-block;transform:translateX(-100%)}
@@ -177,7 +179,7 @@ body.card .leaflet-control-container{display:none}
 </style>
 </head>
 <body>
-<!-- Share preview card: index.html?card=1 renders only this, 1200x900, and the hourly check screenshots it to card.png. -->
+<!-- Share preview card: index.html?card=1 renders only this, 1200x900; each check screenshots it to card.png, published on the "cards" branch. -->
 <div id="card">
   <div id="card-map"></div>
   <span class="pill" id="c-pill">Watch</span>
@@ -382,7 +384,11 @@ body.card .leaflet-control-container{display:none}
   // NHC numbers depressions in words ("Nine"); show digits. Named storms keep their names.
   var NUMS={One:1,Two:2,Three:3,Four:4,Five:5,Six:6,Seven:7,Eight:8,Nine:9,Ten:10,Eleven:11,Twelve:12,Thirteen:13,Fourteen:14,Fifteen:15,Sixteen:16,Seventeen:17,Eighteen:18,Nineteen:19,Twenty:20,"Twenty-One":21,"Twenty-Two":22,"Twenty-Three":23,"Twenty-Four":24,"Twenty-Five":25};
   var stormName=function(s){ var n=s.name||""; var last=n.split(" ").pop(); return NUMS[last]?n.replace(new RegExp(last+"$"),NUMS[last]):n; };
-  var asOf=function(d){ var g=d.gulf||{}; var m=/(\d{1,2})(\d{2}) (AM|PM) (\w+)/.exec(g.source||""); return m?("NHC "+m[1]+":"+m[2]+" "+m[3]+" "+m[4]):("as of "+ctShort(d.updatedAt)); };
+  // "As of" is a real check time, so it keeps its minutes (ctShort rounds, for estimates).
+  var ctAt=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric",minute:"2-digit"}); };
+  var asOf=function(d){ var g=d.gulf||{}; var m=/(\d{1,2})(\d{2}) (AM|PM) (\w+)/.exec(g.source||""); return m?("NHC "+m[1]+":"+m[2]+" "+m[3]+" "+m[4]):("as of "+ctAt(d.updatedAt)); };
+  // Estimated times on the page: the viewer's own zone with its name, like every other time there. The card stays in Central time.
+  var lfTime=function(iso){ return CARD?ctShort(iso):fmtHour(iso); };
   function renderCard(d){
     var lvl=LABEL[d.alertLevel]?d.alertLevel:"quiet", g=d.gulf||{}, s0=(d.storms||[])[0], ww=d.watchesWarnings||{};
     var held=!!d.landfallOccurred;
@@ -416,7 +422,7 @@ body.card .leaflet-control-container{display:none}
       shareText="Gulf storm update: nothing brewing in the Gulf right now.";
     }
     // Shrink long lines (long storm names, several alerts) until they fit the card width.
-    ["c-l1","c-l2"].forEach(function(id){ var el=$(id), size=parseFloat(getComputedStyle(el.querySelector(".nm")||el).fontSize);
+    ["c-l1","c-l2","c-l3"].forEach(function(id){ var el=$(id), size=parseFloat(getComputedStyle(el.querySelector(".nm")||el).fontSize);
       var t=el.querySelector(".nm")||el; while(CARD&&el.scrollWidth>el.clientWidth&&size>24){ size-=2; t.style.fontSize=size+"px"; } });
     done("s");
   }
@@ -444,8 +450,9 @@ body.card .leaflet-control-container{display:none}
   }
   $("push-test").addEventListener("click",pushTest);
   async function pushEnable(){
-    if(!pushOK){ pmsg("This browser can't show notifications. Use the ntfy option below instead."); return; }
+    // iPhone Safari outside the Home Screen exposes no push support at all, so this comes first.
     if(IOS&&!STANDALONE){ $("push-ios").hidden=false; pmsg("Add the page to your Home Screen first (steps above), then tap this button from there."); return; }
+    if(!pushOK){ pmsg("This browser can't show notifications. Use the ntfy option below instead."); return; }
     try{
       pmsg("Asking for permission\u2026");
       var reg=await navigator.serviceWorker.register("sw.js"); await navigator.serviceWorker.ready;
@@ -454,7 +461,7 @@ body.card .leaflet-control-container{display:none}
       var sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(VAPID_PUBLIC)});
       var r=await fetch(PUSH_API+"/subscribe",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(sub)});
       if(!r.ok) throw new Error("registration failed");
-      pushState(true); pmsg("Alerts are on for this device.");
+      pushState(true); pmsg("Alerts are on for this device."); try{ localStorage.setItem("gsw-push-sync",String(Date.now())); }catch(e){}
     }catch(e){ pmsg("Couldn't turn on notifications ("+(e&&e.message||e)+"). Try again, or use the ntfy option below."); }
   }
   async function pushDisable(){
@@ -464,6 +471,14 @@ body.card .leaflet-control-container{display:none}
     pushState(false); pmsg("Alerts are off for this device.");
   }
   $("push-on").addEventListener("click",pushEnable); $("push-off").addEventListener("click",pushDisable);
+  // A subscription the browser renewed (new address) or the service dropped must be registered again, or alerts stop
+  // silently. Once a day, a device that has alerts on re-sends its current subscription (the service keeps one per device).
+  (function(){ var on=false, last=0; try{ on=localStorage.getItem("gsw-push")==="1"; last=+localStorage.getItem("gsw-push-sync")||0; }catch(e){}
+    if(CARD||!on||!pushOK||Date.now()-last<864e5) return;
+    navigator.serviceWorker.getRegistration("sw.js").then(function(reg){ return reg&&reg.pushManager.getSubscription(); }).then(function(sub){
+      if(!sub){ pushState(false); return; }
+      return fetch(PUSH_API+"/subscribe",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(sub)}).then(function(r){ if(r.ok) try{ localStorage.setItem("gsw-push-sync",String(Date.now())); }catch(e){} });
+    }).catch(function(){}); })();
   // A link ending in ?alerts=1 (the invite text) opens the Get alerts steps straight away.
   if(/[?&]alerts=1/.test(location.search)&&!CARD) setTimeout(function(){ $("alerts").click(); },600);
   document.querySelectorAll('a[href^="ntfy://"]').forEach(function(a){ a.addEventListener("click",function(){ hit("ntfy-tap"); }); });
@@ -483,30 +498,45 @@ body.card .leaflet-control-container{display:none}
     else if(navigator.clipboard) navigator.clipboard.writeText(url).then(function(){ btn.textContent="Copied"; setTimeout(function(){btn.textContent="Share"},1500); });
   });
 
+  // How fresh the reading on screen is. Run on every refresh, including one that could not load anything new.
+  var lastStatus=null;
+  function freshness(d,refreshFailed){
+    var age=(Date.now()-new Date(d.updatedAt).getTime())/36e5, src=d.sources||{};
+    var SRC_NAME={outlook:"NHC outlook",storms:"NHC storm list",forecast:"NHC forecast advisory",map:"map layers"};
+    var unavailable=Object.keys(src).filter(function(k){return /unavailable|incomplete/.test(src[k])}).map(function(k){return k==="alerts"?"NWS "+src[k]:(SRC_NAME[k]||k)+(/incomplete/.test(src[k])?" ("+src[k]+")":"")});
+    $("stale").hidden=!(age>3||unavailable.length||refreshFailed);
+    $("stale").textContent=(refreshFailed?"Could not refresh just now; showing the last reading loaded. ":"")+(age>3?"Last successful reading was "+Math.round(age)+" hours ago; this may be out of date. ":"")+(unavailable.length?"Could not read: "+unavailable.join("; ")+". Those parts show the previous reading.":"");
+    var due=d.nextCheck?new Date(d.nextCheck).getTime():0, lateMin=Math.round((Date.now()-due)/6e4);
+    $("next").textContent=!due?"Checks run every 30 minutes":lateMin>10?("Check due "+fmt(d.nextCheck)+" is running late ("+lateMin+" min)"):("Next check about "+fmt(d.nextCheck));
+  }
   function renderStatus(d){
+    lastStatus=d;
     renderCard(d);
     var lvl=LABEL[d.alertLevel]?d.alertLevel:"quiet";
     $("band").style.setProperty("--lvl","var(--"+lvl+")");
     $("pill-text").textContent=levelLabel(d);
     $("headline").textContent=d.headline||"";
-    var age=(Date.now()-new Date(d.updatedAt).getTime())/36e5, src=d.sources||{};
-    var SRC_NAME={outlook:"NHC outlook",storms:"NHC storm list",forecast:"NHC forecast advisory",map:"map layers"};
-    var unavailable=Object.keys(src).filter(function(k){return /unavailable|incomplete/.test(src[k])}).map(function(k){return k==="alerts"?"NWS "+src[k]:(SRC_NAME[k]||k)+(/incomplete/.test(src[k])?" ("+src[k]+")":"")});
-    $("stale").hidden=!(age>3||unavailable.length);
-    $("stale").textContent=(age>3?"Last successful reading was "+Math.round(age)+" hours ago; this may be out of date. ":"")+(unavailable.length?"Could not read: "+unavailable.join("; ")+". Those parts show the previous reading.":"");
+    freshness(d,false);
     // THREAT and "Landfall expected" are this page's own reading of the NHC track, not an official product.
     var official=STATES.some(function(s){return (d.watchesWarnings||{})[s]&&d.watchesWarnings[s].level});
-    $("level-note").hidden=!((lvl==="threat"||lvl==="landfall")&&!official);
-    $("level-note").textContent=lvl==="landfall"&&!d.landfallOccurred?"\u201cLandfall expected\u201d is this page\u2019s reading of the NHC forecast track, not an official watch or warning. None is in effect for AL, FL, MS or LA."
+    $("level-note").textContent=!((lvl==="threat"||lvl==="landfall")&&!official)?"":lvl==="landfall"&&!d.landfallOccurred?"\u201cLandfall expected\u201d is this page\u2019s reading of the NHC forecast track, not an official watch or warning. None is in effect for AL, FL, MS or LA."
       :lvl==="threat"?"\u201cThreat\u201d is this page\u2019s reading: the NHC forecast track reaches the coast. It is not an official watch or warning; none is in effect for AL, FL, MS or LA.":"";
+    $("level-note").hidden=!$("level-note").textContent;
     $("eyebrow").textContent=((d.tracked&&d.tracked.name)||(d.storms&&d.storms[0]&&d.storms[0].name)||((d.gulf||{}).area)||"Gulf of Mexico")+" \u00b7 AL \u00b7 FL \u00b7 MS \u00b7 LA";
     var g=d.gulf||{}, p7=g.formation7d, p48=g.formation48;
     $("p7").textContent=p7==null?"—":p7; $("nd7").style.left=(p7==null?0:Math.max(0,Math.min(100,p7)))+"%";
     $("p48").textContent=p48==null?"—":p48; $("p48sub").textContent=g.area||"No Gulf disturbance in the outlook";
     $("outlook").textContent=g.text||"No Gulf disturbance in the current NHC outlook.";
     $("src").textContent=((d.storms||[])[0]&&g.area?"Earlier outlook, before advisories began \u00b7 ":"")+(g.source||"NHC outlook");
-    var st=d.storms||[], s0=st[0];
-    $("tiles").setAttribute("data-stage",s0?"storm":"form");
+    var st=d.storms||[], s0=st[0], lo=d.landfallOccurred;
+    // The 48-hour hold after landfall, once NHC has dropped the storm: still the storm's page, not a quiet Gulf.
+    var held=!s0&&!!lo;
+    $("tiles").setAttribute("data-stage",s0||held?"storm":"form");
+    if(held){
+      $("st-type").textContent=(d.tracked&&d.tracked.name)||"The storm"; $("st-type-sub").textContent="No longer an active NHC storm";
+      $("st-wind").textContent="\u2014"; $("st-wind-sub").textContent="NHC advisories have ended";
+      $("st-lf").textContent="Made landfall: "+lo.state; $("st-lf-sub").textContent="about "+fmt(lo.at);
+    }
     if(s0){
       $("st-type").innerHTML=esc(stormName(s0))+(s0.category?' <span class="catb c'+s0.category+'">CAT '+s0.category+'</span>':"");
       $("st-type-sub").textContent=(s0.advisory||"NHC advisory")+(s0.advisoryAt?" \u00b7 "+fmt(s0.advisoryAt):"");
@@ -519,7 +549,9 @@ body.card .leaflet-control-container{display:none}
     $("storms").innerHTML=st.length?st.map(function(s){var k=catKey(s);return '<div class="storm"><div class="cat" data-k="'+k+'">'+k+'</div><div><div class="nm">'+esc(s.name)+'</div><dl>'+
       '<dt>Winds</dt><dd class="mono">'+esc(mph(s.winds))+' mph ('+esc(s.winds)+' kt)</dd>'+
       '<dt>Position</dt><dd>'+esc(s.location)+'</dd><dt>Motion</dt><dd>'+esc(s.movement)+'</dd>'+
-      '<dt>Track</dt><dd>'+esc(s.gulfRisk)+'</dd>'+(s.advisory?'<dt>Source</dt><dd>'+esc(s.advisory)+'</dd>':'')+'</dl></div></div>'}).join(""):'<div class="empty">Not yet a depression. No NHC advisories or forecast track.</div>';
+      '<dt>Track</dt><dd>'+esc(s.gulfRisk)+'</dd>'+(s.advisory?'<dt>Source</dt><dd>'+esc(s.advisory)+'</dd>':'')+'</dl></div></div>'}).join("")
+      :held?'<div class="empty">No longer an active NHC storm. It made landfall in '+esc(STATE_NAME[lo.state]||lo.state)+' about '+esc(fmt(lo.at))+'.</div>'
+      :'<div class="empty">Not yet a depression. No NHC advisories or forecast track.</div>';
     var ww=d.watchesWarnings||{};
     var unavail=(ww.unavailable||[]);
     var anyWW=STATES.some(function(s){return ww[s]&&ww[s].level});
@@ -547,13 +579,21 @@ body.card .leaflet-control-container{display:none}
       var rows=STATES.map(function(s){return [s,G.coast[s]||0]}).concat([["Center not forecast to reach the AL\u2013FL coast",G.members-G.hits]]);
       $("goog-bars").innerHTML=rows.map(function(r){return '<b>'+r[0]+'</b><div class="bar"><i style="width:'+(100*r[1]/G.members)+'%"></i></div><span class="mono">'+r[1]+' of '+G.members+'</span>'}).join("");
     } else { $("goog-text").textContent="No data for this system yet. Google's ensemble only covers systems NHC has numbered."; $("goog-run").textContent="Experimental"; }
-    $("last").textContent=fmt(d.lastAttemptAt||d.updatedAt); var due=d.nextCheck?new Date(d.nextCheck).getTime():0, lateMin=Math.round((Date.now()-due)/6e4);
-    $("next").textContent=!due?"Checks run every 30 minutes":lateMin>10?("Check due "+fmt(d.nextCheck)+" is running late ("+lateMin+" min)"):("Next check about "+fmt(d.nextCheck));
+    $("last").textContent=fmt(d.lastAttemptAt||d.updatedAt);
   }
   function renderLog(rows){
     rows=rows.slice(0,40);
     $("logcount").textContent=rows.length?rows.length+" recent checks":"";
-    $("log").innerHTML=rows.length?rows.map(function(x){return '<div class="log-row"><span class="mono">'+fmt(x.ts)+'</span><span>'+esc(x.summary)+'</span><span class="chg" data-c="'+(x.changed?1:0)+'" data-u="'+(x.updated?1:0)+'">'+(x.changed?(x.pushed?"ALERT SENT":"ALERT"):x.updated?"update":"no change")+'</span></div>'}).join(""):'<div class="empty">No checks logged yet.</div>';
+    // The badge reflects every channel, and retries of an undelivered alert say how they went.
+    var CH=["private","browser","public"], CHN={private:"owner",browser:"browser",public:"public feed"};
+    var badge=function(x){
+      if(!x.changed) return x.retry?(x.retry.stillFailed&&x.retry.stillFailed.length?(x.retry.gaveUp?"RETRY GAVE UP":"RETRY FAILED"):"RETRY SENT"):x.updated?"update":"no change";
+      var dl=x.delivery||{}, failed=CH.filter(function(k){return dl[k]===false});
+      if(failed.length) return "ALERT \u00b7 "+failed.map(function(k){return CHN[k]}).join(", ")+" failed";
+      return x.pushed||CH.some(function(k){return dl[k]===true})?"ALERT SENT":"ALERT";
+    };
+    var extra=function(x){ return (x.superseded?" Replaced an earlier alert that had not been delivered.":"")+(x.outagePush?" Outage notice sent to the owner.":"")+(x.retry&&!x.changed?" Retried the "+fmt(x.retry.of)+" alert ("+(x.retry.channels||[]).map(function(k){return CHN[k]||k}).join(", ")+").":""); };
+    $("log").innerHTML=rows.length?rows.map(function(x){return '<div class="log-row"><span class="mono">'+fmt(x.ts)+'</span><span>'+esc(x.summary+extra(x))+'</span><span class="chg" data-c="'+(x.changed?1:0)+'" data-u="'+(x.updated||x.retry?1:0)+'">'+esc(badge(x))+'</span></div>'}).join(""):'<div class="empty">No checks logged yet.</div>';
   }
   // ----- map: development area before formation; cone, track and coastal alerts after -----
   var map, group, modelGroups={}, danielGroup, lastBounds;
@@ -580,7 +620,7 @@ body.card .leaflet-control-container{display:none}
       sums.push(c[1]+", run "+fmt(e.run)+": "+e.developing+" members track a system through the Gulf; "+(e.hits?e.hits+" bring it to the Louisiana-to-Florida coast ("+by+"), typically around "+fmt(e.eta):"none bring it to the Louisiana-to-Florida coast")+"; "+e.hurricane+" reach hurricane strength.");
     });
     $("ec-legend").innerHTML=legend;
-    $("ec-sum").innerHTML=sums.length?sums.map(esc).join("<br>")+"<br>Thick line: the typical (median) path of the members that develop the system, ending where the typical member finishes (a member that made landfall, or whose storm the model lost, is held at its last point). These are raw model runs out to 7 days (6 days for the 1 AM and 1 PM runs of ECENS), not a forecast. Two more views are off by default; switch them on with the layers button on the map: the shaded spread (where at least a quarter, light, or half, darker, of the members pass) and every individual member line. Data: &copy; ECMWF open data, CC BY 4.0, filtered to Gulf tracks.":"";
+    $("ec-sum").innerHTML=sums.length?sums.map(esc).join("<br>")+"<br>Thick line: the typical (median) path of the members that develop the system. It ends once fewer than 60% of them still have the storm (until then, a member that made landfall, or whose storm the model lost, counts at its last point). These are raw model runs out to 7 days (6 days for the 06 and 18 UTC runs of ECENS), not a forecast. Two more views are off by default; switch them on with the layers button on the map: the shaded spread (where at least a quarter, light, or half, darker, of the members pass) and every individual member line. Data: &copy; ECMWF open data, CC BY 4.0, filtered to Gulf tracks.":"";
   }
   var windColor=function(kt){for(var i=0;i<WIND.length;i++) if(kt>=WIND[i][0]) return WIND[i][1]};
   var sw=function(c,t,line){return '<span><i'+(line?' class="ln" style="border-color:'+c+'"':' style="background:'+c+'"')+'></i>'+t+'</span>'};
@@ -591,7 +631,8 @@ body.card .leaflet-control-container{display:none}
     L.tileLayer(esri+"Base/MapServer/tile/{z}/{y}/{x}",{attribution:"Map: Esri, HERE, Garmin, &copy; OpenStreetMap contributors",maxZoom:10}).addTo(map);
     if(!CARD) L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
     // The card is viewed at thumbnail size, so it gets a few large city labels instead of the fine map text.
-    else [["Houston",29.76,-95.37,1],["New Orleans",29.95,-90.07,1],["Pensacola",30.42,-87.22],["Tampa",27.95,-82.46],["Canc\u00fan",21.16,-86.85]].forEach(function(c){
+    // On the wide X card (zoom 5.5) Houston's label would run into New Orleans, and Cancun sits under the advisory label.
+    else [["Houston",29.76,-95.37,1],["New Orleans",29.95,-90.07,1],["Pensacola",30.42,-87.22],["Tampa",27.95,-82.46],["Canc\u00fan",21.16,-86.85]].filter(function(c){ return !CARDX||(c[0]!=="Houston"&&c[0]!=="Canc\u00fan"); }).forEach(function(c){
       L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city"+(c[3]?" left":""),html:c[3]?'<span class="l">'+c[0]+"<i></i></span>":"<i></i>"+c[0],iconSize:[0,0],iconAnchor:c[3]?[-14,20]:[14,20]})}).addTo(map); });
     // European ensemble lines sit in their own pane under everything else, each with an on/off switch.
     map.createPane("ec").style.zIndex=350;
@@ -599,7 +640,8 @@ body.card .leaflet-control-container{display:none}
     // Individual member lines start switched off to keep the map readable.
     // Default: official layers, averages, Google and Euro typical paths. Member lines and the Euro shading start off.
     // A device's saved choices override these, and a layer added later starts at its default.
-    var off={model:true,ens:true,ecens_m:true,ecaie_m:true,ecens_s:true,ecaie_s:true}; try{ if(!CARD) off=Object.assign(off,JSON.parse(localStorage.getItem("gsw-layers-off-3"))||{}); }catch(e){}
+    var DEFAULT_OFF={model:true,ens:true,ecens_m:true,ecaie_m:true,ecens_s:true,ecaie_s:true};
+    var off=Object.assign({},DEFAULT_OFF); try{ if(!CARD) off=Object.assign(off,JSON.parse(localStorage.getItem("gsw-layers-off-3"))||{}); }catch(e){}
     var overlays={}, names={};
     var add=function(key,label,g){ names[label]=key; overlays[label]=g; if(!off[key]) g.addTo(map); return g; };
     group=add("official","NHC official (area, track, alerts)",L.featureGroup());
@@ -607,9 +649,14 @@ body.card .leaflet-control-container{display:none}
     danielGroup=add("daniel","Daniel's Average",L.layerGroup());
     Object.keys(EC).forEach(function(k){ ecGroups[k]=add(k,EC[k][2]+": typical path",L.layerGroup()); ecGroups[k+"_s"]=add(k+"_s",EC[k][2]+": shaded spread",L.layerGroup()); ecGroups[k+"_m"]=add(k+"_m",EC[k][2]+": all member lines",L.layerGroup()); });
     L.control.layers(null,overlays,{collapsed:true}).addTo(map);
-    var remember=function(e){ off[names[e.name]]=e.type==="overlayremove"; try{ localStorage.setItem("gsw-layers-off-3",JSON.stringify(off)); }catch(x){} };
-    map.on("overlayadd",remember); map.on("overlayremove",remember);
+    // Only the reader's own choices are stored (where they differ from the defaults), so a later change to a default still
+    // reaches devices that never touched that layer. The first view is set before listening: Leaflet adds the default
+    // layers only once the map has a view, and those adds are not choices.
     map.fitBounds([[18,-98],[31,-80]]);
+    var remember=function(e){ off[names[e.name]]=e.type==="overlayremove";
+      var mine={}; Object.keys(off).forEach(function(k){ if(!!off[k]!==!!DEFAULT_OFF[k]) mine[k]=!!off[k]; });
+      try{ localStorage.setItem("gsw-layers-off-3",JSON.stringify(mine)); }catch(x){} };
+    map.on("overlayadd",remember); map.on("overlayremove",remember);
   }
   function renderMap(m){
     initMap(); if(!map) return;
@@ -619,10 +666,10 @@ body.card .leaflet-control-container{display:none}
     var fs=(m&&m.features)||[], kinds={}, mods={}, risk, hasPast=false, hasNow=false, maxCat=0, dan=null;
     fs.forEach(function(f){ var p=f.properties||{}, r=p.role, c=f.geometry.coordinates, l;
       if(r==="daniel"){ dan=p;
-        var tip="Daniel's Average of "+(p.members||[]).length+" tracks: "+esc((p.members||[]).join(", "))+(p.landfall?". Reaches the coast near "+esc(p.landfall.near)+" about "+esc(ctShort(p.landfall.eta)):"");
+        var tip="Daniel's Average of "+(p.members||[]).length+" tracks: "+esc((p.members||[]).join(", "))+(p.landfall?". Reaches the coast near "+esc(p.landfall.near)+" about "+esc(lfTime(p.landfall.eta)):"");
         danielGroup.addLayer(L.geoJSON(f,{style:{color:"#0d151c",weight:7*K,opacity:.75}}));
         danielGroup.addLayer(L.geoJSON(f,{style:{color:DAN,weight:3.6*K,opacity:1,dashArray:CARD?"26 14":"10 7"}}).bindTooltip(tip,{sticky:true}));
-        if(p.landfall&&p.landfall.lat!=null) danielGroup.addLayer(L.circleMarker([p.landfall.lat,-p.landfall.lonW],{radius:6*(CARD?2:1),color:DAN,weight:3*(CARD?2:1),fillColor:"#0d151c",fillOpacity:1}).bindTooltip("Daniel's Average reaches the coast near "+esc(p.landfall.near)+" about "+esc(ctShort(p.landfall.eta))));
+        if(p.landfall&&p.landfall.lat!=null) danielGroup.addLayer(L.circleMarker([p.landfall.lat,-p.landfall.lonW],{radius:6*(CARD?2:1),color:DAN,weight:3*(CARD?2:1),fillColor:"#0d151c",fillOpacity:1}).bindTooltip("Daniel's Average reaches the coast near "+esc(p.landfall.near)+" about "+esc(lfTime(p.landfall.eta))));
         return; }
       if(r==="model"){ mods[p.group]=1; var ms=MODEL[p.group]||MODEL.model;
         l=L.geoJSON(f,{style:{color:ms[0],weight:ms[1]*K,opacity:ms[2]}}).bindTooltip(esc(p.name)+" ("+esc(p.tech)+")",{sticky:true}); }
@@ -655,14 +702,15 @@ body.card .leaflet-control-container{display:none}
     $("map-src").textContent=(m&&m.source)||"NHC";
     $("dan-note").hidden=!dan; $("st-lf-dan").hidden=!dan;
     if(dan) $("st-lf-dan").innerHTML="<b>Daniel\u2019s Average:</b> "+(dan.landfall?"near "+esc(dan.landfall.near):"stays off the AL\u2013FL coast");
-    if(dan) $("dan-note").innerHTML="<b>Daniel\u2019s Average</b> of "+(dan.members||[]).length+" tracks"+(dan.landfall?" reaches the coast near <b>"+esc(dan.landfall.near)+"</b> about "+esc(ctShort(dan.landfall.eta)):" stays off the AL\u2013FL coast")+".";
+    if(dan) $("dan-note").innerHTML="<b>Daniel\u2019s Average</b> of "+(dan.members||[]).length+" tracks"+(dan.landfall?" reaches the coast near <b>"+esc(dan.landfall.near)+"</b> about "+esc(lfTime(dan.landfall.eta)):" stays off the AL\u2013FL coast")+".";
     $("map-legend").innerHTML=kind==="storm"
       ? '<span><i class="wl lg">45</i>Forecast wind, mph</span>'+(maxCat?'<span>'+[1,2,3,4,5].map(function(c){return '<i class="wl lg c'+c+'">'+c+'</i>'}).join("")+'Hurricane category</span>':'')+sw(fg,"NHC forecast track",1)+sw(muted,"Past track",1)+Object.keys(kinds).map(function(k){return WW[k]?sw(WW[k][0],WW[k][1],1):""}).join("")+(dan?sw(DAN,"Daniel's Average",1):"")+modelLegend
       : kind==="outlook" ? sw(RISK[risk]||RISK.Medium,"7-day development area")+(hasNow?'<span><b style="color:var(--landfall)">&#9679;</b> Latest position</span>':'<span><b style="color:var(--landfall)">&#10005;</b> Disturbance now</span>')+(hasPast?sw(fg,"Where it has been",1):"")+modelLegend : "";
     $("map-note").textContent=kind==="storm"
       ? "Labels are NHC forecast positions of the storm center with the expected wind in mph; hover or tap one for the time. The spread of the model tracks shows how uncertain the path is; wind, surge and rain reach well outside the center's line."
       : kind==="outlook" ? "NHC has not issued a forecast track yet. The shaded area is where it expects the system to develop over the next 7 days; the track and any coastal watches appear here automatically once a depression forms."
-      : (m&&m.unavailable) ? "The map could not be loaded just now; it will retry on the next refresh." : "No Gulf system to map.";
+      : (m&&m.unavailable) ? "The map could not be loaded just now; it will retry on the next refresh."
+      : (lastStatus&&lastStatus.landfallOccurred&&!(lastStatus.storms||[]).length) ? "NHC is no longer issuing advisories on this system, so there is no forecast track to map." : "No Gulf system to map.";
     if(dan) $("map-note").textContent+=" The dashed aqua line is Daniel\u2019s Average: the average of "+(dan.members||[]).join(", ")+", matched at the same forecast times every 6 hours. Each track is first shifted to start at the storm\u2019s current position (the shift fades out over 48 hours), and the line ends where fewer than 60% of them still have a position. It is a simple average of guidance, not a forecast.";
     if(hasModels) $("map-note").textContent+=" Thin coloured lines are raw computer-model runs ("+(m.models||"NHC model guidance")+"). They are not a forecast, they disagree with each other, and they shift from run to run; hover or tap a line for the model name. Switch each group on or off with the layers button on the map.";
     else if(kind==="outlook") $("map-note").textContent+=" Model tracks will be drawn here once NHC designates the system as an Invest and starts publishing guidance for it.";
@@ -721,7 +769,7 @@ body.card .leaflet-control-container{display:none}
     var bases=CARD?[""]:[RAW,""];
     Promise.allSettled(bases.map(function(b){return json(b,"data/status.json").then(function(d){return {base:b,d:d}})})).then(function(rs){
       var best=null; rs.forEach(function(r){ if(r.status==="fulfilled"&&(!best||stamp(r.value.d)>stamp(best.d))) best=r.value; });
-      if(!best){ if(!shownAt){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; } return; }
+      if(!best){ if(!shownAt){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; } else if(lastStatus) freshness(lastStatus,true); return; }
       if(stamp(best.d)<shownAt) return; // never step back to an older reading than the one on screen
       shownAt=stamp(best.d); renderStatus(best.d);
       var get=function(f){return json(best.base,f).catch(function(){return json(best.base===RAW?"":RAW,f)})};

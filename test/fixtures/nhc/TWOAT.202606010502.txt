@@ -1,0 +1,93 @@
+
+000
+ABNT20 KNHC 010502
+TWOAT 
+
+Tropical Weather Outlook
+NWS National Hurricane Center Miami FL
+200 AM EDT Mon Jun 1 2026
+
+For the North Atlantic...Caribbean Sea and the Gulf of America:
+
+Tropical cyclone formation is not expected during the next 7 days.
+
+&&
+Today marks the first day of the Atlantic hurricane season, which
+will run until November 30. The long-term averages for the number of
+named storms, hurricanes, and major hurricanes are 14, 7, and 3,
+respectively.
+
+The list of names for 2026 is as follows:
+
+Name         Pronunciation       Name         Pronunciation
+--------------------------------------------------------------------
+Arthur       AR-thur             Leah         LEE-ah
+Bertha       BUR-thuh            Marco        MAR-koe
+Cristobal    krees-TOH-bahl      Nana         NA-na
+Dolly        DAH-lee             Omar         OH-mar
+Edouard      eh-DWARD            Paulette     pawl-LET 
+Fay          fay                 Rene         re-NAY
+Gonzalo      gohn-SAH-loh        Sally        SAL-ee
+Hanna        HAN-uh              Teddy        TEHD-ee
+Isaias       ees-ah-EE-ahs       Vicky        VIH-kee
+Josephine    JOH-seh-feen        Wilfred      WILL-fred
+Kyle         KY-ull
+
+A full list of Atlantic basin tropical cyclone names and
+pronunciations can be found at:
+www.nhc.noaa.gov/pdf/aboutnames_pronounce_atlc.pdf
+
+This product, the Tropical Weather Outlook, briefly describes 
+significant areas of disturbed weather and their potential for 
+tropical cyclone formation during the next seven days.  The issuance 
+times of this product are 2 AM, 8 AM, 2 PM, and 8 PM EDT.  After the 
+change to standard time in November, the issuance times are 1 AM,  
+7 AM, 1 PM, and 7 PM EST.
+
+A Special Tropical Weather Outlook will be issued to provide 
+updates, as necessary, in between the regularly scheduled issuances 
+of the Tropical Weather Outlook.  Special Tropical Weather Outlooks 
+will be issued under the same WMO and AWIPS headers as the regular 
+Tropical Weather Outlooks.
+
+A standard package of products, consisting of the tropical cyclone 
+public advisory, the forecast/advisory, the cyclone discussion, and 
+a wind speed probability product is issued every six hours for all 
+ongoing tropical cyclones.  In addition, a special advisory package 
+may be issued at any time to advise of significant unexpected 
+changes or to modify watches or warnings.
+
+NHC has the option to issue advisories, watches, and warnings for 
+disturbances that are not yet a tropical cyclone, but which pose the 
+threat of bringing tropical storm or hurricane conditions to land 
+areas within 72 hours.  For these land-threatening "potential 
+tropical cyclones", NHC will issue the full suite of advisory and 
+watch/warning products.  Potential tropical cyclones share the 
+naming conventions currently in place for tropical depressions, 
+being numbered from a single list (e.g., "One", "Two", "Three", 
+etc.).
+
+The Tropical Cyclone Update is a brief statement to inform of 
+significant changes in a tropical cyclone, to post or cancel watches 
+or warnings, or to provide hourly position updates between 
+intermediate advisories when the storm center is easily followed by 
+radar.  It can also be used in lieu of or to precede the issuance of 
+a special advisory package.  Tropical Cyclone Updates, which can be 
+issued at any time, can be found under the WMO header WTNT61-65 
+KNHC, and under AWIPS header MIATCUAT1-5.
+
+All NHC text and graphical products are available on the web at
+https://www.hurricanes.gov.  More information on NHC text and
+graphical products can be found at
+https://www.nhc.noaa.gov/pdf/NHC_Product_Description.pdf. 
+New and updated products for the 2026 season can be found at
+https://www.nhc.noaa.gov/pdf/2026NHCNewProductsAndServices.pdf
+
+You can also interact with NHC on Facebook at 
+https://www.facebook.com/NWSNHC.  Notifications are available via X 
+when select National Hurricane Center products are issued. 
+Information about our Atlantic X feed (@NHC_Atlantic) is available 
+at https://www.nhc.noaa.gov/socialmedia/.
+
+$$
+Forecaster Hagen

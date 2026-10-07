@@ -14,6 +14,10 @@ function validEndpoint(endpoint) {
   return u.protocol === 'https:' && !u.username && !u.password && PUSH_HOSTS.some((re) => re.test(u.hostname));
 }
 const b64len = (s, n) => typeof s === 'string' && /^[A-Za-z0-9_-]+$/.test(s) && (() => { try { return fromB64url(s).length === n; } catch { return false; } })();
+// A device key that is not a real P-256 point can never be encrypted to: every alert to it would fail forever.
+async function validP256(s) {
+  try { await crypto.subtle.importKey('raw', fromB64url(s), { name: 'ECDH', namedCurve: 'P-256' }, false, []); return true; } catch { return false; }
+}
 async function readJSON(req) {
   const len = +(req.headers.get('content-length') || 0);
   if (len > MAX_BODY) return null;
@@ -61,11 +65,19 @@ function serialised(key, fn) {
 
 // ---- usage counts: one number per event per day (no identity, no addresses). Visits are counted by Cloudflare ----
 // Web Analytics on the page; these cover what that cannot see: alert sign-ups and taps.
+// Each count is a KV write, and the free plan allows about 1,000 a day for everything, sign-ups included. Counting
+// stops at COUNT_CAP per event per day (the report shows it as "N+"), so taps, real or scripted, can never use up the
+// writes that registrations need. The count also rides in the key's metadata, so the report reads it from one list.
 const EVENTS = ['alerts-open', 'share', 'ntfy-tap', 'subscribe', 'unsubscribe', 'test'];
+const COUNT_CAP = 100;
 async function count(env, e) {
   if (!EVENTS.includes(e)) return;
   const k = `stat:${e}:${new Date().toISOString().slice(0, 10)}`;
-  try { await env.SUBS.put(k, String((+(await env.SUBS.get(k)) || 0) + 1), { expirationTtl: 400 * 86400 }); } catch {} // best effort; a lost count is fine
+  try {
+    const n = (+(await env.SUBS.get(k)) || 0) + 1;
+    if (n > COUNT_CAP) return;
+    await env.SUBS.put(k, String(n), { expirationTtl: 400 * 86400, metadata: { n } });
+  } catch {} // best effort; a lost count is fine
 }
 
 export default {
@@ -108,11 +120,16 @@ export default {
       const key = await keyFor(sub.endpoint);
       if (url.pathname === '/unsubscribe') { await env.SUBS.delete(key); await count(env, 'unsubscribe'); return json({ ok: true }); }
       // p256dh is a 65-byte P-256 public key, auth a 16-byte secret, both base64url.
-      if (!sub.keys || !b64len(sub.keys.p256dh, 65) || !b64len(sub.keys.auth, 16)) return json({ error: 'bad keys' }, 400);
+      if (!sub.keys || !b64len(sub.keys.p256dh, 65) || !b64len(sub.keys.auth, 16) || !(await validP256(sub.keys.p256dh))) return json({ error: 'bad keys' }, 400);
       // Keep the subscription in metadata so a single list() call returns everything.
       const existing = await env.SUBS.getWithMetadata(key);
-      await env.SUBS.put(key, '1', { metadata: { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth }, added: existing?.metadata?.added || Date.now() } });
-      if (!existing?.metadata) await count(env, 'subscribe');
+      const m = existing?.metadata;
+      // Devices re-send their subscription once a day; an unchanged one costs no write.
+      if (m && m.endpoint === sub.endpoint && m.keys?.p256dh === sub.keys.p256dh && m.keys?.auth === sub.keys.auth) return json({ ok: true }, 200);
+      try {
+        await env.SUBS.put(key, '1', { metadata: { endpoint: sub.endpoint, keys: { p256dh: sub.keys.p256dh, auth: sub.keys.auth }, added: m?.added || Date.now() } });
+      } catch { return json({ error: 'registration is not available right now; try again later' }, 503); }
+      if (!m) await count(env, 'subscribe');
       return json({ ok: true }, 201);
     }
 
@@ -131,12 +148,18 @@ export default {
     // Owner's usage report: registered devices (with the day each was added) and the event counts by day.
     if (req.method === 'GET' && url.pathname === '/stats') {
       const devices = [], counts = {};
-      let cursor;
+      let cursor, reads = 0;
       do {
         const page = await env.SUBS.list({ cursor, prefix: '' });
         for (const k of page.keys) {
           if (k.metadata?.endpoint) devices.push({ added: new Date(k.metadata.added || 0).toISOString().slice(0, 10), service: new URL(k.metadata.endpoint).hostname });
-          else if (k.name.startsWith('stat:')) { const [, e, day] = k.name.split(':'); (counts[day] ||= {})[e] = +(await env.SUBS.get(k.name)) || 0; }
+          else if (k.name.startsWith('stat:')) {
+            const [, e, day] = k.name.split(':');
+            // Counts carry their value in metadata; only counters written before that need a read (bounded: a Worker
+            // invocation allows 1,000 KV operations).
+            const n = k.metadata?.n ?? (reads++ < 500 ? +(await env.SUBS.get(k.name)) || 0 : null);
+            if (n != null) (counts[day] ||= {})[e] = n >= COUNT_CAP ? `${COUNT_CAP}+` : n;
+          }
         }
         cursor = page.list_complete ? null : page.cursor;
       } while (cursor);

@@ -1,0 +1,52 @@
+
+000
+ABNT20 KNHC 032346
+TWOAT 
+
+Tropical Weather Outlook
+NWS National Hurricane Center Miami FL
+700 PM EST Sun Nov 3 2024
+
+For the North Atlantic...Caribbean Sea and the Gulf of Mexico:
+
+Active Systems:
+The National Hurricane Center is issuing advisories on Subtropical 
+Storm Patty, located over the northeastern Atlantic Ocean east of 
+the Azores Islands.
+
+The National Hurricane Center has initiated advisories on Potential 
+Tropical Cyclone Eighteen, located over the south-central portion 
+of the Caribbean Sea.
+* Formation chance through 48 hours...high...near 100 percent.
+* Formation chance through 7 days...high...near 100 percent.
+
+Southwestern Atlantic:
+An area of disturbed weather could develop from an interaction of 
+moisture with an upper-level trough digging near the northern 
+Leeward Islands around the middle of this week.  Some slow 
+subtropical or tropical development of this system is possible after 
+that time as it moves generally westward over the southwestern 
+Atlantic.
+* Formation chance through 48 hours...low...near 0 percent.
+* Formation chance through 7 days...low...20 percent.
+
+Near the Southeastern Bahamas:
+A trough of low pressure continues to produce disorganized showers 
+and thunderstorms along with gusty winds over the southeastern 
+Bahamas and adjacent waters. This system is expected to be absorbed 
+into Potential Tropical Cyclone Eighteen (AL18) over the Caribbean 
+Sea by late Monday, and development before that time is no longer 
+anticipated. Regardless, locally heavy rains are possible during the 
+next couple of days across the Greater Antilles and the Bahamas.
+* Formation chance through 48 hours...low...near 0 percent.
+* Formation chance through 7 days...low...near 0 percent.
+
+&&
+Public Advisories on Potential Tropical Cyclone Eighteen are issued 
+under WMO header WTNT33 KNHC and under AWIPS header MIATCPAT3. 
+Forecast/Advisories on Potential Tropical Cyclone Eighteen are 
+issued under WMO header WTNT23 KNHC and under AWIPS header 
+MIATCMAT3.
+
+$$
+Forecaster Papin
