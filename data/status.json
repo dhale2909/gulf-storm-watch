@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-07T00:00:19.393Z",
-  "lastAttemptAt": "2026-10-07T00:00:19.393Z",
-  "nextCheck": "2026-10-07T00:30:00.000Z",
+  "updatedAt": "2026-10-07T00:30:06.327Z",
+  "lastAttemptAt": "2026-10-07T00:30:06.327Z",
+  "nextCheck": "2026-10-07T01:00:00.000Z",
   "alertLevel": "threat",
   "headline": "Tropical Depression Nine: 35 mph, 22.1N 95.6W, Gulf, moving E at 6 mph. Forecast track reaches the coast near Pascagoula, MS around Fri, Oct 9, 8 PM CT (approximate).",
   "gulf": {
@@ -83,10 +83,10 @@
   ],
   "watchesWarnings": {
     "note": "",
-    "MS": {},
-    "FL": {},
     "AL": {},
-    "LA": {}
+    "LA": {},
+    "FL": {},
+    "MS": {}
   },
   "landfall": {
     "state": "MS",
@@ -125,22 +125,22 @@
     "map": "ok"
   },
   "google": {
-    "run": "2026-10-06T12:00:00.000Z",
-    "members": 32,
+    "run": "2026-10-06T18:00:00.000Z",
+    "members": 37,
     "total": 50,
-    "hits": 32,
+    "hits": 37,
     "coast": {
-      "LA": 0,
-      "MS": 0,
-      "AL": 6,
-      "FL": 26
+      "LA": 1,
+      "MS": 5,
+      "AL": 15,
+      "FL": 16
     },
     "eta": "2026-10-10T06:00:00.000Z",
-    "hurricane": 31,
-    "major": 18,
-    "peakMedianKt": 101,
-    "text": "32 of 50 ensemble members forecast a track so far. 32 of 32 bring the center to the Louisiana-to-Florida coast (FL 26, AL 6), typically around Sat, Oct 10, 1 AM CT. 31 of 32 reach hurricane strength (18 major); typical peak 115 mph.",
+    "hurricane": 37,
+    "major": 22,
+    "peakMedianKt": 105,
+    "text": "37 of 50 ensemble members forecast a track so far. 37 of 37 bring the center to the Louisiana-to-Florida coast (FL 16, AL 15, MS 5, LA 1), typically around Sat, Oct 10, 1 AM CT. 37 of 37 reach hurricane strength (22 major); typical peak 120 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-07T00:00:19.393Z"
+    "computedAt": "2026-10-07T00:30:06.327Z"
   }
 }
