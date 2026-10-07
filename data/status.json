@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-07T20:35:06.015Z",
-  "lastAttemptAt": "2026-10-07T20:35:06.015Z",
-  "nextCheck": "2026-10-07T21:05:00.000Z",
+  "updatedAt": "2026-10-07T21:05:14.153Z",
+  "lastAttemptAt": "2026-10-07T21:05:14.153Z",
+  "nextCheck": "2026-10-07T21:35:00.000Z",
   "alertLevel": "threat",
-  "headline": "Tropical Storm Isaias: 50 mph, 22.6N 93.4W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 11 PM CT (approximate). Tropical alerts in effect: AL (Hurricane Watch, Storm Surge Watch); FL (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); MS (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); LA (Storm Surge Watch, Tropical Storm Watch).",
+  "headline": "Tropical Storm Isaias: 65 mph, 22.7N 92.9W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 10 PM CT (approximate). Tropical alerts in effect: AL (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); FL (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); MS (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); LA (Storm Surge Watch, Tropical Storm Watch).",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -17,63 +17,63 @@
       "bin": "AT4",
       "name": "Tropical Storm Isaias",
       "type": "Tropical Storm",
-      "winds": 45,
+      "winds": 55,
       "category": 0,
-      "location": "22.6N 93.4W, Gulf",
+      "location": "22.7N 92.9W, Gulf",
       "movement": "ENE at 9 mph",
-      "advisory": "NHC advisory 4",
-      "advisoryAt": "2026-10-07T15:00:00.000Z",
+      "advisory": "NHC advisory 5",
+      "advisoryAt": "2026-10-07T21:00:00.000Z",
       "pos": {
-        "lat": 22.6,
-        "lonW": 93.4
+        "lat": 22.7,
+        "lonW": 92.9
       },
-      "posAt": "2026-10-07T18:00:00.000Z",
+      "posAt": "2026-10-07T21:00:00.000Z",
       "forecast": [
         {
-          "t": "2026-10-08T00:00:00.000Z",
-          "lat": 22.7,
-          "lonW": 92.4,
-          "wind": 50
+          "t": "2026-10-08T06:00:00.000Z",
+          "lat": 23.1,
+          "lonW": 91.8,
+          "wind": 70
         },
         {
-          "t": "2026-10-08T12:00:00.000Z",
-          "lat": 23.4,
-          "lonW": 90.8,
-          "wind": 65
-        },
-        {
-          "t": "2026-10-09T00:00:00.000Z",
-          "lat": 24.6,
-          "lonW": 89.2,
+          "t": "2026-10-08T18:00:00.000Z",
+          "lat": 24.1,
+          "lonW": 90.1,
           "wind": 80
         },
         {
-          "t": "2026-10-09T12:00:00.000Z",
-          "lat": 26.6,
-          "lonW": 88.1,
-          "wind": 95
-        },
-        {
-          "t": "2026-10-10T00:00:00.000Z",
-          "lat": 29.2,
-          "lonW": 87.5,
+          "t": "2026-10-09T06:00:00.000Z",
+          "lat": 25.8,
+          "lonW": 88.7,
           "wind": 90
         },
         {
-          "t": "2026-10-10T12:00:00.000Z",
-          "lat": 32.2,
+          "t": "2026-10-09T18:00:00.000Z",
+          "lat": 28.1,
           "lonW": 87.6,
-          "wind": 45
+          "wind": 95
         },
         {
-          "t": "2026-10-11T12:00:00.000Z",
-          "lat": 38,
+          "t": "2026-10-10T06:00:00.000Z",
+          "lat": 31,
+          "lonW": 87.3,
+          "wind": 60
+        },
+        {
+          "t": "2026-10-10T18:00:00.000Z",
+          "lat": 34,
           "lonW": 87.5,
-          "wind": 20
+          "wind": 30
+        },
+        {
+          "t": "2026-10-11T18:00:00.000Z",
+          "lat": 37.5,
+          "lonW": 84.5,
+          "wind": 15
         }
       ],
       "forecastStale": false,
-      "gulfRisk": "Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 11 PM CT (approximate)"
+      "gulfRisk": "Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 10 PM CT (approximate)"
     }
   ],
   "watchesWarnings": {
@@ -82,6 +82,12 @@
       "level": "watch",
       "text": "Hurricane Watch, Storm Surge Watch, Tropical Storm Watch",
       "counties": {
+        "28039": [
+          "TWA"
+        ],
+        "28041": [
+          "TWA"
+        ],
         "28045": [
           "TWA"
         ],
@@ -90,6 +96,56 @@
         ],
         "28059": [
           "HWA"
+        ]
+      }
+    },
+    "FL": {
+      "level": "watch",
+      "text": "Hurricane Watch, Storm Surge Watch, Tropical Storm Watch",
+      "counties": {
+        "12005": [
+          "HWA",
+          "TWA"
+        ],
+        "12013": [
+          "TWA"
+        ],
+        "12033": [
+          "HWA"
+        ],
+        "12037": [
+          "TWA"
+        ],
+        "12045": [
+          "HWA",
+          "TWA"
+        ],
+        "12059": [
+          "TWA"
+        ],
+        "12063": [
+          "TWA"
+        ],
+        "12065": [
+          "TWA"
+        ],
+        "12077": [
+          "TWA"
+        ],
+        "12091": [
+          "HWA"
+        ],
+        "12113": [
+          "HWA"
+        ],
+        "12129": [
+          "TWA"
+        ],
+        "12131": [
+          "HWA"
+        ],
+        "12133": [
+          "TWA"
         ]
       }
     },
@@ -113,63 +169,64 @@
     },
     "AL": {
       "level": "watch",
-      "text": "Hurricane Watch, Storm Surge Watch",
+      "text": "Hurricane Watch, Storm Surge Watch, Tropical Storm Watch",
       "counties": {
+        "01025": [
+          "TWA"
+        ],
         "01003": [
           "HWA"
         ],
         "01097": [
           "HWA"
-        ]
-      }
-    },
-    "FL": {
-      "level": "watch",
-      "text": "Hurricane Watch, Storm Surge Watch, Tropical Storm Watch",
-      "counties": {
-        "12005": [
-          "HWA",
+        ],
+        "01131": [
           "TWA"
         ],
-        "12033": [
-          "HWA"
-        ],
-        "12037": [
+        "01013": [
           "TWA"
         ],
-        "12045": [
-          "TWA",
+        "01035": [
           "HWA"
         ],
-        "12059": [
+        "01129": [
           "TWA"
         ],
-        "12065": [
+        "01039": [
+          "HWA"
+        ],
+        "01053": [
+          "HWA"
+        ],
+        "01099": [
           "TWA"
         ],
-        "12091": [
-          "HWA"
-        ],
-        "12113": [
-          "HWA"
-        ],
-        "12129": [
+        "01041": [
           "TWA"
         ],
-        "12131": [
-          "HWA"
+        "01061": [
+          "TWA"
         ],
-        "12133": [
+        "01031": [
+          "TWA"
+        ],
+        "01045": [
+          "TWA"
+        ],
+        "01067": [
+          "TWA"
+        ],
+        "01069": [
           "TWA"
         ]
       }
     }
   },
   "landfall": {
-    "state": "AL",
-    "eta": "2026-10-10T04:11:09.767Z",
+    "state": "FL",
+    "eta": "2026-10-10T02:56:51.846Z",
     "near": "Orange Beach, AL",
-    "windKt": 75
+    "windKt": 70
   },
   "landfallOccurred": null,
   "internal": {
@@ -190,8 +247,8 @@
     "stormId": "al092026",
     "name": "Tropical Storm Isaias",
     "lastPos": {
-      "lat": 22.6,
-      "lonW": 93.4
+      "lat": 22.7,
+      "lonW": 92.9
     },
     "since": "2026-10-07T09:00:00.000Z"
   },
@@ -220,24 +277,24 @@
     "peakMedianKt": 106,
     "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 43, AL 6), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (35 major); typical peak 120 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-07T20:35:06.015Z"
+    "computedAt": "2026-10-07T21:05:14.153Z"
   },
   "discussion": {
     "storm": "al092026",
     "url": "https://www.nhc.noaa.gov/text/MIATCDAT4.shtml",
-    "issuedAt": "2026-10-07T15:00:00.000Z",
-    "number": 4,
-    "issued": "1000 AM CDT Wed Oct 07 2026",
+    "issuedAt": "2026-10-07T21:00:00.000Z",
+    "number": 5,
+    "issued": "400 PM CDT Wed Oct 07 2026",
     "paragraphs": [
-      "Isaias has gotten better organized during the past several hours with a large area of deep convection near and northeast of the center. Recent Air Force Hurricane Hunter data indicate that the center is re-forming a bit to the north of the previous advisory nearer to the mid-level center, with an estimated pressure of 1000 mb derived from dropsonde data. The initial wind speed is set to 40 kt in consideration of increase in satellite organization and the 4-mb dropsonde pressure fall, close to the UW-CIMSS SATCON values and many of the other objective estimates.",
-      "The storm is moving east-northeast at 7 kt. The motion should gradually bend northward and increase during the next few days as a trough along the northwestern Gulf coast amplifies and the subtropical ridge east of Florida builds westward. This pattern should cause a fast-moving Isaias to approach the northern Gulf coast by Friday afternoon. Model guidance continues to be somewhat split, with the AI-based models generally on the right side of the model envelope, and the physics based models on the left side. The new NHC forecast is nudged a bit eastward, but isn't as far east as the latest HFIP Corrected Consensus Approach (HCCA) or Google DeepMind ensemble mean (GDMI). It is worth noting that many of the stronger solutions tend to be on the eastern half of the guidance and faster, which necessitates a variety of watches at this time.",
-      "With the center re-formation, the low- and mid-level centers appear to be coming into better alignment. This structural change could facilitate rapid intensification during the next day or two given light-to-moderate shear along the forecast track, near-record SSTs for this time of the year and a very moist environment. Near landfall, increasing shear could cause some weakening, but it isn't certain how fast the winds will diminish. Regardless, Isaias should be growing in size as it approaches the northern Gulf coast due to a trough interaction. The latest guidance is very close to the last NHC intensity forecast, so little changes were made, and the NHC prediction is just below the corrected-consensus HCCA."
+      "Satellite and aircraft data show that Isaias continues to strengthen. GOES-19 imagery indicates that a central dense overcast has formed, and the system has become more symmetric than this morning. The peak NOAA Hurricane Hunter aircraft 700-mb winds were 61 kt, with the pressure dropping to 994 mb. The initial intensity is set to 55 kt as a reflection of this data.",
+      "Isaias is basically on track, moving east-northeast at 7 kt. There is no change to the synoptic reasoning as a deepening trough along the northwestern Gulf Coast and a strengthening Atlantic subtropical ridge should cause the system to move faster to the northeast tomorrow and northward on Friday. As long as the cyclone remains intact, it makes physical sense that the system will move on the faster and eastward side of the guidance due to the stronger shear Isaias should encounter near landfall. Thus, the new forecast is adjusted slightly to the east, closer to the AI-based and corrected-consensus models.",
+      "NOAA radar data (P3-TDR) show that the system is experiencing some southwesterly shear, with tilt analyses displaying the mid-level circulation displaced 5-10 n mi to the northeast of the low-level center. This structure seems sufficient for further intensification given a continuation of similar low or moderate shear and very warm SSTs in a very humid environment. Models are fairly consistent about the shear increasing on Friday, but almost all guidance still shows a category 1 or 2 hurricane at landfall. While the regional hurricane models have generally come down on the peak intensity this cycle, it is unknown whether this is the start of a real trend, and we would prefer to see more than one guidance cycle before making any adjustments. The new forecast is close to the previous one, near the high side of the model suite."
     ],
     "keyMessages": [
-      "Isaias is expected to strengthen into a strong hurricane before approaching the northern Gulf Coast on Friday. There is an increasing risk of life-threatening storm surge along portions of the northern Gulf coast, and a Storm Surge Watch has been issued from The Mouth of the Mississippi River to Yankeetown Florida. Residents in the watch area should follow advice given by local officials and evacuate if told to do so.",
-      "The risk of damaging hurricane force-winds is increasing over portions of the Florida Panhandle, southern Alabama, and Mississippi. A Hurricane Watch has been issued from Bay St. Louis, Mississippi, to Indian Pass, Florida. Residents in these areas should prepare for the possibility of long-duration power outages.",
-      "Isaias will bring areas of heavy rainfall to the central U.S. Gulf coast and much of the Southeast Friday into the weekend. Flash and urban flooding, along with isolated river flooding, will be possible.",
-      "Isaias could bring gusty winds and areas of heavy rain to the western portion of the Yucatan Peninsula over the next day or so."
+      "Isaias is expected to strengthen and be a strong hurricane when it approaches the northern Gulf Coast on Friday. There is an increasing risk of life-threatening storm surge along portions of the northern Gulf Coast, and a Storm Surge Watch is in effect from The Mouth of the Mississippi River to Yankeetown, Florida. Residents in the watch area should follow advice given by local officials and evacuate if told to do so.",
+      "The risk of damaging hurricane-force winds is increasing over portions of the Florida Panhandle, southern Alabama, and southern Mississippi. A Hurricane Watch has been issued from Bay St. Louis, Mississippi, to Indian Pass, Florida. Residents in these areas should prepare for the possibility of long-duration power outages.",
+      "Isaias will bring areas of heavy rainfall to the central U.S. Gulf Coast and much of the Southeast Friday into the weekend. Flash and urban flooding, along with isolated river flooding, will be possible.",
+      "Isaias could bring gusty winds and areas of heavy rain to the western portion of the Yucatan Peninsula through Thursday."
     ],
     "forecaster": "Blake"
   }

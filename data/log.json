@@ -1,5 +1,19 @@
 [
   {
+    "ts": "2026-10-07T21:05:14.153Z",
+    "changed": true,
+    "alertLevel": "threat",
+    "formation7d": null,
+    "pushed": true,
+    "delivery": {
+      "private": true,
+      "browser": true,
+      "browserFailed": []
+    },
+    "updated": false,
+    "summary": "AL: alerts now Hurricane Watch, Storm Surge Watch, Tropical Storm Watch (was Hurricane Watch, Storm Surge Watch). Forecast landfall shifted AL -> FL, near Orange Beach, AL (Fri, Oct 9, 10 PM CT)."
+  },
+  {
     "ts": "2026-10-07T20:35:06.015Z",
     "changed": false,
     "alertLevel": "threat",
@@ -1447,15 +1461,6 @@
   },
   {
     "ts": "2026-10-05T21:30:06.807Z",
-    "changed": false,
-    "pushed": false,
-    "updated": false,
-    "alertLevel": "watch",
-    "formation7d": 80,
-    "summary": "No change. NHC gives the Southwestern Gulf of America disturbance a 80% chance of forming within 7 days (60% within 48 hours). No advisories or forecast track yet."
-  },
-  {
-    "ts": "2026-10-05T21:22:06.961Z",
     "changed": false,
     "pushed": false,
     "updated": false,
