@@ -115,6 +115,8 @@ a{color:var(--accent)}
 .credit{display:flex;justify-content:center;padding:18px 0 28px}
 .credit a{display:inline-flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;text-decoration:none;opacity:.8}
 .credit a:hover{opacity:1}.credit img{height:24px;width:auto}
+#ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 6px);transform:translate(-50%,0);z-index:2000;padding:6px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);color:var(--fg);font:600 13px var(--body);opacity:0;transition:opacity .15s;pointer-events:none}
+#ptr.show{opacity:1}
 .leaflet-tooltip.pt{font:500 12px var(--body);padding:3px 8px;background:var(--panel);color:var(--fg);border:1px solid var(--line);border-radius:6px;box-shadow:none}
 .leaflet-tooltip.pt:before{display:none}
 .xmark{font:700 20px/20px var(--display);color:var(--landfall);text-align:center;text-shadow:0 0 3px var(--panel),0 0 3px var(--panel)}
@@ -563,7 +565,7 @@ body.card .leaflet-control-container{display:none}
     Object.keys(ecGroups).forEach(function(k){ecGroups[k].clearLayers()});
     ens.forEach(function(e){ var c=EC[e.key]; if(!c||!ecGroups[e.key]) return;
       (e.features||[]).forEach(function(f){ var p=f.properties;
-        if(p.role==="ecswath") ecGroups[e.key].addLayer(L.geoJSON(f,{pane:"ec",interactive:false,style:{stroke:false,fillColor:c[0],fillOpacity:p.level>=50?.22:.13}}));
+        if(p.role==="ecswath") ecGroups[e.key+"_s"].addLayer(L.geoJSON(f,{pane:"ec",interactive:false,style:{stroke:false,fillColor:c[0],fillOpacity:p.level>=50?.22:.13}}));
         else if(p.role==="ecmean") ecGroups[e.key].addLayer(L.geoJSON(f,{style:{color:c[0],weight:3.5*K,opacity:.95}}).bindTooltip(c[1]+": typical path of "+p.members+" members",{sticky:true}));
         else ecGroups[e.key+"_m"].addLayer(L.geoJSON(f,{pane:"ec",style:{color:c[0],weight:1.2,opacity:.6}}).bindTooltip(c[1]+" member "+p.member+", peak "+mph(p.peak)+" mph",{sticky:true})); });
       if(!(e.features||[]).length) return;
@@ -573,7 +575,7 @@ body.card .leaflet-control-container{display:none}
       sums.push(c[1]+", run "+fmt(e.run)+": "+e.developing+" members track a system through the Gulf; "+(e.hits?e.hits+" bring it to the Louisiana-to-Florida coast ("+by+"), typically around "+fmt(e.eta):"none bring it to the Louisiana-to-Florida coast")+"; "+e.hurricane+" reach hurricane strength.");
     });
     $("ec-legend").innerHTML=legend;
-    $("ec-sum").innerHTML=sums.length?sums.map(esc).join("<br>")+"<br>Thick line: the typical (median) path of the members that develop the system, ending where the typical member finishes (a member that made landfall, or whose storm the model lost, is held at its last point). Shading: where at least a quarter (light) or half (darker) of them pass. These are raw model runs out to 7 days (6 days for the 1 AM and 1 PM runs of ECENS), not a forecast. The individual member lines are off by default; switch them on with the layers button on the map. Data: &copy; ECMWF open data, CC BY 4.0, filtered to Gulf tracks.":"";
+    $("ec-sum").innerHTML=sums.length?sums.map(esc).join("<br>")+"<br>Thick line: the typical (median) path of the members that develop the system, ending where the typical member finishes (a member that made landfall, or whose storm the model lost, is held at its last point). These are raw model runs out to 7 days (6 days for the 1 AM and 1 PM runs of ECENS), not a forecast. Two more views are off by default; switch them on with the layers button on the map: the shaded spread (where at least a quarter, light, or half, darker, of the members pass) and every individual member line. Data: &copy; ECMWF open data, CC BY 4.0, filtered to Gulf tracks.":"";
   }
   var windColor=function(kt){for(var i=0;i<WIND.length;i++) if(kt>=WIND[i][0]) return WIND[i][1]};
   var sw=function(c,t,line){return '<span><i'+(line?' class="ln" style="border-color:'+c+'"':' style="background:'+c+'"')+'></i>'+t+'</span>'};
@@ -590,12 +592,14 @@ body.card .leaflet-control-container{display:none}
     map.createPane("ec").style.zIndex=350;
     // Every kind of line gets its own on/off switch in the layers button; choices are remembered on this device.
     // Individual member lines start switched off to keep the map readable.
-    var off={model:true,ens:true,ecens_m:true,ecaie_m:true}; try{ if(!CARD) off=JSON.parse(localStorage.getItem("gsw-layers-off-3"))||off; }catch(e){} // default: official layers, averages, Google and Euro typical paths
+    // Default: official layers, averages, Google and Euro typical paths. Member lines and the Euro shading start off.
+    // A device's saved choices override these, and a layer added later starts at its default.
+    var off={model:true,ens:true,ecens_m:true,ecaie_m:true,ecens_s:true,ecaie_s:true}; try{ if(!CARD) off=Object.assign(off,JSON.parse(localStorage.getItem("gsw-layers-off-3"))||{}); }catch(e){}
     var overlays={}, names={};
     var add=function(key,label,g){ names[label]=key; overlays[label]=g; if(!off[key]) g.addTo(map); return g; };
     group=add("official","NHC official (area, track, alerts)",L.featureGroup());
     ["model","consensus","google","ens"].forEach(function(k){ modelGroups[k]=add(k,MODEL[k][3],L.layerGroup()); });
-    Object.keys(EC).forEach(function(k){ ecGroups[k]=add(k,EC[k][2]+": typical path and swath",L.layerGroup()); ecGroups[k+"_m"]=add(k+"_m",EC[k][2]+": all member lines",L.layerGroup()); });
+    Object.keys(EC).forEach(function(k){ ecGroups[k]=add(k,EC[k][2]+": typical path",L.layerGroup()); ecGroups[k+"_s"]=add(k+"_s",EC[k][2]+": shaded spread",L.layerGroup()); ecGroups[k+"_m"]=add(k+"_m",EC[k][2]+": all member lines",L.layerGroup()); });
     L.control.layers(null,overlays,{collapsed:true}).addTo(map);
     var remember=function(e){ off[names[e.name]]=e.type==="overlayremove"; try{ localStorage.setItem("gsw-layers-off-3",JSON.stringify(off)); }catch(x){} };
     map.on("overlayadd",remember); map.on("overlayremove",remember);
@@ -711,6 +715,16 @@ body.card .leaflet-control-container{display:none}
     });
   }
   var shownAt=0; load(); setInterval(load,2*60*1000);
+  // Pull to refresh in the home-screen app (Safari has its own; the installed app has none). Pull down from the top
+  // of the page and let go: the latest reading is fetched. Touches that start on the map are left to the map.
+  if(!CARD&&(navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches))){
+    var ptr=document.createElement("div"); ptr.id="ptr"; document.body.appendChild(ptr);
+    var y0=null, pulled=0, hideP=function(){ ptr.classList.remove("show"); ptr.style.transform=""; };
+    addEventListener("touchstart",function(e){ y0=(scrollY<=0&&!(e.target.closest&&e.target.closest("#map,.leaflet-container")))?e.touches[0].clientY:null; pulled=0; },{passive:true});
+    addEventListener("touchmove",function(e){ if(y0==null) return; pulled=Math.max(0,e.touches[0].clientY-y0);
+      ptr.classList.toggle("show",pulled>12); ptr.style.transform="translate(-50%,"+Math.min(pulled*.5,60)+"px)"; ptr.textContent=pulled>90?"Release to refresh":"Pull to refresh"; },{passive:true});
+    addEventListener("touchend",function(){ if(y0!=null&&pulled>90){ ptr.textContent="Refreshing\u2026"; load(); setTimeout(hideP,1200); } else hideP(); y0=null; });
+  }
   // Also refresh the moment the page is brought back into view.
   document.addEventListener("visibilitychange",function(){ if(!document.hidden) load(); });
 })();
