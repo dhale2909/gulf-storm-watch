@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-08T05:35:06.291Z",
-  "lastAttemptAt": "2026-10-08T05:35:06.291Z",
-  "nextCheck": "2026-10-08T06:05:00.000Z",
+  "updatedAt": "2026-10-08T06:05:12.963Z",
+  "lastAttemptAt": "2026-10-08T06:05:12.963Z",
+  "nextCheck": "2026-10-08T06:35:00.000Z",
   "alertLevel": "threat",
-  "headline": "Hurricane Isaias: 75 mph (Category 1), 22.9N 91.9W, Gulf, moving ENE at 10 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
+  "headline": "Hurricane Isaias: 75 mph (Category 1), 23.1N 91.7W, Gulf, moving ENE at 10 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -19,15 +19,15 @@
       "type": "Hurricane",
       "winds": 65,
       "category": 1,
-      "location": "22.9N 91.9W, Gulf",
+      "location": "23.1N 91.7W, Gulf",
       "movement": "ENE at 10 mph",
       "advisory": "NHC advisory 6",
       "advisoryAt": "2026-10-08T03:00:00.000Z",
       "pos": {
-        "lat": 22.9,
-        "lonW": 91.9
+        "lat": 23.1,
+        "lonW": 91.7
       },
-      "posAt": "2026-10-08T03:30:00.000Z",
+      "posAt": "2026-10-08T06:00:00.000Z",
       "forecast": [
         {
           "t": "2026-10-08T12:00:00.000Z",
@@ -72,6 +72,30 @@
   ],
   "watchesWarnings": {
     "note": "",
+    "LA": {
+      "level": "warning",
+      "text": "Storm Surge Warning, Tropical Storm Warning",
+      "counties": {
+        "22071": [
+          "TWR"
+        ],
+        "22075": [
+          "TWR"
+        ],
+        "22087": [
+          "TWR"
+        ],
+        "22103": [
+          "TWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "lix",
+          "name": "New Orleans"
+        }
+      ]
+    },
     "MS": {
       "level": "warning",
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch",
@@ -102,30 +126,6 @@
         {
           "code": "mob",
           "name": "Mobile"
-        }
-      ]
-    },
-    "LA": {
-      "level": "warning",
-      "text": "Storm Surge Warning, Tropical Storm Warning",
-      "counties": {
-        "22071": [
-          "TWR"
-        ],
-        "22075": [
-          "TWR"
-        ],
-        "22087": [
-          "TWR"
-        ],
-        "22103": [
-          "TWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "lix",
-          "name": "New Orleans"
         }
       ]
     },
@@ -170,12 +170,12 @@
           "HWR"
         ],
         "12129": [
-          "TWA",
-          "TWR"
+          "TWR",
+          "TWA"
         ],
         "12131": [
-          "HWR",
-          "HWA"
+          "HWA",
+          "HWR"
         ],
         "12133": [
           "TWA"
@@ -286,8 +286,8 @@
     "stormId": "al092026",
     "name": "Hurricane Isaias",
     "lastPos": {
-      "lat": 22.9,
-      "lonW": 91.9
+      "lat": 23.1,
+      "lonW": 91.7
     },
     "since": "2026-10-07T09:00:00.000Z"
   },
@@ -316,7 +316,7 @@
     "peakMedianKt": 108,
     "text": "50 of 50 bring the center to the Louisiana-to-Florida coast (FL 37, AL 11, MS 2), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (39 major); typical peak 125 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-08T05:35:06.291Z"
+    "computedAt": "2026-10-08T06:05:12.963Z"
   },
   "discussion": {
     "storm": "al092026",
