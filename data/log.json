@@ -1,5 +1,19 @@
 [
   {
+    "ts": "2026-10-08T15:05:31.676Z",
+    "changed": true,
+    "alertLevel": "threat",
+    "formation7d": null,
+    "pushed": true,
+    "delivery": {
+      "private": true,
+      "browser": true,
+      "browserFailed": []
+    },
+    "updated": false,
+    "summary": "Forecast landfall shifted AL -> FL, near Orange Beach, AL (Fri, Oct 9, 10 PM CT)."
+  },
+  {
     "ts": "2026-10-08T14:35:06.479Z",
     "changed": false,
     "alertLevel": "threat",
@@ -1513,14 +1527,5 @@
     "alertLevel": "watch",
     "formation7d": 90,
     "summary": "Update, below the alert threshold: 7-day odds 80% -> 90%. 48-hour odds 80% -> 90%."
-  },
-  {
-    "ts": "2026-10-06T13:34:04.792Z",
-    "changed": false,
-    "pushed": false,
-    "updated": false,
-    "alertLevel": "watch",
-    "formation7d": null,
-    "summary": "Tracker error (fixed 8:45 AM): NHC changed its outlook format and the check misread it as \"no disturbance\". Invest 92L was being tracked throughout; the QUIET alert at 7:00 AM was wrong."
   }
 ]
