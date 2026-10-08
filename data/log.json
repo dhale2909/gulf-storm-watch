@@ -1,5 +1,19 @@
 [
   {
+    "ts": "2026-10-08T09:05:49.805Z",
+    "changed": true,
+    "alertLevel": "threat",
+    "formation7d": null,
+    "pushed": true,
+    "delivery": {
+      "private": true,
+      "browser": true,
+      "browserFailed": []
+    },
+    "updated": false,
+    "summary": "FL: alerts now Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning (was Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch). Forecast landfall shifted FL -> AL, near Orange Beach, AL (Fri, Oct 9, 9 PM CT)."
+  },
+  {
     "ts": "2026-10-08T08:35:06.345Z",
     "changed": false,
     "alertLevel": "threat",
@@ -1486,15 +1500,6 @@
   },
   {
     "ts": "2026-10-06T08:30:05.030Z",
-    "changed": false,
-    "pushed": false,
-    "updated": false,
-    "alertLevel": "watch",
-    "formation7d": 80,
-    "summary": "No change. NHC gives the Southwestern Gulf of America disturbance a 80% chance of forming within 7 days (80% within 48 hours). No advisories or forecast track yet."
-  },
-  {
-    "ts": "2026-10-06T08:00:30.174Z",
     "changed": false,
     "pushed": false,
     "updated": false,
