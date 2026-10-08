@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-10-08T01:35:06.338Z",
+    "changed": false,
+    "alertLevel": "threat",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. Tropical Storm Isaias: 65 mph, 22.8N 92.4W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 10 PM CT (approximate). Tropical alerts in effect: AL (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); FL (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); MS (Hurricane Watch, Storm Surge Watch, Tropical Storm Watch); LA (Storm Surge Watch, Tropical Storm Watch)."
+  },
+  {
     "ts": "2026-10-08T01:05:17.222Z",
     "changed": false,
     "alertLevel": "threat",
@@ -1467,14 +1477,5 @@
     "alertLevel": "watch",
     "formation7d": 80,
     "summary": "No change. NHC gives the Southwestern Gulf of America disturbance a 80% chance of forming within 7 days (70% within 48 hours). No advisories or forecast track yet."
-  },
-  {
-    "ts": "2026-10-06T00:01:06.504Z",
-    "changed": false,
-    "pushed": false,
-    "updated": true,
-    "alertLevel": "watch",
-    "formation7d": 80,
-    "summary": "Update, below the alert threshold: 48-hour odds 60% -> 70%."
   }
 ]
