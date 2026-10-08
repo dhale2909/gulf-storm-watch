@@ -138,6 +138,9 @@ dialog .sub{font-size:13px;color:var(--muted)}
 dialog .go{display:inline-block;font-weight:600;padding:6px 12px;border-radius:8px;background:var(--accent);color:var(--accent-ink);text-decoration:none}
 dialog details summary{cursor:pointer} dialog ol.sub{font-size:13px;color:var(--muted)} dialog .sub b{color:var(--fg)}
 #card{display:none}
+/* First visit: the page stays invisible (it still lays out) until the first reading is in, then appears at once instead of
+   jumping as the headline and tiles fill in. Returning visitors get their last reading immediately; 4 s at most. */
+body.loading .wrap{visibility:hidden}
 body.card{padding:0;overflow:hidden}
 body.card .wrap{display:none}
 body.card #card{display:flex;flex-direction:column;position:relative;width:1200px;height:900px;background:var(--bg)}
@@ -181,7 +184,7 @@ body.card .leaflet-control-container{display:none}
 .foot{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13px;color:var(--muted);align-items:center}
 </style>
 </head>
-<body>
+<body class="loading">
 <!-- Share preview card: index.html?card=1 renders only this, 1200x900; each check screenshots it to card.png, published on the "cards" branch. -->
 <div id="card">
   <div id="card-map"></div>
@@ -215,7 +218,7 @@ body.card .leaflet-control-container{display:none}
     <div class="sub" id="level-note" hidden style="margin-top:8px"></div>
   </section>
 
-  <section class="tiles" id="tiles">
+  <section class="tiles" id="tiles" data-stage="storm"><!-- one set of tiles from the start, so nothing collapses when data arrives -->
     <div class="tile stage-storm">
       <div class="eyebrow">Storm</div>
       <div class="val sm" id="st-type">—</div>
@@ -505,7 +508,7 @@ body.card .leaflet-control-container{display:none}
     $("next").textContent=!due?"Checks run every 30 minutes":lateMin>10?("Check due "+fmt(d.nextCheck)+" is running late ("+lateMin+" min)"):("Next check about "+fmt(d.nextCheck));
   }
   function renderStatus(d){
-    lastStatus=d;
+    lastStatus=d; document.body.classList.remove("loading");
     renderCard(d);
     var lvl=LABEL[d.alertLevel]?d.alertLevel:"quiet";
     $("band").style.setProperty("--lvl","var(--"+lvl+")");
@@ -795,9 +798,10 @@ body.card .leaflet-control-container{display:none}
     var bases=CARD?[""]:[RAW,""].concat(sha?["https://raw.githubusercontent.com/dhale2909/gulf-storm-watch/"+sha+"/"]:[]);
     Promise.allSettled(bases.map(function(b){return json(b,"data/status.json").then(function(d){return {base:b,d:d}})})).then(function(rs){
       var best=null; rs.forEach(function(r){ if(r.status==="fulfilled"&&(!best||stamp(r.value.d)>stamp(best.d))) best=r.value; });
-      if(!best){ if(!shownAt){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; } else if(lastStatus) freshness(lastStatus,true); return; }
+      if(!best){ document.body.classList.remove("loading"); if(!shownAt){ $("pill-text").textContent="Offline"; $("headline").textContent="Could not load the latest check."; } else if(lastStatus) freshness(lastStatus,true); return; }
       if(stamp(best.d)<shownAt) return; // never step back to an older reading than the one on screen
       shownAt=stamp(best.d); renderStatus(best.d);
+      if(!CARD) try{ localStorage.setItem("gsw-last",JSON.stringify(best.d)); }catch(e){} // shown at once on the next visit
       var get=function(f){return json(best.base,f).catch(function(){return json(best.base===RAW?"":RAW,f)})};
       get("data/ecmwf.json").then(renderEC).catch(function(){ renderEC(null); }).then(function(){ done("e"); });
       get("data/map.json").then(renderMap).catch(function(){ renderMap({unavailable:true}); }).then(function(){ done("m"); });
@@ -805,7 +809,12 @@ body.card .leaflet-control-container{display:none}
     });
     });
   }
-  var shownAt=0; load(); setInterval(load,2*60*1000);
+  var shownAt=0; setTimeout(function(){ document.body.classList.remove("loading"); },4000);
+  // A returning visitor sees the last reading this device loaded straight away (if under a day old), so the page does not
+  // jump while the fresh one loads; the fresh reading then replaces it, and its freshness note says how old it is.
+  if(!CARD) try{ var cached=JSON.parse(localStorage.getItem("gsw-last")||"null"), ct=cached&&Date.parse(cached.lastAttemptAt||cached.updatedAt);
+    if(ct&&Date.now()-ct<864e5){ shownAt=ct; renderStatus(cached); } }catch(e){}
+  load(); setInterval(load,2*60*1000);
   // Pull to refresh in the home-screen app (Safari has its own; the installed app has none). Pull down from the top
   // of the page and let go: the latest reading is fetched. Touches that start on the map are left to the map.
   if(!CARD&&(navigator.standalone||(window.matchMedia&&matchMedia("(display-mode: standalone)").matches))){
