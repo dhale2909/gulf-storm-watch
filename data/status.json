@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-08T04:35:05.693Z",
-  "lastAttemptAt": "2026-10-08T04:35:05.693Z",
+  "updatedAt": "2026-10-08T04:54:30.622Z",
+  "lastAttemptAt": "2026-10-08T04:54:30.622Z",
   "nextCheck": "2026-10-08T05:05:00.000Z",
   "alertLevel": "threat",
-  "headline": "Hurricane Isaias: 75 mph (Category 1), 22.9N 91.9W, Gulf, moving ENE at 10 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Tropical alerts in effect: AL (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Watch); FL (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch); MS (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch); LA (Storm Surge Warning, Tropical Storm Warning).",
+  "headline": "Hurricane Isaias: 75 mph (Category 1), 22.9N 91.9W, Gulf, moving ENE at 10 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -93,7 +93,17 @@
           "HWA",
           "TWR"
         ]
-      }
+      },
+      "offices": [
+        {
+          "code": "lix",
+          "name": "New Orleans"
+        },
+        {
+          "code": "mob",
+          "name": "Mobile"
+        }
+      ]
     },
     "LA": {
       "level": "warning",
@@ -111,7 +121,13 @@
         "22103": [
           "TWR"
         ]
-      }
+      },
+      "offices": [
+        {
+          "code": "lix",
+          "name": "New Orleans"
+        }
+      ]
     },
     "AL": {
       "level": "warning",
@@ -165,7 +181,17 @@
         "01013": [
           "TWA"
         ]
-      }
+      },
+      "offices": [
+        {
+          "code": "mob",
+          "name": "Mobile"
+        },
+        {
+          "code": "tae",
+          "name": "Tallahassee"
+        }
+      ]
     },
     "FL": {
       "level": "warning",
@@ -218,7 +244,21 @@
         "12133": [
           "TWA"
         ]
-      }
+      },
+      "offices": [
+        {
+          "code": "tae",
+          "name": "Tallahassee"
+        },
+        {
+          "code": "mob",
+          "name": "Mobile"
+        },
+        {
+          "code": "tbw",
+          "name": "Tampa Bay Ruskin"
+        }
+      ]
     }
   },
   "landfall": {
@@ -276,7 +316,7 @@
     "peakMedianKt": 108,
     "text": "50 of 50 bring the center to the Louisiana-to-Florida coast (FL 37, AL 11, MS 2), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (39 major); typical peak 125 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-08T04:35:05.693Z"
+    "computedAt": "2026-10-08T04:54:30.622Z"
   },
   "discussion": {
     "storm": "al092026",
