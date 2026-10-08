@@ -1,5 +1,19 @@
 [
   {
+    "ts": "2026-10-08T15:35:05.351Z",
+    "changed": true,
+    "alertLevel": "threat",
+    "formation7d": null,
+    "pushed": true,
+    "delivery": {
+      "private": true,
+      "browser": true,
+      "browserFailed": []
+    },
+    "updated": false,
+    "summary": "FL: alerts now Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch (was Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning)."
+  },
+  {
     "ts": "2026-10-08T15:05:31.676Z",
     "changed": true,
     "alertLevel": "threat",
@@ -1518,14 +1532,5 @@
     "alertLevel": "watch",
     "formation7d": 90,
     "summary": "No change. NHC gives the Southwestern Gulf of America disturbance a 90% chance of forming within 7 days (90% within 48 hours). No advisories or forecast track yet."
-  },
-  {
-    "ts": "2026-10-06T13:35:52.882Z",
-    "changed": false,
-    "pushed": false,
-    "updated": true,
-    "alertLevel": "watch",
-    "formation7d": 90,
-    "summary": "Update, below the alert threshold: 7-day odds 80% -> 90%. 48-hour odds 80% -> 90%."
   }
 ]
