@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-08T10:20:37.590Z",
-  "lastAttemptAt": "2026-10-08T10:20:37.590Z",
-  "nextCheck": "2026-10-08T10:35:00.000Z",
+  "updatedAt": "2026-10-08T10:35:07.326Z",
+  "lastAttemptAt": "2026-10-08T10:35:07.326Z",
+  "nextCheck": "2026-10-08T11:05:00.000Z",
   "alertLevel": "threat",
   "headline": "Hurricane Isaias: 80 mph (Category 1), 23.3N 91.2W, Gulf, moving ENE at 10 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
@@ -160,10 +160,10 @@
         "01025": [
           "TWA"
         ],
-        "01013": [
+        "01099": [
           "TWA"
         ],
-        "01099": [
+        "01013": [
           "TWA"
         ],
         "01061": [
@@ -314,7 +314,7 @@
     "peakMedianKt": 111,
     "text": "50 of 50 bring the center to the Louisiana-to-Florida coast (FL 37, AL 11, MS 2), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (40 major); typical peak 130 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-08T10:20:37.590Z"
+    "computedAt": "2026-10-08T10:35:07.326Z"
   },
   "discussion": {
     "storm": "al092026",
