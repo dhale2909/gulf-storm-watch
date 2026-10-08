@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-08T03:35:06.304Z",
-  "lastAttemptAt": "2026-10-08T03:35:06.304Z",
-  "nextCheck": "2026-10-08T04:05:00.000Z",
+  "updatedAt": "2026-10-08T04:05:18.670Z",
+  "lastAttemptAt": "2026-10-08T04:05:18.670Z",
+  "nextCheck": "2026-10-08T04:35:00.000Z",
   "alertLevel": "threat",
   "headline": "Hurricane Isaias: 75 mph (Category 1), 22.9N 91.9W, Gulf, moving ENE at 10 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Tropical alerts in effect: AL (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Watch); FL (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch); MS (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch); LA (Storm Surge Warning, Tropical Storm Warning).",
   "gulf": {
@@ -72,24 +72,6 @@
   ],
   "watchesWarnings": {
     "note": "",
-    "LA": {
-      "level": "warning",
-      "text": "Storm Surge Warning, Tropical Storm Warning",
-      "counties": {
-        "22071": [
-          "TWR"
-        ],
-        "22075": [
-          "TWR"
-        ],
-        "22087": [
-          "TWR"
-        ],
-        "22103": [
-          "TWR"
-        ]
-      }
-    },
     "MS": {
       "level": "warning",
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch",
@@ -110,6 +92,77 @@
           "HWR",
           "HWA",
           "TWR"
+        ]
+      }
+    },
+    "LA": {
+      "level": "warning",
+      "text": "Storm Surge Warning, Tropical Storm Warning",
+      "counties": {
+        "22071": [
+          "TWR"
+        ],
+        "22075": [
+          "TWR"
+        ],
+        "22087": [
+          "TWR"
+        ],
+        "22103": [
+          "TWR"
+        ]
+      }
+    },
+    "FL": {
+      "level": "warning",
+      "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch",
+      "counties": {
+        "12005": [
+          "HWR",
+          "TWA"
+        ],
+        "12013": [
+          "TWA"
+        ],
+        "12033": [
+          "HWR"
+        ],
+        "12037": [
+          "TWA",
+          "TWR"
+        ],
+        "12045": [
+          "TWA",
+          "TWR"
+        ],
+        "12059": [
+          "TWA"
+        ],
+        "12063": [
+          "TWA"
+        ],
+        "12065": [
+          "TWR"
+        ],
+        "12077": [
+          "TWA"
+        ],
+        "12091": [
+          "HWR"
+        ],
+        "12113": [
+          "HWR"
+        ],
+        "12129": [
+          "TWA",
+          "TWR"
+        ],
+        "12131": [
+          "HWA",
+          "HWR"
+        ],
+        "12133": [
+          "TWA"
         ]
       }
     },
@@ -163,59 +216,6 @@
           "TWA"
         ],
         "01013": [
-          "TWA"
-        ]
-      }
-    },
-    "FL": {
-      "level": "warning",
-      "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch",
-      "counties": {
-        "12005": [
-          "HWR",
-          "TWA"
-        ],
-        "12013": [
-          "TWA"
-        ],
-        "12033": [
-          "HWR"
-        ],
-        "12037": [
-          "TWA",
-          "TWR"
-        ],
-        "12045": [
-          "TWR",
-          "TWA"
-        ],
-        "12059": [
-          "TWA"
-        ],
-        "12063": [
-          "TWA"
-        ],
-        "12065": [
-          "TWR"
-        ],
-        "12077": [
-          "TWA"
-        ],
-        "12091": [
-          "HWR"
-        ],
-        "12113": [
-          "HWR"
-        ],
-        "12129": [
-          "TWA",
-          "TWR"
-        ],
-        "12131": [
-          "HWR",
-          "HWA"
-        ],
-        "12133": [
           "TWA"
         ]
       }
@@ -276,7 +276,7 @@
     "peakMedianKt": 108,
     "text": "50 of 50 bring the center to the Louisiana-to-Florida coast (FL 37, AL 11, MS 2), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (39 major); typical peak 125 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-08T03:35:06.304Z"
+    "computedAt": "2026-10-08T04:05:18.670Z"
   },
   "discussion": {
     "storm": "al092026",
