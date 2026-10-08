@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-08T13:35:06.380Z",
-  "lastAttemptAt": "2026-10-08T13:35:06.380Z",
-  "nextCheck": "2026-10-08T14:05:00.000Z",
+  "updatedAt": "2026-10-08T14:05:15.931Z",
+  "lastAttemptAt": "2026-10-08T14:05:15.931Z",
+  "nextCheck": "2026-10-08T14:35:00.000Z",
   "alertLevel": "threat",
   "headline": "Hurricane Isaias: 80 mph (Category 1), 23.7N 90.6W, Gulf, moving ENE at 10 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
@@ -142,10 +142,10 @@
       "level": "warning",
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch",
       "counties": {
-        "01045": [
+        "01061": [
           "TWR"
         ],
-        "01061": [
+        "01045": [
           "TWR"
         ],
         "01067": [
@@ -157,19 +157,19 @@
         "01069": [
           "TWR"
         ],
-        "01003": [
-          "HWR"
+        "01013": [
+          "TWR"
         ],
         "01053": [
+          "HWR"
+        ],
+        "01003": [
           "HWR"
         ],
         "01097": [
           "HWR"
         ],
         "01025": [
-          "TWR"
-        ],
-        "01013": [
           "TWR"
         ],
         "01099": [
@@ -212,8 +212,8 @@
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning",
       "counties": {
         "12005": [
-          "TWR",
-          "HWR"
+          "HWR",
+          "TWR"
         ],
         "12013": [
           "TWR"
@@ -249,8 +249,8 @@
           "TWR"
         ],
         "12131": [
-          "HWA",
           "TWR",
+          "HWA",
           "HWR"
         ],
         "12133": [
@@ -328,7 +328,7 @@
     "peakMedianKt": 107,
     "text": "50 of 50 bring the center to the Louisiana-to-Florida coast (FL 38, AL 12), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (43 major); typical peak 125 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-08T13:35:06.380Z"
+    "computedAt": "2026-10-08T14:05:15.931Z"
   },
   "discussion": {
     "storm": "al092026",
