@@ -390,7 +390,18 @@ export async function gatherAlerts(prior, gulfStorm) {
           const k = WIND_KIND[f.properties?.event];
           if (k) for (const code of f.properties?.geocode?.SAME || []) { const fips = String(code).slice(-5); if (/^\d{5}$/.test(fips) && !(counties[fips] ||= []).includes(k)) counties[fips].push(k); }
         }
-        ww[st] = { level: events.some((e) => /Warning$/.test(e)) ? 'warning' : 'watch', text: events.sort().join(', '), ...(Object.keys(counties).length ? { counties } : {}) };
+        // The NWS offices that issued them (the WMO header names the office, "WTUS84 KMOB ..."), busiest first, so the page
+        // can link each state to them: NWS no longer has a page of alerts by state.
+        const byOffice = new Map();
+        for (const f of actual) {
+          if (!TROPICAL_EVENTS.test(f.properties?.event || '')) continue;
+          const m = /\bK([A-Z]{3})\b/.exec((f.properties?.parameters?.WMOidentifier || [])[0] || '');
+          if (!m) continue;
+          const code = m[1].toLowerCase(), o = byOffice.get(code) || { code, name: String(f.properties?.senderName || '').replace(/^NWS\s+/, '').replace(/\s+[A-Z]{2}$/, '') || m[1], n: 0 };
+          o.n++; byOffice.set(code, o);
+        }
+        const offices = [...byOffice.values()].sort((a, b) => b.n - a.n).map(({ code, name }) => ({ code, name }));
+        ww[st] = { level: events.some((e) => /Warning$/.test(e)) ? 'warning' : 'watch', text: events.sort().join(', '), ...(Object.keys(counties).length ? { counties } : {}), ...(offices.length ? { offices } : {}) };
       }
     } catch (e) {
       console.warn(`alerts for ${st} unavailable: ${e.message}`);
@@ -724,6 +735,24 @@ async function gatherGoogle(storm, invest) {
 
 // ---------- decide ----------
 
+// The headline's alert line, short enough for a phone and a notification: each state's strongest wind product and strongest
+// surge product, grouped by product ("Hurricane warning: AL, FL, MS. Storm surge warning: AL, FL, MS, LA."). The coastal
+// panel and the "posted/changed" alert lines still name every product (owner's choice, Oct 7 2026).
+const WIND_ORDER = ['Hurricane Warning', 'Tropical Storm Warning', 'Hurricane Watch', 'Tropical Storm Watch'];
+const SURGE_ORDER = ['Storm Surge Warning', 'Storm Surge Watch'];
+export function alertSummary(ww) {
+  const groups = new Map();
+  for (const st of STATES) {
+    if (!ww?.[st]?.level) continue;
+    const products = String(ww[st].text || '').split(', ');
+    for (const order of [WIND_ORDER, SURGE_ORDER]) {
+      const top = order.find((p) => products.includes(p));
+      if (top) groups.set(top, [...(groups.get(top) || []), st]);
+    }
+  }
+  return [...WIND_ORDER, ...SURGE_ORDER].filter((p) => groups.has(p)).map((p) => `${p[0]}${p.slice(1).toLowerCase()}: ${groups.get(p).join(', ')}.`).join(' ');
+}
+
 const lcFirst = (t) => String(t || '').replace(/^./, (c) => c.toLowerCase()); // mid-sentence, keeping town names and times as written
 
 export function build(prior, gulf, storms, ww) {
@@ -765,7 +794,7 @@ export function build(prior, gulf, storms, ww) {
   } else {
     headline = 'No Gulf disturbance in the NHC outlook and no Gulf storm.';
   }
-  if (anyAlert) headline += ` Tropical alerts in effect: ${STATES.filter((s) => ww[s].level).map((s) => `${s} (${ww[s].text})`).join('; ')}.`;
+  if (anyAlert) headline += ` ${alertSummary(ww)}`;
   const others = storms.slice(1).filter((o) => !o.other || true);
   if (others.length) headline += ` Also in the Gulf: ${others.map((o) => `${o.name} (${mph(o.winds)} mph; ${lcFirst(o.gulfRisk)})`).join('; ')}.`;
 

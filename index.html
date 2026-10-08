@@ -90,6 +90,7 @@ a{color:var(--accent)}
 .st b{font-family:var(--display);font-size:18px;font-weight:700}
 .st span{font-size:12px;color:var(--muted)}
 .coast.clear{grid-template-columns:1fr}.st.all span a{color:var(--fg)}
+.st[data-office]{cursor:pointer}.st .offs{font-size:12px}.st .offs a{color:var(--accent)}
 
 .log-row{display:grid;grid-template-columns:150px 1fr auto;gap:12px;padding:9px 0;border-top:1px solid var(--line);align-items:baseline;font-size:13.5px}
 .log-row:first-child{border-top:0}
@@ -359,6 +360,7 @@ body.card .leaflet-control-container{display:none}
   var LABEL={quiet:"Quiet",watch:"Monitoring",threat:"Threat",landfall:"Landfall"};
   var levelLabel=function(d){ return d.alertLevel==="landfall"&&!d.landfallOccurred?"Landfall expected":LABEL[d.alertLevel]||"Quiet"; };
   var STATES=["AL","FL","MS","LA"];
+  var COAST_OFFICE={AL:[{code:"mob",name:"Mobile"}],FL:[{code:"tae",name:"Tallahassee"}],MS:[{code:"lix",name:"New Orleans"}],LA:[{code:"lix",name:"New Orleans"}]}; // each state's Gulf coast NWS office
   var fmt=function(iso){ if(!iso) return "—"; var d=new Date(iso); if(isNaN(d)) return iso;
     return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"}); };
   var esc=function(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
@@ -556,10 +558,14 @@ body.card .leaflet-control-container{display:none}
     var unavail=(ww.unavailable||[]);
     var anyWW=STATES.some(function(s){return ww[s]&&ww[s].level});
     $("coast").classList.toggle("clear",!anyWW&&!unavail.length);
+    // NWS no longer has a page of alerts by state (alerts.weather.gov is gone), so each state links to the NWS offices that
+    // issued its alerts, busiest first; with no alert, to the office covering that state's Gulf coast.
+    var offs=function(s){ var v=ww[s]||{}; return v.offices&&v.offices.length?v.offices:COAST_OFFICE[s]; };
+    var offLink=function(o){ return '<a href="https://www.weather.gov/'+encodeURIComponent(o.code)+'/" target="_blank" rel="noopener">NWS '+esc(o.name)+'</a>'; };
     $("coast").innerHTML=(!anyWW&&!unavail.length)
-      ? '<div class="st all"><b>No tropical watches or warnings</b><span>None reported for Alabama, Florida, Mississippi or Louisiana. Official NWS alerts: '+STATES.map(function(s){return '<a href="https://alerts.weather.gov/search?area='+s+'" target="_blank" rel="noopener">'+s+'</a>'}).join(" \u00b7 ")+'</span></div>'
+      ? '<div class="st all"><b>No tropical watches or warnings</b><span>None reported for Alabama, Florida, Mississippi or Louisiana. NWS offices on the coast: '+[COAST_OFFICE.AL[0],COAST_OFFICE.FL[0],COAST_OFFICE.LA[0]].map(offLink).join(" \u00b7 ")+'</span></div>'
       : STATES.map(function(s){var v=ww[s]||{}; var c=v.level==="warning"?"var(--landfall)":v.level==="watch"?"var(--threat)":"var(--line)";
-      return '<div class="st" style="--stc:'+c+'"><b>'+s+'</b><span>'+esc(v.text||(unavail.indexOf(s)>=0?"NWS not reachable; previous reading shown":"No tropical watch or warning reported"))+'</span><a href="https://alerts.weather.gov/search?area='+s+'" target="_blank" rel="noopener" style="font-size:12px">Official NWS alerts</a></div>'}).join("");
+      return '<div class="st" data-office="https://www.weather.gov/'+encodeURIComponent(offs(s)[0].code)+'/" style="--stc:'+c+'"><b>'+s+'</b><span>'+esc(v.text||(unavail.indexOf(s)>=0?"NWS not reachable; previous reading shown":"No tropical watch or warning reported"))+'</span><span class="offs">'+offs(s).map(offLink).join(" \u00b7 ")+'</span></div>'}).join("");
     // NHC's own words: Key Messages up front, the forecaster's reasoning behind a fold.
     var D=d.discussion;
     $("nhc-panel").hidden=!(D&&((D.keyMessages||[]).length||(D.paragraphs||[]).length));
@@ -570,7 +576,7 @@ body.card .leaflet-control-container{display:none}
       $("nhc-keys").hidden=!(D.keyMessages||[]).length;
       $("nhc-disc").innerHTML=(D.paragraphs||[]).map(function(p){return "<p>"+esc(p)+"</p>"}).join("")+'<p class="by">'+(D.forecaster?"Forecaster "+esc(D.forecaster)+" \u00b7 ":"")+'<a href="'+esc(D.url)+'" target="_blank" rel="noopener">Full text on nhc.noaa.gov</a></p>';
     }
-    $("coast-note").textContent=(anyWW?"Tropical watches or warnings are in effect; tap a state for the official product. ":"")+(unavail.length?"NWS could not be reached for "+unavail.join(", ")+"; showing the previous reading.":"");
+    $("coast-note").textContent=(anyWW?"Tropical watches or warnings are in effect; tap a state to open the NWS office that issued them. ":"")+(unavail.length?"NWS could not be reached for "+unavail.join(", ")+"; showing the previous reading.":"");
     var G=d.google;
     $("goog-text").classList.toggle("empty",!G); $("goog-bars").hidden=!G;
     if(G){
@@ -581,6 +587,8 @@ body.card .leaflet-control-container{display:none}
     } else { $("goog-text").textContent="No data for this system yet. Google's ensemble only covers systems NHC has numbered."; $("goog-run").textContent="Experimental"; }
     $("last").textContent=fmt(d.lastAttemptAt||d.updatedAt);
   }
+  // Tapping anywhere on a state card opens its main NWS office (a tap on one of the office links opens that one).
+  $("coast").addEventListener("click",function(e){ if(e.target.closest("a")) return; var card=e.target.closest(".st[data-office]"); if(card) window.open(card.getAttribute("data-office"),"_blank","noopener"); });
   function renderLog(rows){
     rows=rows.slice(0,40);
     $("logcount").textContent=rows.length?rows.length+" recent checks":"";

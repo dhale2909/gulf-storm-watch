@@ -955,3 +955,24 @@ test('watch counties are shaded on the map; the NHC line stays only where no cou
   assert.equal(map.features.filter((f) => f.properties.role === 'wwcounty').length, 0);
   assert.equal(map.features.filter((f) => f.properties.role === 'ww')[0].geometry.coordinates.length, 5, 'no counties listed: the whole line');
 });
+
+// ---- Coastal panel: NWS has no alerts-by-state page any more, so each state links to the offices that issued its alerts ----
+test('each state records the NWS offices that issued its tropical alerts, busiest first', async () => {
+  const a = (event, wmo, sender) => ({ properties: { event, status: 'Actual', messageType: 'Alert', senderName: sender, parameters: { WMOidentifier: [wmo] } } });
+  responses[alertsURL('FL')] = { features: [a('Hurricane Warning', 'WTUS82 KTAE 080300', 'NWS Tallahassee FL'), a('Tropical Storm Watch', 'WTUS82 KTAE 080300', 'NWS Tallahassee FL'), a('Hurricane Watch', 'WTUS84 KMOB 080253', 'NWS Mobile AL'), a('Flood Watch', 'WGUS62 KTBW 080200', 'NWS Tampa Bay Ruskin FL')] };
+  for (const s of ['AL', 'MS', 'LA']) responses[alertsURL(s)] = { features: [] };
+  const ww = await m.gatherAlerts(state(), true);
+  assert.deepEqual(ww.FL.offices, [{ code: 'tae', name: 'Tallahassee' }, { code: 'mob', name: 'Mobile' }], 'non-tropical products (the flood watch) do not count');
+  assert.equal(ww.AL.offices, undefined);
+});
+test("the headline's alert line is each state's strongest wind and surge product, grouped (owner's choice, Oct 7)", () => {
+  const tonight = { ...ww(),
+    AL: { level: 'warning', text: 'Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Watch' },
+    FL: { level: 'warning', text: 'Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch' },
+    MS: { level: 'warning', text: 'Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch' },
+    LA: { level: 'warning', text: 'Storm Surge Warning, Tropical Storm Warning' } };
+  assert.equal(m.alertSummary(tonight), 'Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.');
+  const d = m.build(state(), null, [forecastStorm()], tonight);
+  assert.match(d.headline, /\. Hurricane warning: AL, FL, MS\. Tropical storm warning: LA\. Storm surge warning: AL, FL, MS, LA\.$/);
+  assert.equal(m.alertSummary({ ...ww(), FL: { level: 'watch', text: 'Storm Surge Watch, Tropical Storm Watch' } }), 'Tropical storm watch: FL. Storm surge watch: FL.');
+});
