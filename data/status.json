@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-08T18:05:14.132Z",
-  "lastAttemptAt": "2026-10-08T18:05:14.132Z",
-  "nextCheck": "2026-10-08T18:35:00.000Z",
+  "updatedAt": "2026-10-08T18:35:03.348Z",
+  "lastAttemptAt": "2026-10-08T18:35:03.348Z",
+  "nextCheck": "2026-10-08T19:05:00.000Z",
   "alertLevel": "threat",
   "headline": "Hurricane Isaias: 85 mph (Category 1), 24.0N 89.8W, Gulf, moving ENE at 12 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
@@ -142,9 +142,6 @@
       "level": "warning",
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch",
       "counties": {
-        "01011": [
-          "TWA"
-        ],
         "01105": [
           "TWA"
         ],
@@ -169,7 +166,7 @@
         "01073": [
           "TWA"
         ],
-        "01063": [
+        "01011": [
           "TWA"
         ],
         "01021": [
@@ -199,43 +196,43 @@
         "01123": [
           "TWA"
         ],
-        "01017": [
-          "TWA"
-        ],
-        "01087": [
-          "TWA"
-        ],
-        "01091": [
-          "TWA"
-        ],
-        "01101": [
-          "TWA"
-        ],
-        "01047": [
-          "TWA"
-        ],
-        "01109": [
-          "TWA"
-        ],
-        "01081": [
-          "TWA"
-        ],
-        "01007": [
-          "TWA"
-        ],
-        "01113": [
+        "01063": [
           "TWA"
         ],
         "01085": [
           "TWA"
         ],
-        "01031": [
+        "01007": [
+          "TWA"
+        ],
+        "01081": [
+          "TWA"
+        ],
+        "01109": [
+          "TWA"
+        ],
+        "01047": [
+          "TWA"
+        ],
+        "01101": [
+          "TWA"
+        ],
+        "01091": [
+          "TWA"
+        ],
+        "01087": [
+          "TWA"
+        ],
+        "01017": [
+          "TWA"
+        ],
+        "01113": [
+          "TWA"
+        ],
+        "01061": [
           "TWR"
         ],
-        "01069": [
-          "TWR"
-        ],
-        "01067": [
+        "01045": [
           "TWR"
         ],
         "01099": [
@@ -264,10 +261,13 @@
         "01003": [
           "HWR"
         ],
-        "01045": [
+        "01069": [
           "TWR"
         ],
-        "01061": [
+        "01067": [
+          "TWR"
+        ],
+        "01031": [
           "TWR"
         ],
         "01023": [
@@ -303,8 +303,8 @@
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch",
       "counties": {
         "12005": [
-          "HWR",
-          "TWR"
+          "TWR",
+          "HWR"
         ],
         "12013": [
           "TWR"
@@ -348,8 +348,8 @@
         ],
         "12131": [
           "TWR",
-          "HWR",
-          "HWA"
+          "HWA",
+          "HWR"
         ],
         "12133": [
           "TWR"
@@ -410,23 +410,23 @@
     "map": "ok"
   },
   "google": {
-    "run": "2026-10-08T06:00:00.000Z",
+    "run": "2026-10-08T12:00:00.000Z",
     "members": 50,
     "total": 50,
-    "hits": 50,
+    "hits": 49,
     "coast": {
       "LA": 0,
       "MS": 0,
-      "AL": 12,
-      "FL": 38
+      "AL": 3,
+      "FL": 46
     },
     "eta": "2026-10-10T06:00:00.000Z",
     "hurricane": 50,
-    "major": 43,
-    "peakMedianKt": 107,
-    "text": "50 of 50 bring the center to the Louisiana-to-Florida coast (FL 38, AL 12), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (43 major); typical peak 125 mph.",
+    "major": 50,
+    "peakMedianKt": 121,
+    "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 46, AL 3), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (50 major); typical peak 140 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-08T18:05:14.132Z"
+    "computedAt": "2026-10-08T18:35:03.348Z"
   },
   "discussion": {
     "storm": "al092026",
