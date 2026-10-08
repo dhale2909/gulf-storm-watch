@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-08T03:05:13.434Z",
-  "lastAttemptAt": "2026-10-08T03:05:13.434Z",
-  "nextCheck": "2026-10-08T03:35:00.000Z",
+  "updatedAt": "2026-10-08T03:35:06.304Z",
+  "lastAttemptAt": "2026-10-08T03:35:06.304Z",
+  "nextCheck": "2026-10-08T04:05:00.000Z",
   "alertLevel": "threat",
-  "headline": "Tropical Storm Isaias: 70 mph, 22.9N 91.9W, Gulf, moving ENE at 10 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Tropical alerts in effect: AL (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Watch); FL (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch); MS (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch); LA (Storm Surge Warning, Tropical Storm Warning).",
+  "headline": "Hurricane Isaias: 75 mph (Category 1), 22.9N 91.9W, Gulf, moving ENE at 10 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Tropical alerts in effect: AL (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Watch); FL (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch); MS (Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch); LA (Storm Surge Warning, Tropical Storm Warning).",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -15,10 +15,10 @@
     {
       "id": "al092026",
       "bin": "AT4",
-      "name": "Tropical Storm Isaias",
-      "type": "Tropical Storm",
-      "winds": 60,
-      "category": 0,
+      "name": "Hurricane Isaias",
+      "type": "Hurricane",
+      "winds": 65,
+      "category": 1,
       "location": "22.9N 91.9W, Gulf",
       "movement": "ENE at 10 mph",
       "advisory": "NHC advisory 6",
@@ -27,7 +27,7 @@
         "lat": 22.9,
         "lonW": 91.9
       },
-      "posAt": "2026-10-08T03:00:00.000Z",
+      "posAt": "2026-10-08T03:30:00.000Z",
       "forecast": [
         {
           "t": "2026-10-08T12:00:00.000Z",
@@ -72,57 +72,21 @@
   ],
   "watchesWarnings": {
     "note": "",
-    "AL": {
+    "LA": {
       "level": "warning",
-      "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Watch",
+      "text": "Storm Surge Warning, Tropical Storm Warning",
       "counties": {
-        "01061": [
-          "TWA"
+        "22071": [
+          "TWR"
         ],
-        "01031": [
-          "TWA"
+        "22075": [
+          "TWR"
         ],
-        "01067": [
-          "TWA"
+        "22087": [
+          "TWR"
         ],
-        "01045": [
-          "TWA"
-        ],
-        "01069": [
-          "TWA"
-        ],
-        "01035": [
-          "HWA"
-        ],
-        "01053": [
-          "HWA"
-        ],
-        "01041": [
-          "TWA"
-        ],
-        "01131": [
-          "TWA"
-        ],
-        "01039": [
-          "HWA"
-        ],
-        "01097": [
-          "HWR"
-        ],
-        "01099": [
-          "TWA"
-        ],
-        "01003": [
-          "HWR"
-        ],
-        "01025": [
-          "TWA"
-        ],
-        "01013": [
-          "TWA"
-        ],
-        "01129": [
-          "TWA"
+        "22103": [
+          "TWR"
         ]
       }
     },
@@ -143,27 +107,63 @@
           "TWR"
         ],
         "28059": [
-          "TWR",
+          "HWR",
           "HWA",
-          "HWR"
+          "TWR"
         ]
       }
     },
-    "LA": {
+    "AL": {
       "level": "warning",
-      "text": "Storm Surge Warning, Tropical Storm Warning",
+      "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Watch",
       "counties": {
-        "22071": [
-          "TWR"
+        "01061": [
+          "TWA"
         ],
-        "22075": [
-          "TWR"
+        "01031": [
+          "TWA"
         ],
-        "22087": [
-          "TWR"
+        "01067": [
+          "TWA"
         ],
-        "22103": [
-          "TWR"
+        "01045": [
+          "TWA"
+        ],
+        "01069": [
+          "TWA"
+        ],
+        "01039": [
+          "HWA"
+        ],
+        "01097": [
+          "HWR"
+        ],
+        "01025": [
+          "TWA"
+        ],
+        "01003": [
+          "HWR"
+        ],
+        "01099": [
+          "TWA"
+        ],
+        "01131": [
+          "TWA"
+        ],
+        "01041": [
+          "TWA"
+        ],
+        "01035": [
+          "HWA"
+        ],
+        "01053": [
+          "HWA"
+        ],
+        "01129": [
+          "TWA"
+        ],
+        "01013": [
+          "TWA"
         ]
       }
     },
@@ -244,7 +244,7 @@
   "tracked": {
     "invest": "Invest 92L",
     "stormId": "al092026",
-    "name": "Tropical Storm Isaias",
+    "name": "Hurricane Isaias",
     "lastPos": {
       "lat": 22.9,
       "lonW": 91.9
@@ -276,7 +276,7 @@
     "peakMedianKt": 108,
     "text": "50 of 50 bring the center to the Louisiana-to-Florida coast (FL 37, AL 11, MS 2), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (39 major); typical peak 125 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-08T03:05:13.434Z"
+    "computedAt": "2026-10-08T03:35:06.304Z"
   },
   "discussion": {
     "storm": "al092026",
