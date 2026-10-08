@@ -1,5 +1,19 @@
 [
   {
+    "ts": "2026-10-08T21:05:16.774Z",
+    "changed": true,
+    "alertLevel": "threat",
+    "formation7d": null,
+    "pushed": true,
+    "delivery": {
+      "private": true,
+      "browser": true,
+      "browserFailed": []
+    },
+    "updated": false,
+    "summary": "Hurricane Isaias is now Category 2 (100 mph)."
+  },
+  {
     "ts": "2026-10-08T20:35:05.379Z",
     "changed": false,
     "alertLevel": "threat",
@@ -1534,14 +1548,5 @@
     "alertLevel": "watch",
     "formation7d": 100,
     "summary": "7-day formation odds 80% -> 100%. 48-hour formation odds 80% -> 100%."
-  },
-  {
-    "ts": "2026-10-06T18:00:28.616Z",
-    "changed": true,
-    "pushed": true,
-    "updated": false,
-    "alertLevel": "watch",
-    "formation7d": null,
-    "summary": "Tracker error (fixed 1:20 PM): NHC wrote the odds as \"near 100 percent\" and the check could not read it, so it reported \"no disturbance\". Invest 92L was being tracked throughout; the 1:00 PM QUIET alert was wrong."
   }
 ]

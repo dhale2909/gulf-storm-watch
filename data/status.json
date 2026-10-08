@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-08T20:35:05.379Z",
-  "lastAttemptAt": "2026-10-08T20:35:05.379Z",
-  "nextCheck": "2026-10-08T21:05:00.000Z",
+  "updatedAt": "2026-10-08T21:05:16.774Z",
+  "lastAttemptAt": "2026-10-08T21:05:16.774Z",
+  "nextCheck": "2026-10-08T21:35:00.000Z",
   "alertLevel": "threat",
-  "headline": "Hurricane Isaias: 85 mph (Category 1), 24.0N 89.8W, Gulf, moving ENE at 12 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
+  "headline": "Hurricane Isaias: 100 mph (Category 2), 24.4N 89.3W, Gulf, moving NE at 14 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -17,57 +17,57 @@
       "bin": "AT4",
       "name": "Hurricane Isaias",
       "type": "Hurricane",
-      "winds": 75,
-      "category": 1,
-      "location": "24.0N 89.8W, Gulf",
-      "movement": "ENE at 12 mph",
-      "advisory": "NHC advisory 8",
-      "advisoryAt": "2026-10-08T15:00:00.000Z",
+      "winds": 85,
+      "category": 2,
+      "location": "24.4N 89.3W, Gulf",
+      "movement": "NE at 14 mph",
+      "advisory": "NHC advisory 9",
+      "advisoryAt": "2026-10-08T21:00:00.000Z",
       "pos": {
-        "lat": 24,
-        "lonW": 89.8
+        "lat": 24.4,
+        "lonW": 89.3
       },
-      "posAt": "2026-10-08T18:00:00.000Z",
+      "posAt": "2026-10-08T21:00:00.000Z",
       "forecast": [
         {
-          "t": "2026-10-09T00:00:00.000Z",
-          "lat": 24.9,
-          "lonW": 89,
-          "wind": 90
-        },
-        {
-          "t": "2026-10-09T12:00:00.000Z",
-          "lat": 27.1,
-          "lonW": 87.9,
+          "t": "2026-10-09T06:00:00.000Z",
+          "lat": 25.7,
+          "lonW": 88.4,
           "wind": 95
         },
         {
-          "t": "2026-10-10T00:00:00.000Z",
-          "lat": 29.6,
+          "t": "2026-10-09T18:00:00.000Z",
+          "lat": 28.2,
           "lonW": 87.4,
           "wind": 85
         },
         {
-          "t": "2026-10-10T12:00:00.000Z",
-          "lat": 32.3,
-          "lonW": 87.8,
-          "wind": 35
+          "t": "2026-10-10T06:00:00.000Z",
+          "lat": 31,
+          "lonW": 87.2,
+          "wind": 65
         },
         {
-          "t": "2026-10-11T00:00:00.000Z",
-          "lat": 34.6,
-          "lonW": 88.1,
+          "t": "2026-10-10T18:00:00.000Z",
+          "lat": 33.2,
+          "lonW": 87.8,
           "wind": 30
         },
         {
-          "t": "2026-10-11T12:00:00.000Z",
-          "lat": 36.5,
+          "t": "2026-10-11T06:00:00.000Z",
+          "lat": 35,
           "lonW": 87.8,
           "wind": 25
+        },
+        {
+          "t": "2026-10-11T18:00:00.000Z",
+          "lat": 37,
+          "lonW": 85,
+          "wind": 20
         }
       ],
       "forecastStale": false,
-      "gulfRisk": "Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 10 PM CT (approximate)"
+      "gulfRisk": "Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate)"
     }
   ],
   "watchesWarnings": {
@@ -143,8 +143,8 @@
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch",
       "counties": {
         "12005": [
-          "TWR",
-          "HWR"
+          "HWR",
+          "TWR"
         ],
         "12013": [
           "TWR"
@@ -214,145 +214,145 @@
       "level": "warning",
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch",
       "counties": {
-        "01011": [
-          "TWA"
-        ],
-        "01105": [
-          "TWA"
-        ],
-        "01119": [
-          "TWA"
-        ],
-        "01027": [
-          "TWA"
-        ],
-        "01121": [
-          "TWA"
-        ],
-        "01111": [
-          "TWA"
-        ],
-        "01051": [
-          "TWA"
-        ],
-        "01001": [
-          "TWA"
-        ],
-        "01073": [
-          "TWA"
-        ],
-        "01113": [
-          "TWA"
-        ],
-        "01021": [
-          "TWA"
-        ],
-        "01065": [
-          "TWA"
-        ],
-        "01005": [
-          "TWA"
-        ],
-        "01117": [
-          "TWA"
-        ],
-        "01107": [
-          "TWA"
-        ],
-        "01125": [
-          "TWA"
-        ],
-        "01037": [
-          "TWA"
-        ],
-        "01123": [
-          "TWA"
-        ],
-        "01017": [
-          "TWA"
-        ],
-        "01087": [
-          "TWA"
-        ],
-        "01091": [
-          "TWA"
-        ],
-        "01101": [
-          "TWA"
-        ],
-        "01047": [
-          "TWA"
-        ],
-        "01109": [
-          "TWA"
-        ],
-        "01081": [
-          "TWA"
-        ],
-        "01007": [
-          "TWA"
-        ],
-        "01115": [
-          "TWA"
-        ],
-        "01085": [
-          "TWA"
-        ],
-        "01063": [
-          "TWA"
-        ],
-        "01069": [
+        "01131": [
           "TWR"
-        ],
-        "01067": [
-          "TWR"
-        ],
-        "01099": [
-          "TWR"
-        ],
-        "01025": [
-          "TWR"
-        ],
-        "01013": [
-          "TWR"
-        ],
-        "01129": [
-          "TWR"
-        ],
-        "01097": [
-          "HWR"
-        ],
-        "01039": [
-          "TWR",
-          "HWA"
         ],
         "01035": [
           "TWR",
           "HWA"
         ],
-        "01003": [
-          "HWR"
-        ],
-        "01045": [
-          "TWR"
-        ],
-        "01061": [
-          "TWR"
-        ],
-        "01031": [
-          "TWR"
-        ],
         "01023": [
           "TWA"
         ],
-        "01131": [
+        "01003": [
+          "HWR"
+        ],
+        "01099": [
+          "TWR"
+        ],
+        "01097": [
+          "HWR"
+        ],
+        "01013": [
+          "TWR"
+        ],
+        "01025": [
+          "TWR"
+        ],
+        "01053": [
+          "HWR"
+        ],
+        "01129": [
           "TWR"
         ],
         "01041": [
           "TWR"
         ],
-        "01053": [
-          "HWR"
+        "01039": [
+          "HWA",
+          "TWR"
+        ],
+        "01063": [
+          "TWA"
+        ],
+        "01115": [
+          "TWA"
+        ],
+        "01037": [
+          "TWA"
+        ],
+        "01125": [
+          "TWA"
+        ],
+        "01107": [
+          "TWA"
+        ],
+        "01117": [
+          "TWA"
+        ],
+        "01005": [
+          "TWA"
+        ],
+        "01085": [
+          "TWA"
+        ],
+        "01007": [
+          "TWA"
+        ],
+        "01081": [
+          "TWA"
+        ],
+        "01109": [
+          "TWA"
+        ],
+        "01047": [
+          "TWA"
+        ],
+        "01101": [
+          "TWA"
+        ],
+        "01091": [
+          "TWA"
+        ],
+        "01017": [
+          "TWA"
+        ],
+        "01065": [
+          "TWA"
+        ],
+        "01021": [
+          "TWA"
+        ],
+        "01011": [
+          "TWA"
+        ],
+        "01073": [
+          "TWA"
+        ],
+        "01001": [
+          "TWA"
+        ],
+        "01051": [
+          "TWA"
+        ],
+        "01111": [
+          "TWA"
+        ],
+        "01027": [
+          "TWA"
+        ],
+        "01087": [
+          "TWA"
+        ],
+        "01123": [
+          "TWA"
+        ],
+        "01113": [
+          "TWA"
+        ],
+        "01119": [
+          "TWA"
+        ],
+        "01121": [
+          "TWA"
+        ],
+        "01105": [
+          "TWA"
+        ],
+        "01031": [
+          "TWR"
+        ],
+        "01061": [
+          "TWR"
+        ],
+        "01067": [
+          "TWR"
+        ],
+        "01045": [
+          "TWR"
+        ],
+        "01069": [
+          "TWR"
         ]
       },
       "offices": [
@@ -373,9 +373,9 @@
   },
   "landfall": {
     "state": "FL",
-    "eta": "2026-10-10T02:53:25.839Z",
-    "near": "Orange Beach, AL",
-    "windKt": 75
+    "eta": "2026-10-10T02:53:31.510Z",
+    "near": "Pensacola, FL",
+    "windKt": 70
   },
   "landfallOccurred": null,
   "internal": {
@@ -396,8 +396,8 @@
     "stormId": "al092026",
     "name": "Hurricane Isaias",
     "lastPos": {
-      "lat": 24,
-      "lonW": 89.8
+      "lat": 24.4,
+      "lonW": 89.3
     },
     "since": "2026-10-07T09:00:00.000Z"
   },
@@ -426,25 +426,24 @@
     "peakMedianKt": 121,
     "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 46, AL 3), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (50 major); typical peak 140 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-08T20:35:05.379Z"
+    "computedAt": "2026-10-08T21:05:16.774Z"
   },
   "discussion": {
     "storm": "al092026",
     "url": "https://www.nhc.noaa.gov/text/MIATCDAT4.shtml",
-    "issuedAt": "2026-10-08T15:00:00.000Z",
-    "number": 8,
-    "issued": "1000 AM CDT Thu Oct 08 2026",
+    "issuedAt": "2026-10-08T21:00:00.000Z",
+    "number": 9,
+    "issued": "400 PM CDT Thu Oct 08 2026",
     "paragraphs": [
-      "Isaias is strengthening in an environment of moderate vertical wind shear. Observations from an Air Force Hurricane Hunter aircraft indicate that the central pressure continues to fall and the maximum winds are now near 75 kt. The center of the hurricane is near the southwestern side of a Central Dense Overcast feature, and some convective banding features are evident over the eastern portion of the circulation. Additional aircraft reconnaissance missions are scheduled for today, tonight, and Friday, so we will have close monitoring of the intensity of the system up until landfall.",
-      "Center fixes from the Hurricane Hunters indicate that Isais continues on a generally east-northward track with an initial motion of about 060/9 kt. During the next 36 hours, the hurricane should gradually turn toward the northeast and north as it moves between a ridge extending from the Bahamas across the Florida Peninsula and a zonally-oriented mid-level trough near the northwestern Gulf coast. On the forecast track, the center of the hurricane is forecast to move across the east-central to northeastern Gulf coast in 36-42 hours. Thereafter, the weakening cyclone should move over the southeastern United States bringing strong winds well inland. The track guidance has not changed much for this advisory cycle and the official forecast is similar to that of the previous advisory.",
-      "The intensity forecast up to landfall is somewhat challenging. On the one hand, the hurricane should move over waters of high oceanic heat content and within a fairly moist air mass through tomorrow. On the other hand, the SHIPS model input parameters show a significant increase in vertical wind shear, particularly when Isais nears the coast. Regarding, the shorter-term intensity forecast, a recent WSFM microwave satellite image at 37 GHz frequency shows a closed ring around the eye. This is typically a harbinger of rapid intensification. The 12-hour forecast does show a relatively large increase in strength, but in view of the expected stronger shear in 24-36 hours, some decrease in intensity is indicated as Isaias approaches the coast. Regardless, Isaias is expected to remain a dangerous hurricane through landfall, and gusty winds are expected well inland after landfall given the anticipated expansion of the wind field and accelerating forward speed of the storm."
+      "The eye of Isaias has become apparent on visible and infrared satellite imagery. Interestingly, this is the first eye noted on satellite pictures in the Atlantic basin during the 2026 Hurricane Season. The cloud tops have mostly warmed in the system, but the latest subjective Dvorak classification value from TAFB has increased to T4.5 or 77 kt. NOAA Hurricane Hunter aircraft observations do not indicate a drop in central pressure so far and the peak 700-mb flight-level winds have not increased. However, Tail Doppler Radar wind velocities from the aircraft measured just above the surface support increasing the intensity to 85 kt for this advisory.",
+      "Satellite and aircraft center fixes indicate that the hurricane appears to have made its expected turn toward the northeast and the initial motion is now 050/10 kt. Isaias is expected to turn northward tomorrow and move between a mid-level ridge extending westward from the Bahamas to the Florida peninsula and a trough near the northwest Gulf Coast. On the forecast track, the center will move inland along the northern Gulf coast within the next 36 hours, and then pass over portions of the southeastern U.S. during the next few days. The official forecast is nudged slightly eastward and follows the latest corrected consensus model guidance.",
+      "The intensity forecast remains somewhat problematic. The hurricane will be passing over Gulf waters of high oceanic heat content during the next day or so. In fact, the projected track of Isais shows it passing near a warm eddy overnight. However, the vertical wind shear, which is already significant, is expected to increase substantially during the next 36 hours. The current thinking is that the shear will not offset the conducive oceanic conditions until 12-24 hours, so further strengthening is anticipated overnight. The official intensity forecast is at the high end of the model guidance, but in consideration of the expected stronger wind shear in 24-36 hours, some decrease in intensity is indicated as Isaias approaches the coast. Regardless, Isaias is expected to remain a dangerous hurricane through landfall, and strong gusty winds are expected well inland after the center crosses the coast."
     ],
     "keyMessages": [
       "A life-threatening storm surge is expected from the Mouth of the Mississippi River to Suwannee, Florida. Residents in the warning area should follow advice given by local officials and evacuate immediately if told to do so.",
       "Damaging hurricane force-winds are expected over portions of the Florida Panhandle, southern Alabama, and southern Mississippi where a Hurricane Warning is in effect. Residents in these areas should prepare for the possibility of long-duration power outages.",
-      "Damaging wind gusts are possible over much of central and northern Alabama and portions of western and northern Georgia, especially in areas of higher terrain. Additional Tropical Storm and High Wind Watches and Warnings will likely be required for portions of that area later today. Residents should secure loose outdoor items, avoid driving high-profile vehicles, and prepare for power outages.",
-      "Isaias will bring areas of heavy rainfall to the central U.S. Gulf coast and much of the Southeast Friday into the weekend. Considerable flash and urban flooding, along with significant river flooding, will be possible.",
-      "Isaias could bring gusty winds and areas of heavy rain to the western portion of the Yucatan Peninsula today."
+      "Damaging wind gusts are possible over much of central and northern Alabama, extreme eastern Mississippi, and portions of western and northern Georgia, especially in areas of higher terrain. Additional Tropical Storm and High Wind Watches and Warnings may be required for portions of that area later tonight. Residents should secure loose outdoor items, avoid driving high-profile vehicles, and prepare for power outages.",
+      "Isaias will bring areas of heavy rainfall to the central U.S. Gulf coast and much of the Southeast Friday into the weekend. Considerable flash and urban flooding, along with significant river flooding, will be possible."
     ],
     "forecaster": "Pasch"
   }
