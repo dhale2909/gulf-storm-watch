@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-09T12:35:06.061Z",
-  "lastAttemptAt": "2026-10-09T12:35:06.061Z",
+  "updatedAt": "2026-10-09T13:01:20.683Z",
+  "lastAttemptAt": "2026-10-09T13:01:20.683Z",
   "nextCheck": "2026-10-09T13:05:00.000Z",
   "alertLevel": "landfall",
   "headline": "Hurricane Isaias: 120 mph (Category 3), 27.0N 87.6W, Gulf, moving NNE at 17 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
@@ -66,30 +66,6 @@
   ],
   "watchesWarnings": {
     "note": "",
-    "LA": {
-      "level": "warning",
-      "text": "Storm Surge Warning, Tropical Storm Warning",
-      "counties": {
-        "22071": [
-          "TWR"
-        ],
-        "22075": [
-          "TWR"
-        ],
-        "22087": [
-          "TWR"
-        ],
-        "22103": [
-          "TWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "lix",
-          "name": "New Orleans"
-        }
-      ]
-    },
     "MS": {
       "level": "warning",
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch",
@@ -117,8 +93,8 @@
         ],
         "28059": [
           "TWR",
-          "HWA",
-          "HWR"
+          "HWR",
+          "HWA"
         ],
         "28061": [
           "TWA"
@@ -180,8 +156,8 @@
       "text": "Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch",
       "counties": {
         "12005": [
-          "HWR",
-          "TWR"
+          "TWR",
+          "HWR"
         ],
         "12013": [
           "TWR"
@@ -205,8 +181,8 @@
           "TWR"
         ],
         "12065": [
-          "TWA",
-          "TWR"
+          "TWR",
+          "TWA"
         ],
         "12073": [
           "TWR"
@@ -245,6 +221,30 @@
         }
       ]
     },
+    "LA": {
+      "level": "warning",
+      "text": "Storm Surge Warning, Tropical Storm Warning",
+      "counties": {
+        "22071": [
+          "TWR"
+        ],
+        "22075": [
+          "TWR"
+        ],
+        "22087": [
+          "TWR"
+        ],
+        "22103": [
+          "TWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "lix",
+          "name": "New Orleans"
+        }
+      ]
+    },
     "AL": {
       "level": "warning",
       "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch",
@@ -264,34 +264,34 @@
         "01061": [
           "TWR"
         ],
+        "01039": [
+          "HWR"
+        ],
+        "01129": [
+          "TWR"
+        ],
         "01003": [
           "HWR"
         ],
-        "01013": [
+        "01041": [
           "TWR"
         ],
-        "01131": [
-          "TWR"
+        "01023": [
+          "TWA"
         ],
-        "01035": [
+        "01053": [
           "HWR"
         ],
         "01099": [
           "TWR"
         ],
-        "01053": [
+        "01035": [
           "HWR"
         ],
-        "01023": [
-          "TWA"
-        ],
-        "01041": [
+        "01131": [
           "TWR"
         ],
-        "01039": [
-          "HWR"
-        ],
-        "01129": [
+        "01013": [
           "TWR"
         ],
         "01097": [
@@ -300,37 +300,34 @@
         "01025": [
           "TWR"
         ],
-        "01063": [
+        "01017": [
           "TWA"
         ],
-        "01011": [
-          "TWR"
-        ],
-        "01021": [
+        "01037": [
           "TWA"
         ],
-        "01101": [
-          "TWR"
-        ],
-        "01047": [
+        "01001": [
           "TWR"
         ],
         "01085": [
           "TWR"
         ],
-        "01001": [
+        "01047": [
           "TWR"
         ],
-        "01037": [
+        "01101": [
+          "TWR"
+        ],
+        "01021": [
           "TWA"
         ],
-        "01017": [
-          "TWA"
+        "01011": [
+          "TWR"
         ],
         "01123": [
           "TWA"
         ],
-        "01117": [
+        "01063": [
           "TWA"
         ],
         "01125": [
@@ -360,7 +357,7 @@
         "01109": [
           "TWR"
         ],
-        "01051": [
+        "01005": [
           "TWR"
         ],
         "01007": [
@@ -384,7 +381,10 @@
         "01119": [
           "TWA"
         ],
-        "01005": [
+        "01117": [
+          "TWA"
+        ],
+        "01051": [
           "TWR"
         ]
       },
@@ -459,7 +459,7 @@
     "peakMedianKt": 99,
     "text": "50 of 50 bring the center to the Louisiana-to-Florida coast (FL 48, AL 2), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (31 major); typical peak 115 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-09T12:35:06.061Z"
+    "computedAt": "2026-10-09T13:01:20.683Z"
   },
   "discussion": {
     "storm": "al092026",
