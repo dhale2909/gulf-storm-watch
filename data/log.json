@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-10-09T06:35:05.940Z",
+    "changed": false,
+    "alertLevel": "landfall",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. Hurricane Isaias: 105 mph (Category 2), 25.8N 88.4W, Gulf, moving NNE at 16 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA."
+  },
+  {
     "ts": "2026-10-09T06:05:18.228Z",
     "changed": false,
     "alertLevel": "landfall",
@@ -1545,19 +1555,5 @@
     "alertLevel": "threat",
     "formation7d": 100,
     "summary": "No change. Tropical Depression Nine: 35 mph, 22.1N 95.6W, Gulf, moving E at 6 mph. Forecast track reaches the coast near Pascagoula, MS around Fri, Oct 9, 8 PM CT (approximate)."
-  },
-  {
-    "ts": "2026-10-06T21:18:23.397Z",
-    "changed": true,
-    "pushed": true,
-    "delivery": {
-      "private": true,
-      "public": true,
-      "browser": true
-    },
-    "updated": false,
-    "alertLevel": "threat",
-    "formation7d": 100,
-    "summary": "Forecast landfall shifted AL -> MS, near Pascagoula, MS (Fri, Oct 9, 8 PM CT)."
   }
 ]
