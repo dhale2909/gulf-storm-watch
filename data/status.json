@@ -1,6 +1,6 @@
 {
-  "updatedAt": "2026-10-09T05:35:05.974Z",
-  "lastAttemptAt": "2026-10-09T05:35:05.974Z",
+  "updatedAt": "2026-10-09T05:47:55.701Z",
+  "lastAttemptAt": "2026-10-09T05:47:55.701Z",
   "nextCheck": "2026-10-09T06:05:00.000Z",
   "alertLevel": "landfall",
   "headline": "Hurricane Isaias: 105 mph (Category 2), 25.4N 88.4W, Gulf, moving NE at 16 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
@@ -119,9 +119,9 @@
           "TWR"
         ],
         "28059": [
-          "TWR",
+          "HWA",
           "HWR",
-          "HWA"
+          "TWR"
         ],
         "28061": [
           "TWA"
@@ -177,8 +177,8 @@
       "text": "Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch",
       "counties": {
         "12005": [
-          "HWR",
-          "TWR"
+          "TWR",
+          "HWR"
         ],
         "12013": [
           "TWR"
@@ -348,8 +348,8 @@
         "01061": [
           "TWR"
         ],
-        "01035": [
-          "HWR"
+        "01023": [
+          "TWA"
         ],
         "01003": [
           "HWR"
@@ -366,8 +366,8 @@
         "01099": [
           "TWR"
         ],
-        "01023": [
-          "TWA"
+        "01035": [
+          "HWR"
         ],
         "01053": [
           "HWR"
@@ -456,7 +456,7 @@
     "peakMedianKt": 108,
     "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 48, AL 1), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (43 major); typical peak 125 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-09T05:35:05.974Z"
+    "computedAt": "2026-10-09T05:47:55.701Z"
   },
   "discussion": {
     "storm": "al092026",
