@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-09T15:35:06.057Z",
-  "lastAttemptAt": "2026-10-09T15:35:06.057Z",
-  "nextCheck": "2026-10-09T16:05:00.000Z",
+  "updatedAt": "2026-10-09T16:05:13.749Z",
+  "lastAttemptAt": "2026-10-09T16:05:13.749Z",
+  "nextCheck": "2026-10-09T16:35:00.000Z",
   "alertLevel": "landfall",
-  "headline": "Hurricane Isaias: 120 mph (Category 3), 27.7N 87.3W, Gulf, moving NNE at 18 mph. Forecast track reaches the coast near Navarre, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
+  "headline": "Hurricane Isaias: 120 mph (Category 3), 27.9N 87.2W, Gulf, moving NNE at 18 mph. Forecast track reaches the coast near Navarre, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -19,15 +19,15 @@
       "type": "Hurricane",
       "winds": 105,
       "category": 3,
-      "location": "27.7N 87.3W, Gulf",
+      "location": "27.9N 87.2W, Gulf",
       "movement": "NNE at 18 mph",
       "advisory": "NHC advisory 12",
       "advisoryAt": "2026-10-09T15:00:00.000Z",
       "pos": {
-        "lat": 27.7,
-        "lonW": 87.3
+        "lat": 27.9,
+        "lonW": 87.2
       },
-      "posAt": "2026-10-09T15:00:00.000Z",
+      "posAt": "2026-10-09T16:00:00.000Z",
       "forecast": [
         {
           "t": "2026-10-10T00:00:00.000Z",
@@ -172,74 +172,6 @@
         {
           "code": "mob",
           "name": "Mobile"
-        }
-      ]
-    },
-    "FL": {
-      "level": "warning",
-      "text": "Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning",
-      "counties": {
-        "12005": [
-          "HWR"
-        ],
-        "12013": [
-          "TWR"
-        ],
-        "12033": [
-          "HWR"
-        ],
-        "12037": [
-          "TWR"
-        ],
-        "12039": [
-          "TWR"
-        ],
-        "12045": [
-          "TWR"
-        ],
-        "12059": [
-          "HWR"
-        ],
-        "12063": [
-          "TWR"
-        ],
-        "12065": [
-          "TWR"
-        ],
-        "12073": [
-          "TWR"
-        ],
-        "12077": [
-          "TWR"
-        ],
-        "12091": [
-          "HWR"
-        ],
-        "12113": [
-          "HWR"
-        ],
-        "12129": [
-          "TWR"
-        ],
-        "12131": [
-          "HWR"
-        ],
-        "12133": [
-          "HWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "tae",
-          "name": "Tallahassee"
-        },
-        {
-          "code": "mob",
-          "name": "Mobile"
-        },
-        {
-          "code": "tbw",
-          "name": "Tampa Bay Ruskin"
         }
       ]
     },
@@ -415,6 +347,74 @@
           "name": "Tallahassee"
         }
       ]
+    },
+    "FL": {
+      "level": "warning",
+      "text": "Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning",
+      "counties": {
+        "12005": [
+          "HWR"
+        ],
+        "12013": [
+          "TWR"
+        ],
+        "12033": [
+          "HWR"
+        ],
+        "12037": [
+          "TWR"
+        ],
+        "12039": [
+          "TWR"
+        ],
+        "12045": [
+          "TWR"
+        ],
+        "12059": [
+          "HWR"
+        ],
+        "12063": [
+          "TWR"
+        ],
+        "12065": [
+          "TWR"
+        ],
+        "12073": [
+          "TWR"
+        ],
+        "12077": [
+          "TWR"
+        ],
+        "12091": [
+          "HWR"
+        ],
+        "12113": [
+          "HWR"
+        ],
+        "12129": [
+          "TWR"
+        ],
+        "12131": [
+          "HWR"
+        ],
+        "12133": [
+          "HWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "tae",
+          "name": "Tallahassee"
+        },
+        {
+          "code": "mob",
+          "name": "Mobile"
+        },
+        {
+          "code": "tbw",
+          "name": "Tampa Bay Ruskin"
+        }
+      ]
     }
   },
   "landfall": {
@@ -442,8 +442,8 @@
     "stormId": "al092026",
     "name": "Hurricane Isaias",
     "lastPos": {
-      "lat": 27.7,
-      "lonW": 87.3
+      "lat": 27.9,
+      "lonW": 87.2
     },
     "since": "2026-10-07T09:00:00.000Z"
   },
@@ -472,7 +472,7 @@
     "peakMedianKt": 99,
     "text": "50 of 50 bring the center to the Louisiana-to-Florida coast (FL 48, AL 2), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (31 major); typical peak 115 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-09T15:35:06.057Z"
+    "computedAt": "2026-10-09T16:05:13.749Z"
   },
   "discussion": {
     "storm": "al092026",
