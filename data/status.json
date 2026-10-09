@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-09T08:35:05.855Z",
-  "lastAttemptAt": "2026-10-09T08:35:05.855Z",
-  "nextCheck": "2026-10-09T09:05:00.000Z",
+  "updatedAt": "2026-10-09T09:05:13.857Z",
+  "lastAttemptAt": "2026-10-09T09:05:13.857Z",
+  "nextCheck": "2026-10-09T09:35:00.000Z",
   "alertLevel": "landfall",
-  "headline": "Hurricane Isaias: 105 mph (Category 2), 25.8N 88.4W, Gulf, moving NNE at 16 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
+  "headline": "Hurricane Isaias: 110 mph (Category 2), 26.4N 88.0W, Gulf, moving NNE at 17 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -17,85 +17,55 @@
       "bin": "AT4",
       "name": "Hurricane Isaias",
       "type": "Hurricane",
-      "winds": 90,
+      "winds": 95,
       "category": 2,
-      "location": "25.8N 88.4W, Gulf",
-      "movement": "NNE at 16 mph",
-      "advisory": "NHC advisory 10",
-      "advisoryAt": "2026-10-09T03:00:00.000Z",
+      "location": "26.4N 88.0W, Gulf",
+      "movement": "NNE at 17 mph",
+      "advisory": "NHC advisory 11",
+      "advisoryAt": "2026-10-09T09:00:00.000Z",
       "pos": {
-        "lat": 25.8,
-        "lonW": 88.4
+        "lat": 26.4,
+        "lonW": 88
       },
-      "posAt": "2026-10-09T06:00:00.000Z",
+      "posAt": "2026-10-09T09:00:00.000Z",
       "forecast": [
         {
-          "t": "2026-10-09T12:00:00.000Z",
-          "lat": 27.1,
-          "lonW": 87.6,
-          "wind": 100
-        },
-        {
-          "t": "2026-10-10T00:00:00.000Z",
-          "lat": 29.9,
-          "lonW": 87.1,
-          "wind": 85
-        },
-        {
-          "t": "2026-10-10T12:00:00.000Z",
-          "lat": 32.2,
+          "t": "2026-10-09T18:00:00.000Z",
+          "lat": 28.4,
           "lonW": 87.3,
-          "wind": 45
+          "wind": 105
         },
         {
-          "t": "2026-10-11T00:00:00.000Z",
-          "lat": 34.1,
+          "t": "2026-10-10T06:00:00.000Z",
+          "lat": 31,
+          "lonW": 87.1,
+          "wind": 65
+        },
+        {
+          "t": "2026-10-10T18:00:00.000Z",
+          "lat": 33.5,
           "lonW": 87.5,
-          "wind": 30
+          "wind": 35
         },
         {
-          "t": "2026-10-11T12:00:00.000Z",
-          "lat": 36.1,
-          "lonW": 86.1,
-          "wind": 20
+          "t": "2026-10-11T06:00:00.000Z",
+          "lat": 35.5,
+          "lonW": 86.7,
+          "wind": 25
         },
         {
-          "t": "2026-10-12T00:00:00.000Z",
-          "lat": 38,
-          "lonW": 83,
-          "wind": 20
+          "t": "2026-10-11T18:00:00.000Z",
+          "lat": 38.2,
+          "lonW": 83.1,
+          "wind": 15
         }
       ],
       "forecastStale": false,
-      "gulfRisk": "Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 9 PM CT (approximate)"
+      "gulfRisk": "Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate)"
     }
   ],
   "watchesWarnings": {
     "note": "",
-    "LA": {
-      "level": "warning",
-      "text": "Storm Surge Warning, Tropical Storm Warning",
-      "counties": {
-        "22071": [
-          "TWR"
-        ],
-        "22075": [
-          "TWR"
-        ],
-        "22087": [
-          "TWR"
-        ],
-        "22103": [
-          "TWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "lix",
-          "name": "New Orleans"
-        }
-      ]
-    },
     "MS": {
       "level": "warning",
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch",
@@ -239,6 +209,30 @@
         {
           "code": "tbw",
           "name": "Tampa Bay Ruskin"
+        }
+      ]
+    },
+    "LA": {
+      "level": "warning",
+      "text": "Storm Surge Warning, Tropical Storm Warning",
+      "counties": {
+        "22071": [
+          "TWR"
+        ],
+        "22075": [
+          "TWR"
+        ],
+        "22087": [
+          "TWR"
+        ],
+        "22103": [
+          "TWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "lix",
+          "name": "New Orleans"
         }
       ]
     },
@@ -403,9 +397,9 @@
   },
   "landfall": {
     "state": "FL",
-    "eta": "2026-10-10T02:01:02.068Z",
+    "eta": "2026-10-10T02:41:51.627Z",
     "near": "Pensacola, FL",
-    "windKt": 80
+    "windKt": 75
   },
   "landfallOccurred": null,
   "internal": {
@@ -426,8 +420,8 @@
     "stormId": "al092026",
     "name": "Hurricane Isaias",
     "lastPos": {
-      "lat": 25.8,
-      "lonW": 88.4
+      "lat": 26.4,
+      "lonW": 88
     },
     "since": "2026-10-07T09:00:00.000Z"
   },
@@ -456,25 +450,25 @@
     "peakMedianKt": 99,
     "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 45, AL 4), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (31 major); typical peak 115 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-09T08:35:05.855Z"
+    "computedAt": "2026-10-09T09:05:13.857Z"
   },
   "discussion": {
     "storm": "al092026",
     "url": "https://www.nhc.noaa.gov/text/MIATCDAT4.shtml",
-    "issuedAt": "2026-10-09T03:00:00.000Z",
-    "number": 10,
-    "issued": "1000 PM CDT Thu Oct 08 2026",
+    "issuedAt": "2026-10-09T09:00:00.000Z",
+    "number": 11,
+    "issued": "400 AM CDT Fri Oct 09 2026",
     "paragraphs": [
-      "The satellite presentation of Isaias has improved over the past few hours. Infrared cloud top temperatures have cooled within the expanding central dense overcast, and recent images show a warm spot that could be an emerging eye. A series of earlier passive microwave images showed the mid-level eyewall was open to the southwest, and a comparison of the AMSR3 89- and 37-GHz channels indicated the vortex was slightly tilted with height due to continued southwesterly shear. The stronger Tail Doppler Radar winds noted from the previous mission indicated the satellite intensity estimates are likely running too low, and based on the improved structure of the hurricane, the initial intensity is raised to 90 kt. Air Force and NOAA Hurricane Hunter aircraft are scheduled to collect data in Isaias overnight.",
-      "Isaias is moving toward the northeast (040/12 kt), but is expected to turn northward and accelerate on Friday within the flow between an upper trough near the northwestern Gulf Coast and a subtropical ridge extending across the western Atlantic. Landfall is expected to occur within the hurricane warning area Friday night or early Saturday, with the updated 24-h forecast near the coast. The NHC forecast continues to lie closer to the right side of the guidance envelope, very near the latest corrected consensus (HCCA). This results in little overall change from the previous prediction, although this forecast is slightly faster based on the model trends this cycle.",
-      "High oceanic heat content and strong upper-level divergence could allow for additional strengthening overnight while the shear vector is still oriented in the direction of storm motion. A majority of Google DeepMind ensemble members show Isaias briefly reaching major hurricane status early Friday (along with some of the hurricane regional models), and this is now reflected in the NHC forecast. This strengthening should be short lived as southwesterly shear from the aforementioned trough will increase considerably on Friday and cause some weakening before landfall. Nonetheless, Isaias will be a dangerous hurricane with significant storm surge, damaging winds, and flooding rains when it reaches the northern Gulf Coast. During this time, the wind field is also predicted to grow due to the trough interaction, and some of these impacts will extend well away from the center. After landfall, gusty winds are expected to reach well inland over portions of the southeastern United States."
+      "Isaias has intensified overnight. NOAA and Air Force Reserve Hurricane Hunter data showed that the maximum flight-level winds have increased up to 107 kt, with a better-defined eye and a shrinking eyewall. These changes are also present on satellite imagery, with a more symmetric presentation along with a warming eye/cooling eyewall. The available data suggest a current intensity of 95 kt for this advisory.",
+      "Isaias will likely become a major hurricane soon with the improving satellite imagery, and it could continue to intensify for the next 12 hours or so while it moves over very warm and deep water. However, a large increase in shear is anticipated before landfall, which will probably cause some weakening to occur. This is a tenuous spot because it would only take about a 6h delay in the onset of the shear to bring a stronger hurricane than expected onshore. The new forecast explicitly is a bit higher than the last one, but our best forecast at this time is for a high-end category 2 intensity at landfall, which is about the same as before. Regardless of its exact wind speed at landfall, Isaias will be a dangerous hurricane with significant storm surge, damaging winds, and flooding rains. The wind field is also predicted to grow due to a trough interaction, and some of these impacts will extend well away from the center. After landfall, gusty winds are expected to reach well inland over portions of the southeastern United States.",
+      "Isaias has turned towards the north-northeast (020/13 kt), and the hurricane is expected to turn northward and accelerate later today due to increasing flow between an upper trough near the northwestern Gulf Coast and a subtropical ridge extending across the western Atlantic. Landfall is expected to occur within the hurricane warning area Friday night or early Saturday. The new forecast is almost the same as before, very near the Google DeepMind guidance, which has been very accurate for Isaias."
     ],
     "keyMessages": [
       "A life-threatening storm surge is expected from the Mouth of the Mississippi River to Suwannee, Florida. Residents in the warning area should follow advice given by local officials and evacuate immediately if told to do so.",
       "Damaging hurricane force-winds are expected over portions of the Florida Panhandle, southern Alabama, and southern Mississippi where a Hurricane Warning is in effect. Residents in these areas should prepare for the possibility of long-duration power outages.",
-      "Damaging wind gusts are possible over much of central and northern Alabama, extreme eastern Mississippi, and portions of western and northern Georgia, especially in areas of higher terrain. Additional Tropical Storm and High Wind Watches and Warnings may be required for portions of that area later tonight or on Friday. Residents should secure loose outdoor items, avoid driving high-profile vehicles, and prepare for power outages.",
-      "Isaias will bring areas of heavy rainfall to the central U.S. Gulf Coast and much of the Southeast Friday into the weekend. Considerable flash and urban flooding, along with significant river flooding, will be possible."
+      "Damaging wind gusts are possible over much of central and northern Alabama, extreme eastern Mississippi, and portions of western and northern Georgia, especially in areas of higher terrain. Additional Tropical Storm and High Wind Watches and Warnings may be required for portions of that area later today. Residents should secure loose outdoor items, avoid driving high-profile vehicles, and prepare for power outages.",
+      "Isaias will bring areas of heavy rainfall to the central U.S. Gulf coast and much of the Southeast through the weekend. Considerable flash and urban flooding, along with significant river flooding, will be possible."
     ],
-    "forecaster": "Reinhart"
+    "forecaster": "Blake"
   }
 }
