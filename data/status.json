@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-09T01:05:48.226Z",
-  "lastAttemptAt": "2026-10-09T01:05:48.226Z",
-  "nextCheck": "2026-10-09T01:35:00.000Z",
+  "updatedAt": "2026-10-09T01:35:01.473Z",
+  "lastAttemptAt": "2026-10-09T01:35:01.473Z",
+  "nextCheck": "2026-10-09T02:05:00.000Z",
   "alertLevel": "threat",
   "headline": "Hurricane Isaias: 100 mph (Category 2), 24.9N 88.8W, Gulf, moving NE at 15 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
@@ -72,100 +72,6 @@
   ],
   "watchesWarnings": {
     "note": "",
-    "FL": {
-      "level": "warning",
-      "text": "Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch",
-      "counties": {
-        "12005": [
-          "TWR",
-          "HWR"
-        ],
-        "12013": [
-          "TWR"
-        ],
-        "12033": [
-          "HWR"
-        ],
-        "12037": [
-          "TWR"
-        ],
-        "12039": [
-          "TWR"
-        ],
-        "12045": [
-          "TWR"
-        ],
-        "12059": [
-          "TWR"
-        ],
-        "12063": [
-          "TWR"
-        ],
-        "12065": [
-          "TWR",
-          "TWA"
-        ],
-        "12073": [
-          "TWR"
-        ],
-        "12077": [
-          "TWR"
-        ],
-        "12091": [
-          "HWR"
-        ],
-        "12113": [
-          "HWR"
-        ],
-        "12129": [
-          "TWR"
-        ],
-        "12131": [
-          "HWR"
-        ],
-        "12133": [
-          "TWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "tae",
-          "name": "Tallahassee"
-        },
-        {
-          "code": "mob",
-          "name": "Mobile"
-        },
-        {
-          "code": "tbw",
-          "name": "Tampa Bay Ruskin"
-        }
-      ]
-    },
-    "LA": {
-      "level": "warning",
-      "text": "Storm Surge Warning, Tropical Storm Warning",
-      "counties": {
-        "22071": [
-          "TWR"
-        ],
-        "22075": [
-          "TWR"
-        ],
-        "22087": [
-          "TWR"
-        ],
-        "22103": [
-          "TWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "lix",
-          "name": "New Orleans"
-        }
-      ]
-    },
     "MS": {
       "level": "warning",
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch",
@@ -242,26 +148,126 @@
         }
       ]
     },
+    "LA": {
+      "level": "warning",
+      "text": "Storm Surge Warning, Tropical Storm Warning",
+      "counties": {
+        "22071": [
+          "TWR"
+        ],
+        "22075": [
+          "TWR"
+        ],
+        "22087": [
+          "TWR"
+        ],
+        "22103": [
+          "TWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "lix",
+          "name": "New Orleans"
+        }
+      ]
+    },
+    "FL": {
+      "level": "warning",
+      "text": "Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch",
+      "counties": {
+        "12005": [
+          "TWR",
+          "HWR"
+        ],
+        "12013": [
+          "TWR"
+        ],
+        "12033": [
+          "HWR"
+        ],
+        "12037": [
+          "TWR"
+        ],
+        "12039": [
+          "TWR"
+        ],
+        "12045": [
+          "TWR"
+        ],
+        "12059": [
+          "TWR"
+        ],
+        "12063": [
+          "TWR"
+        ],
+        "12065": [
+          "TWR",
+          "TWA"
+        ],
+        "12073": [
+          "TWR"
+        ],
+        "12077": [
+          "TWR"
+        ],
+        "12091": [
+          "HWR"
+        ],
+        "12113": [
+          "HWR"
+        ],
+        "12129": [
+          "TWR"
+        ],
+        "12131": [
+          "HWR"
+        ],
+        "12133": [
+          "TWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "tae",
+          "name": "Tallahassee"
+        },
+        {
+          "code": "mob",
+          "name": "Mobile"
+        },
+        {
+          "code": "tbw",
+          "name": "Tampa Bay Ruskin"
+        }
+      ]
+    },
     "AL": {
       "level": "warning",
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch",
       "counties": {
+        "01007": [
+          "TWA"
+        ],
+        "01091": [
+          "TWR"
+        ],
         "01109": [
           "TWR"
         ],
-        "01115": [
+        "01073": [
           "TWA"
         ],
-        "01081": [
+        "01001": [
+          "TWR"
+        ],
+        "01027": [
           "TWA"
         ],
-        "01121": [
+        "01113": [
           "TWA"
         ],
-        "01111": [
-          "TWA"
-        ],
-        "01017": [
+        "01117": [
           "TWA"
         ],
         "01119": [
@@ -270,28 +276,22 @@
         "01105": [
           "TWA"
         ],
-        "01117": [
+        "01017": [
           "TWA"
         ],
-        "01113": [
+        "01111": [
           "TWA"
         ],
-        "01027": [
+        "01121": [
           "TWA"
         ],
-        "01001": [
-          "TWR"
-        ],
-        "01073": [
+        "01081": [
           "TWA"
         ],
-        "01091": [
-          "TWR"
-        ],
-        "01007": [
+        "01115": [
           "TWA"
         ],
-        "01021": [
+        "01065": [
           "TWA"
         ],
         "01125": [
@@ -330,17 +330,8 @@
         "01037": [
           "TWA"
         ],
-        "01065": [
+        "01021": [
           "TWA"
-        ],
-        "01061": [
-          "TWR"
-        ],
-        "01069": [
-          "TWR"
-        ],
-        "01067": [
-          "TWR"
         ],
         "01045": [
           "TWR"
@@ -348,8 +339,14 @@
         "01031": [
           "TWR"
         ],
-        "01097": [
-          "HWR"
+        "01067": [
+          "TWR"
+        ],
+        "01069": [
+          "TWR"
+        ],
+        "01061": [
+          "TWR"
         ],
         "01035": [
           "TWR",
@@ -364,26 +361,29 @@
         "01099": [
           "TWR"
         ],
+        "01097": [
+          "HWR"
+        ],
         "01013": [
           "TWR"
         ],
         "01131": [
           "TWR"
         ],
-        "01053": [
-          "HWR"
-        ],
-        "01129": [
-          "TWR"
-        ],
-        "01025": [
-          "TWR"
+        "01039": [
+          "TWR",
+          "HWA"
         ],
         "01041": [
           "TWR"
         ],
-        "01039": [
-          "HWA",
+        "01129": [
+          "TWR"
+        ],
+        "01053": [
+          "HWR"
+        ],
+        "01025": [
           "TWR"
         ]
       },
@@ -458,7 +458,7 @@
     "peakMedianKt": 108,
     "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 48, AL 1), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (43 major); typical peak 125 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-09T01:05:48.226Z"
+    "computedAt": "2026-10-09T01:35:01.473Z"
   },
   "discussion": {
     "storm": "al092026",
