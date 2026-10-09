@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-09T18:05:15.126Z",
-  "lastAttemptAt": "2026-10-09T18:05:15.126Z",
-  "nextCheck": "2026-10-09T18:35:00.000Z",
+  "updatedAt": "2026-10-09T18:35:06.606Z",
+  "lastAttemptAt": "2026-10-09T18:35:06.606Z",
+  "nextCheck": "2026-10-09T19:05:00.000Z",
   "alertLevel": "landfall",
   "headline": "Hurricane Isaias: 120 mph (Category 3), 28.4N 87.2W, Gulf, moving NNE at 18 mph. Forecast track reaches the coast near Navarre, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
@@ -70,6 +70,9 @@
       "level": "warning",
       "text": "Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning",
       "counties": {
+        "28017": [
+          "TWR"
+        ],
         "28019": [
           "TWR"
         ],
@@ -94,10 +97,13 @@
         "28047": [
           "TWR"
         ],
-        "28059": [
-          "HWA",
-          "HWR",
+        "28057": [
           "TWR"
+        ],
+        "28059": [
+          "TWR",
+          "HWA",
+          "HWR"
         ],
         "28061": [
           "TWR"
@@ -111,7 +117,13 @@
         "28075": [
           "TWR"
         ],
+        "28081": [
+          "TWR"
+        ],
         "28087": [
+          "TWR"
+        ],
+        "28095": [
           "TWR"
         ],
         "28099": [
@@ -154,6 +166,34 @@
         {
           "code": "mob",
           "name": "Mobile"
+        },
+        {
+          "code": "meg",
+          "name": "Memphis"
+        }
+      ]
+    },
+    "LA": {
+      "level": "warning",
+      "text": "Storm Surge Warning, Tropical Storm Warning",
+      "counties": {
+        "22071": [
+          "TWR"
+        ],
+        "22075": [
+          "TWR"
+        ],
+        "22087": [
+          "TWR"
+        ],
+        "22103": [
+          "TWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "lix",
+          "name": "New Orleans"
         }
       ]
     },
@@ -229,6 +269,9 @@
       "level": "warning",
       "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning",
       "counties": {
+        "01003": [
+          "HWR"
+        ],
         "01099": [
           "TWR"
         ],
@@ -237,9 +280,6 @@
         ],
         "01013": [
           "TWR"
-        ],
-        "01003": [
-          "HWR"
         ],
         "01129": [
           "TWR"
@@ -253,70 +293,61 @@
         "01035": [
           "HWR"
         ],
-        "01039": [
-          "HWR"
-        ],
-        "01131": [
-          "TWR"
-        ],
         "01025": [
           "TWR"
         ],
         "01041": [
           "TWR"
         ],
-        "01011": [
+        "01131": [
+          "TWR"
+        ],
+        "01039": [
+          "HWR"
+        ],
+        "01123": [
+          "TWR"
+        ],
+        "01047": [
+          "TWR"
+        ],
+        "01085": [
+          "TWR"
+        ],
+        "01125": [
+          "TWR"
+        ],
+        "01087": [
+          "TWR"
+        ],
+        "01001": [
+          "TWR"
+        ],
+        "01109": [
+          "TWR"
+        ],
+        "01017": [
+          "TWR"
+        ],
+        "01091": [
+          "TWR"
+        ],
+        "01063": [
+          "TWR"
+        ],
+        "01075": [
+          "TWR"
+        ],
+        "01081": [
+          "TWR"
+        ],
+        "01101": [
           "TWR"
         ],
         "01005": [
           "TWR"
         ],
         "01051": [
-          "TWR"
-        ],
-        "01101": [
-          "TWR"
-        ],
-        "01081": [
-          "TWR"
-        ],
-        "01063": [
-          "TWR"
-        ],
-        "01091": [
-          "TWR"
-        ],
-        "01017": [
-          "TWR"
-        ],
-        "01109": [
-          "TWR"
-        ],
-        "01001": [
-          "TWR"
-        ],
-        "01087": [
-          "TWR"
-        ],
-        "01125": [
-          "TWR"
-        ],
-        "01085": [
-          "TWR"
-        ],
-        "01047": [
-          "TWR"
-        ],
-        "01123": [
-          "TWR"
-        ],
-        "01115": [
-          "TWR"
-        ],
-        "01127": [
-          "TWR"
-        ],
-        "01037": [
           "TWR"
         ],
         "01121": [
@@ -343,7 +374,7 @@
         "01007": [
           "TWR"
         ],
-        "01093": [
+        "01127": [
           "TWR"
         ],
         "01073": [
@@ -361,10 +392,19 @@
         "01111": [
           "TWR"
         ],
-        "01075": [
+        "01115": [
           "TWR"
         ],
         "01113": [
+          "TWR"
+        ],
+        "01037": [
+          "TWR"
+        ],
+        "01011": [
+          "TWR"
+        ],
+        "01093": [
           "TWR"
         ],
         "01031": [
@@ -395,30 +435,6 @@
         {
           "code": "tae",
           "name": "Tallahassee"
-        }
-      ]
-    },
-    "LA": {
-      "level": "warning",
-      "text": "Storm Surge Warning, Tropical Storm Warning",
-      "counties": {
-        "22071": [
-          "TWR"
-        ],
-        "22075": [
-          "TWR"
-        ],
-        "22087": [
-          "TWR"
-        ],
-        "22103": [
-          "TWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "lix",
-          "name": "New Orleans"
         }
       ]
     }
@@ -462,23 +478,23 @@
     "map": "ok"
   },
   "google": {
-    "run": "2026-10-09T06:00:00.000Z",
-    "members": 50,
+    "run": "2026-10-09T12:00:00.000Z",
+    "members": 36,
     "total": 50,
-    "hits": 50,
+    "hits": 36,
     "coast": {
       "LA": 0,
       "MS": 0,
-      "AL": 2,
-      "FL": 48
+      "AL": 0,
+      "FL": 36
     },
     "eta": "2026-10-10T06:00:00.000Z",
-    "hurricane": 50,
-    "major": 22,
-    "peakMedianKt": 94,
-    "text": "50 of 50 bring the center to the Louisiana-to-Florida coast (FL 48, AL 2), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (22 major); typical peak 110 mph.",
+    "hurricane": 36,
+    "major": 25,
+    "peakMedianKt": 101,
+    "text": "36 of 50 ensemble members forecast a track so far. 36 of 36 bring the center to the Louisiana-to-Florida coast (FL 36), typically around Sat, Oct 10, 1 AM CT. 36 of 36 reach hurricane strength (25 major); typical peak 115 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-09T18:05:15.126Z"
+    "computedAt": "2026-10-09T18:35:06.606Z"
   },
   "discussion": {
     "storm": "al092026",
