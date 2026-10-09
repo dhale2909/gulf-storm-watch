@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-09T15:05:13.369Z",
-  "lastAttemptAt": "2026-10-09T15:05:13.369Z",
-  "nextCheck": "2026-10-09T15:35:00.000Z",
+  "updatedAt": "2026-10-09T15:35:06.057Z",
+  "lastAttemptAt": "2026-10-09T15:35:06.057Z",
+  "nextCheck": "2026-10-09T16:05:00.000Z",
   "alertLevel": "landfall",
   "headline": "Hurricane Isaias: 120 mph (Category 3), 27.7N 87.3W, Gulf, moving NNE at 18 mph. Forecast track reaches the coast near Navarre, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
@@ -177,11 +177,10 @@
     },
     "FL": {
       "level": "warning",
-      "text": "Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch",
+      "text": "Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning",
       "counties": {
         "12005": [
-          "HWR",
-          "TWR"
+          "HWR"
         ],
         "12013": [
           "TWR"
@@ -199,13 +198,12 @@
           "TWR"
         ],
         "12059": [
-          "TWR"
+          "HWR"
         ],
         "12063": [
           "TWR"
         ],
         "12065": [
-          "TWA",
           "TWR"
         ],
         "12073": [
@@ -227,7 +225,7 @@
           "HWR"
         ],
         "12133": [
-          "TWR"
+          "HWR"
         ]
       },
       "offices": [
@@ -247,8 +245,125 @@
     },
     "AL": {
       "level": "warning",
-      "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch",
+      "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning",
       "counties": {
+        "01115": [
+          "TWR"
+        ],
+        "01075": [
+          "TWR"
+        ],
+        "01111": [
+          "TWR"
+        ],
+        "01105": [
+          "TWR"
+        ],
+        "01119": [
+          "TWR"
+        ],
+        "01027": [
+          "TWR"
+        ],
+        "01073": [
+          "TWR"
+        ],
+        "01093": [
+          "TWR"
+        ],
+        "01127": [
+          "TWR"
+        ],
+        "01007": [
+          "TWR"
+        ],
+        "01133": [
+          "TWR"
+        ],
+        "01117": [
+          "TWR"
+        ],
+        "01107": [
+          "TWR"
+        ],
+        "01057": [
+          "TWR"
+        ],
+        "01021": [
+          "TWR"
+        ],
+        "01065": [
+          "TWR"
+        ],
+        "01121": [
+          "TWR"
+        ],
+        "01091": [
+          "TWR"
+        ],
+        "01123": [
+          "TWR"
+        ],
+        "01047": [
+          "TWR"
+        ],
+        "01085": [
+          "TWR"
+        ],
+        "01125": [
+          "TWR"
+        ],
+        "01087": [
+          "TWR"
+        ],
+        "01001": [
+          "TWR"
+        ],
+        "01109": [
+          "TWR"
+        ],
+        "01017": [
+          "TWR"
+        ],
+        "01063": [
+          "TWR"
+        ],
+        "01081": [
+          "TWR"
+        ],
+        "01101": [
+          "TWR"
+        ],
+        "01005": [
+          "TWR"
+        ],
+        "01011": [
+          "TWR"
+        ],
+        "01051": [
+          "TWR"
+        ],
+        "01037": [
+          "TWR"
+        ],
+        "01113": [
+          "TWR"
+        ],
+        "01067": [
+          "TWR"
+        ],
+        "01061": [
+          "HWR"
+        ],
+        "01031": [
+          "HWR"
+        ],
+        "01045": [
+          "TWR"
+        ],
+        "01069": [
+          "TWR"
+        ],
         "01039": [
           "HWR"
         ],
@@ -284,108 +399,6 @@
         ],
         "01035": [
           "HWR"
-        ],
-        "01045": [
-          "TWR"
-        ],
-        "01069": [
-          "TWR"
-        ],
-        "01067": [
-          "TWR"
-        ],
-        "01031": [
-          "TWR"
-        ],
-        "01061": [
-          "TWR"
-        ],
-        "01085": [
-          "TWR"
-        ],
-        "01047": [
-          "TWR"
-        ],
-        "01101": [
-          "TWR"
-        ],
-        "01021": [
-          "TWA"
-        ],
-        "01011": [
-          "TWR"
-        ],
-        "01063": [
-          "TWA"
-        ],
-        "01037": [
-          "TWA"
-        ],
-        "01125": [
-          "TWA"
-        ],
-        "01115": [
-          "TWA"
-        ],
-        "01107": [
-          "TWA"
-        ],
-        "01105": [
-          "TWA"
-        ],
-        "01111": [
-          "TWA"
-        ],
-        "01121": [
-          "TWA"
-        ],
-        "01113": [
-          "TWA"
-        ],
-        "01087": [
-          "TWR"
-        ],
-        "01109": [
-          "TWR"
-        ],
-        "01005": [
-          "TWR"
-        ],
-        "01051": [
-          "TWR"
-        ],
-        "01027": [
-          "TWA"
-        ],
-        "01001": [
-          "TWR"
-        ],
-        "01017": [
-          "TWA"
-        ],
-        "01123": [
-          "TWA"
-        ],
-        "01117": [
-          "TWA"
-        ],
-        "01119": [
-          "TWA"
-        ],
-        "01081": [
-          "TWA"
-        ],
-        "01065": [
-          "TWA"
-        ],
-        "01073": [
-          "TWA"
-        ],
-        "01091": [
-          "TWR"
-        ],
-        "01007": [
-          "TWA"
         ]
       },
       "offices": [
@@ -459,7 +472,7 @@
     "peakMedianKt": 99,
     "text": "50 of 50 bring the center to the Louisiana-to-Florida coast (FL 48, AL 2), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (31 major); typical peak 115 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-09T15:05:13.369Z"
+    "computedAt": "2026-10-09T15:35:06.057Z"
   },
   "discussion": {
     "storm": "al092026",
