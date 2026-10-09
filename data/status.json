@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-09T05:05:12.041Z",
-  "lastAttemptAt": "2026-10-09T05:05:12.041Z",
-  "nextCheck": "2026-10-09T05:35:00.000Z",
+  "updatedAt": "2026-10-09T05:35:05.974Z",
+  "lastAttemptAt": "2026-10-09T05:35:05.974Z",
+  "nextCheck": "2026-10-09T06:05:00.000Z",
   "alertLevel": "landfall",
   "headline": "Hurricane Isaias: 105 mph (Category 2), 25.4N 88.4W, Gulf, moving NE at 16 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
@@ -119,9 +119,9 @@
           "TWR"
         ],
         "28059": [
-          "HWA",
+          "TWR",
           "HWR",
-          "TWR"
+          "HWA"
         ],
         "28061": [
           "TWA"
@@ -264,13 +264,7 @@
         "01027": [
           "TWA"
         ],
-        "01123": [
-          "TWA"
-        ],
         "01085": [
-          "TWR"
-        ],
-        "01001": [
           "TWR"
         ],
         "01111": [
@@ -279,41 +273,41 @@
         "01105": [
           "TWA"
         ],
-        "01117": [
+        "01123": [
           "TWA"
+        ],
+        "01001": [
+          "TWR"
         ],
         "01107": [
           "TWA"
         ],
-        "01017": [
+        "01117": [
           "TWA"
         ],
         "01051": [
           "TWR"
         ],
+        "01017": [
+          "TWA"
+        ],
         "01115": [
           "TWA"
+        ],
+        "01047": [
+          "TWR"
         ],
         "01101": [
           "TWR"
         ],
-        "01063": [
+        "01065": [
           "TWA"
         ],
-        "01121": [
-          "TWA"
+        "01011": [
+          "TWR"
         ],
-        "01125": [
-          "TWA"
-        ],
-        "01119": [
-          "TWA"
-        ],
-        "01081": [
-          "TWA"
-        ],
-        "01113": [
-          "TWA"
+        "01109": [
+          "TWR"
         ],
         "01005": [
           "TWR"
@@ -321,16 +315,31 @@
         "01087": [
           "TWR"
         ],
-        "01109": [
-          "TWR"
-        ],
-        "01011": [
-          "TWR"
-        ],
-        "01065": [
+        "01113": [
           "TWA"
         ],
-        "01047": [
+        "01081": [
+          "TWA"
+        ],
+        "01119": [
+          "TWA"
+        ],
+        "01125": [
+          "TWA"
+        ],
+        "01121": [
+          "TWA"
+        ],
+        "01063": [
+          "TWA"
+        ],
+        "01069": [
+          "TWR"
+        ],
+        "01045": [
+          "TWR"
+        ],
+        "01031": [
           "TWR"
         ],
         "01067": [
@@ -339,14 +348,8 @@
         "01061": [
           "TWR"
         ],
-        "01031": [
-          "TWR"
-        ],
-        "01069": [
-          "TWR"
-        ],
-        "01045": [
-          "TWR"
+        "01035": [
+          "HWR"
         ],
         "01003": [
           "HWR"
@@ -362,9 +365,6 @@
         ],
         "01099": [
           "TWR"
-        ],
-        "01035": [
-          "HWR"
         ],
         "01023": [
           "TWA"
@@ -456,7 +456,7 @@
     "peakMedianKt": 108,
     "text": "49 of 50 bring the center to the Louisiana-to-Florida coast (FL 48, AL 1), typically around Sat, Oct 10, 1 AM CT. 50 of 50 reach hurricane strength (43 major); typical peak 125 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-09T05:05:12.041Z"
+    "computedAt": "2026-10-09T05:35:05.974Z"
   },
   "discussion": {
     "storm": "al092026",
