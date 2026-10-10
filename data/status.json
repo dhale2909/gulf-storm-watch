@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-10T03:35:03.094Z",
-  "lastAttemptAt": "2026-10-10T03:35:03.094Z",
-  "nextCheck": "2026-10-10T04:05:00.000Z",
+  "updatedAt": "2026-10-10T04:05:12.919Z",
+  "lastAttemptAt": "2026-10-10T04:05:12.919Z",
+  "nextCheck": "2026-10-10T04:35:00.000Z",
   "alertLevel": "landfall",
   "headline": "Hurricane Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Hurricane Isaias: 90 mph (Category 1), 30.8N 86.5W, inland, moving N at 23 mph. The center is over land. Hurricane warning: AL, FL. Tropical storm warning: MS. Storm surge warning: AL, FL.",
   "gulf": {
@@ -60,14 +60,79 @@
   ],
   "watchesWarnings": {
     "note": "",
+    "LA": {},
+    "FL": {
+      "level": "warning",
+      "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning",
+      "counties": {
+        "12005": [
+          "HWR"
+        ],
+        "12013": [
+          "TWR"
+        ],
+        "12033": [
+          "HWR"
+        ],
+        "12037": [
+          "TWR"
+        ],
+        "12039": [
+          "TWR"
+        ],
+        "12045": [
+          "TWR"
+        ],
+        "12059": [
+          "HWR"
+        ],
+        "12063": [
+          "TWR"
+        ],
+        "12065": [
+          "TWR"
+        ],
+        "12073": [
+          "TWR"
+        ],
+        "12077": [
+          "TWR"
+        ],
+        "12091": [
+          "HWR"
+        ],
+        "12113": [
+          "HWR"
+        ],
+        "12129": [
+          "TWR"
+        ],
+        "12131": [
+          "HWR"
+        ],
+        "12133": [
+          "HWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "tae",
+          "name": "Tallahassee"
+        },
+        {
+          "code": "mob",
+          "name": "Mobile"
+        }
+      ]
+    },
     "AL": {
       "level": "warning",
       "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning",
       "counties": {
-        "01013": [
+        "01039": [
           "HWR"
         ],
-        "01039": [
+        "01013": [
           "HWR"
         ],
         "01099": [
@@ -190,10 +255,10 @@
         "01007": [
           "TWR"
         ],
-        "01121": [
+        "01133": [
           "TWR"
         ],
-        "01133": [
+        "01121": [
           "TWR"
         ],
         "01057": [
@@ -324,72 +389,7 @@
           "name": "Memphis"
         }
       ]
-    },
-    "FL": {
-      "level": "warning",
-      "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning",
-      "counties": {
-        "12005": [
-          "HWR"
-        ],
-        "12013": [
-          "TWR"
-        ],
-        "12033": [
-          "HWR"
-        ],
-        "12037": [
-          "TWR"
-        ],
-        "12039": [
-          "TWR"
-        ],
-        "12045": [
-          "TWR"
-        ],
-        "12059": [
-          "HWR"
-        ],
-        "12063": [
-          "TWR"
-        ],
-        "12065": [
-          "TWR"
-        ],
-        "12073": [
-          "TWR"
-        ],
-        "12077": [
-          "TWR"
-        ],
-        "12091": [
-          "HWR"
-        ],
-        "12113": [
-          "HWR"
-        ],
-        "12129": [
-          "TWR"
-        ],
-        "12131": [
-          "HWR"
-        ],
-        "12133": [
-          "HWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "tae",
-          "name": "Tallahassee"
-        },
-        {
-          "code": "mob",
-          "name": "Mobile"
-        }
-      ]
-    },
-    "LA": {}
+    }
   },
   "landfall": null,
   "landfallOccurred": {
@@ -454,7 +454,7 @@
     "peakMedianKt": 82,
     "text": "14 of 50 ensemble members forecast a track so far. 14 of 14 bring the center to the Louisiana-to-Florida coast (FL 14), typically around Sat, Oct 10, 1 AM CT. 14 of 14 reach hurricane strength (3 major); typical peak 95 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-10T03:35:03.094Z"
+    "computedAt": "2026-10-10T04:05:12.919Z"
   },
   "discussion": {
     "storm": "al092026",
