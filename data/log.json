@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-10-10T00:33:27.290Z",
+    "changed": false,
+    "alertLevel": "landfall",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. Hurricane Isaias: 110 mph (Category 2), 30.1N 86.6W, Gulf, moving N at 21 mph. Forecast track reaches the coast near Destin, FL around Fri, Oct 9, 8 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA."
+  },
+  {
     "ts": "2026-10-10T00:05:13.544Z",
     "changed": true,
     "alertLevel": "landfall",
@@ -1554,16 +1564,6 @@
   },
   {
     "ts": "2026-10-07T08:05:15.166Z",
-    "changed": false,
-    "alertLevel": "threat",
-    "formation7d": null,
-    "pushed": false,
-    "delivery": null,
-    "updated": false,
-    "summary": "No change. Tropical Depression Nine: 35 mph, 22.1N 95.0W, Gulf, moving E at 6 mph. Forecast track reaches the coast near Pascagoula, MS around Sat, Oct 10, 2 AM CT (approximate)."
-  },
-  {
-    "ts": "2026-10-07T07:35:06.301Z",
     "changed": false,
     "alertLevel": "threat",
     "formation7d": null,
