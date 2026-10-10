@@ -1,5 +1,19 @@
 [
   {
+    "ts": "2026-10-10T02:05:14.558Z",
+    "changed": true,
+    "alertLevel": "landfall",
+    "formation7d": null,
+    "pushed": true,
+    "delivery": {
+      "private": true,
+      "browser": true,
+      "browserFailed": []
+    },
+    "updated": false,
+    "summary": "Hurricane Isaias is now Category 1 (85 mph)."
+  },
+  {
     "ts": "2026-10-10T01:50:43.176Z",
     "changed": true,
     "alertLevel": "landfall",
@@ -1553,16 +1567,6 @@
   },
   {
     "ts": "2026-10-07T10:05:14.677Z",
-    "changed": false,
-    "alertLevel": "threat",
-    "formation7d": null,
-    "pushed": false,
-    "delivery": null,
-    "updated": false,
-    "summary": "No change. Tropical Storm Isaias: 40 mph, 22.0N 94.1W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Gulf Shores, AL around Fri, Oct 9, 11 PM CT (approximate)."
-  },
-  {
-    "ts": "2026-10-07T09:35:00.704Z",
     "changed": false,
     "alertLevel": "threat",
     "formation7d": null,
