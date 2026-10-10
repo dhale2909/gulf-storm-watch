@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-10T18:05:12.757Z",
-  "lastAttemptAt": "2026-10-10T18:05:12.757Z",
-  "nextCheck": "2026-10-10T18:35:00.000Z",
+  "updatedAt": "2026-10-10T18:35:09.491Z",
+  "lastAttemptAt": "2026-10-10T18:35:09.491Z",
+  "nextCheck": "2026-10-10T19:05:00.000Z",
   "alertLevel": "landfall",
   "headline": "Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 35 mph, 32.8N 86.8W, inland, moving NNW at 12 mph. The center is over land.",
   "gulf": {
@@ -54,10 +54,10 @@
   ],
   "watchesWarnings": {
     "note": "",
+    "AL": {},
     "MS": {},
     "LA": {},
-    "FL": {},
-    "AL": {}
+    "FL": {}
   },
   "landfall": null,
   "landfallOccurred": {
@@ -105,25 +105,7 @@
     "alerts": "ok",
     "map": "ok"
   },
-  "google": {
-    "run": "2026-10-09T18:00:00.000Z",
-    "members": 14,
-    "total": 50,
-    "hits": 14,
-    "coast": {
-      "LA": 0,
-      "MS": 0,
-      "AL": 0,
-      "FL": 14
-    },
-    "eta": "2026-10-10T06:00:00.000Z",
-    "hurricane": 0,
-    "major": 0,
-    "peakMedianKt": 43,
-    "text": "14 of 50 ensemble members forecast a track so far. 14 of 14 bring the center to the Louisiana-to-Florida coast (FL 14), typically around Sat, Oct 10, 1 AM CT. 0 of 14 reach hurricane strength; typical peak 50 mph.",
-    "system": "Invest 92L",
-    "computedAt": "2026-10-10T06:05:13.252Z"
-  },
+  "google": null,
   "discussion": {
     "storm": "al092026",
     "url": "https://www.nhc.noaa.gov/text/MIATCDAT4.shtml",
