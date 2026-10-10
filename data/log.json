@@ -1,5 +1,19 @@
 [
   {
+    "ts": "2026-10-10T01:50:43.176Z",
+    "changed": true,
+    "alertLevel": "landfall",
+    "formation7d": null,
+    "pushed": true,
+    "delivery": {
+      "private": true,
+      "browser": true,
+      "browserFailed": []
+    },
+    "updated": false,
+    "summary": "LANDFALL: Hurricane Isaias has made landfall near Destin, FL around Fri, Oct 9, 8 PM CT with 105 mph winds (Category 2)."
+  },
+  {
     "ts": "2026-10-10T01:05:13.495Z",
     "changed": false,
     "alertLevel": "landfall",
@@ -1556,20 +1570,5 @@
     "delivery": null,
     "updated": false,
     "summary": "No change. Tropical Storm Isaias: 40 mph, 22.0N 94.1W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Gulf Shores, AL around Fri, Oct 9, 11 PM CT (approximate)."
-  },
-  {
-    "ts": "2026-10-07T09:05:14.706Z",
-    "changed": true,
-    "alertLevel": "threat",
-    "formation7d": null,
-    "pushed": true,
-    "delivery": {
-      "private": true,
-      "public": true,
-      "browser": true,
-      "browserFailed": []
-    },
-    "updated": false,
-    "summary": "Tropical Depression Nine is now Tropical Storm Isaias. Forecast landfall shifted MS -> AL, near Gulf Shores, AL (Fri, Oct 9, 11 PM CT)."
   }
 ]
