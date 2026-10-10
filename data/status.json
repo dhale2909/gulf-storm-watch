@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-09T23:35:06.031Z",
-  "lastAttemptAt": "2026-10-09T23:35:06.031Z",
-  "nextCheck": "2026-10-10T00:05:00.000Z",
+  "updatedAt": "2026-10-10T00:05:13.544Z",
+  "lastAttemptAt": "2026-10-10T00:05:13.544Z",
+  "nextCheck": "2026-10-10T00:35:00.000Z",
   "alertLevel": "landfall",
-  "headline": "Hurricane Isaias: 115 mph (Category 3), 29.8N 86.8W, Gulf, moving N at 21 mph. Forecast track reaches the coast near Navarre, FL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
+  "headline": "Hurricane Isaias: 110 mph (Category 2), 30.1N 86.6W, Gulf, moving N at 21 mph. Forecast track reaches the coast near Destin, FL around Fri, Oct 9, 8 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -17,17 +17,17 @@
       "bin": "AT4",
       "name": "Hurricane Isaias",
       "type": "Hurricane",
-      "winds": 100,
-      "category": 3,
-      "location": "29.8N 86.8W, Gulf",
+      "winds": 95,
+      "category": 2,
+      "location": "30.1N 86.6W, Gulf",
       "movement": "N at 21 mph",
       "advisory": "NHC advisory 13",
       "advisoryAt": "2026-10-09T21:00:00.000Z",
       "pos": {
-        "lat": 29.8,
-        "lonW": 86.8
+        "lat": 30.1,
+        "lonW": 86.6
       },
-      "posAt": "2026-10-09T23:00:00.000Z",
+      "posAt": "2026-10-10T00:00:00.000Z",
       "forecast": [
         {
           "t": "2026-10-10T06:00:00.000Z",
@@ -55,7 +55,7 @@
         }
       ],
       "forecastStale": false,
-      "gulfRisk": "Forecast track reaches the coast near Navarre, FL around Fri, Oct 9, 9 PM CT (approximate)"
+      "gulfRisk": "Forecast track reaches the coast near Destin, FL around Fri, Oct 9, 8 PM CT (approximate)"
     }
   ],
   "watchesWarnings": {
@@ -119,9 +119,9 @@
           "TWR"
         ],
         "28059": [
-          "HWA",
+          "TWR",
           "HWR",
-          "TWR"
+          "HWA"
         ],
         "28061": [
           "TWR"
@@ -263,46 +263,70 @@
       "level": "warning",
       "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning",
       "counties": {
-        "01101": [
+        "01087": [
           "TWR"
         ],
-        "01063": [
+        "01105": [
           "TWR"
         ],
-        "01021": [
+        "01127": [
           "TWR"
         ],
-        "01027": [
-          "TWR"
-        ],
-        "01111": [
-          "TWR"
-        ],
-        "01073": [
+        "01123": [
           "TWR"
         ],
         "01057": [
           "TWR"
         ],
-        "01125": [
+        "01111": [
           "TWR"
         ],
         "01005": [
           "TWR"
         ],
+        "01001": [
+          "TWR"
+        ],
+        "01081": [
+          "TWR"
+        ],
+        "01101": [
+          "TWR"
+        ],
         "01075": [
           "TWR"
         ],
-        "01065": [
+        "01125": [
           "TWR"
         ],
-        "01133": [
+        "01021": [
+          "TWR"
+        ],
+        "01107": [
+          "TWR"
+        ],
+        "01115": [
+          "TWR"
+        ],
+        "01113": [
           "TWR"
         ],
         "01117": [
           "TWR"
         ],
-        "01107": [
+        "01011": [
+          "TWR"
+        ],
+        "01133": [
+          "TWR"
+        ],
+        "01017": [
+          "TWR"
+        ],
+        "01051": [
+          "TWR"
+        ],
+        "01091": [
           "TWR"
         ],
         "01119": [
@@ -314,107 +338,83 @@
         "01121": [
           "TWR"
         ],
-        "01115": [
+        "01109": [
           "TWR"
         ],
-        "01007": [
-          "TWR"
-        ],
-        "01017": [
-          "TWR"
-        ],
-        "01011": [
-          "TWR"
-        ],
-        "01105": [
-          "TWR"
-        ],
-        "01051": [
-          "TWR"
-        ],
-        "01091": [
-          "TWR"
-        ],
-        "01081": [
+        "01065": [
           "TWR"
         ],
         "01085": [
           "TWR"
         ],
-        "01123": [
+        "01007": [
           "TWR"
         ],
-        "01037": [
+        "01073": [
           "TWR"
         ],
-        "01127": [
+        "01063": [
           "TWR"
         ],
-        "01001": [
-          "TWR"
-        ],
-        "01087": [
+        "01027": [
           "TWR"
         ],
         "01047": [
           "TWR"
         ],
-        "01113": [
+        "01037": [
           "TWR"
         ],
-        "01109": [
-          "TWR"
-        ],
-        "01045": [
-          "TWR"
-        ],
-        "01031": [
-          "HWR"
-        ],
-        "01067": [
-          "TWR"
-        ],
-        "01061": [
-          "HWR"
-        ],
-        "01069": [
-          "TWR"
-        ],
-        "01097": [
-          "HWR"
-        ],
-        "01023": [
-          "TWR"
-        ],
-        "01099": [
-          "TWR"
-        ],
-        "01025": [
-          "TWR"
-        ],
-        "01039": [
+        "01013": [
           "HWR"
         ],
         "01003": [
           "HWR"
         ],
-        "01131": [
-          "TWR"
+        "01097": [
+          "HWR"
+        ],
+        "01041": [
+          "HWR"
+        ],
+        "01039": [
+          "HWR"
         ],
         "01053": [
           "HWR"
         ],
-        "01013": [
-          "TWR"
-        ],
-        "01041": [
-          "TWR"
-        ],
         "01129": [
           "TWR"
         ],
+        "01131": [
+          "TWR"
+        ],
+        "01025": [
+          "TWR"
+        ],
+        "01099": [
+          "HWR"
+        ],
         "01035": [
           "HWR"
+        ],
+        "01023": [
+          "TWR"
+        ],
+        "01069": [
+          "TWR"
+        ],
+        "01067": [
+          "TWR"
+        ],
+        "01031": [
+          "HWR"
+        ],
+        "01061": [
+          "HWR"
+        ],
+        "01045": [
+          "TWR"
         ]
       },
       "offices": [
@@ -435,8 +435,8 @@
   },
   "landfall": {
     "state": "FL",
-    "eta": "2026-10-10T01:36:00.000Z",
-    "near": "Navarre, FL",
+    "eta": "2026-10-10T01:17:08.571Z",
+    "near": "Destin, FL",
     "windKt": 90
   },
   "landfallOccurred": null,
@@ -458,8 +458,8 @@
     "stormId": "al092026",
     "name": "Hurricane Isaias",
     "lastPos": {
-      "lat": 29.8,
-      "lonW": 86.8
+      "lat": 30.1,
+      "lonW": 86.6
     },
     "since": "2026-10-07T09:00:00.000Z"
   },
@@ -484,11 +484,11 @@
     },
     "eta": "2026-10-10T06:00:00.000Z",
     "hurricane": 36,
-    "major": 25,
-    "peakMedianKt": 101,
-    "text": "36 of 50 ensemble members forecast a track so far. 36 of 36 bring the center to the Louisiana-to-Florida coast (FL 36), typically around Sat, Oct 10, 1 AM CT. 36 of 36 reach hurricane strength (25 major); typical peak 115 mph.",
+    "major": 4,
+    "peakMedianKt": 87,
+    "text": "36 of 50 ensemble members forecast a track so far. 36 of 36 bring the center to the Louisiana-to-Florida coast (FL 36), typically around Sat, Oct 10, 1 AM CT. 36 of 36 reach hurricane strength (4 major); typical peak 100 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-09T23:35:06.031Z"
+    "computedAt": "2026-10-10T00:05:13.544Z"
   },
   "discussion": {
     "storm": "al092026",
