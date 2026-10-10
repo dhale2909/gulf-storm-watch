@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-10T02:35:06.273Z",
-  "lastAttemptAt": "2026-10-10T02:35:06.273Z",
-  "nextCheck": "2026-10-10T03:05:00.000Z",
+  "updatedAt": "2026-10-10T03:05:16.066Z",
+  "lastAttemptAt": "2026-10-10T03:05:16.066Z",
+  "nextCheck": "2026-10-10T03:35:00.000Z",
   "alertLevel": "landfall",
-  "headline": "Hurricane Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Hurricane Isaias: 100 mph (Category 2), 30.5N 86.4W, inland, moving N at 22 mph. The center is over land. Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
+  "headline": "Hurricane Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Hurricane Isaias: 90 mph (Category 1), 30.8N 86.5W, inland, moving N at 23 mph. The center is over land. Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -17,40 +17,40 @@
       "bin": "AT4",
       "name": "Hurricane Isaias",
       "type": "Hurricane",
-      "winds": 85,
-      "category": 2,
-      "location": "30.5N 86.4W, inland",
-      "movement": "N at 22 mph",
-      "advisory": "NHC advisory 13",
-      "advisoryAt": "2026-10-09T21:00:00.000Z",
+      "winds": 80,
+      "category": 1,
+      "location": "30.8N 86.5W, inland",
+      "movement": "N at 23 mph",
+      "advisory": "NHC advisory 14",
+      "advisoryAt": "2026-10-10T03:00:00.000Z",
       "pos": {
-        "lat": 30.5,
-        "lonW": 86.4
+        "lat": 30.8,
+        "lonW": 86.5
       },
-      "posAt": "2026-10-10T02:00:00.000Z",
+      "posAt": "2026-10-10T03:00:00.000Z",
       "forecast": [
         {
-          "t": "2026-10-10T06:00:00.000Z",
-          "lat": 31.2,
-          "lonW": 86.8,
-          "wind": 75
+          "t": "2026-10-10T12:00:00.000Z",
+          "lat": 32.7,
+          "lonW": 86.7,
+          "wind": 50
         },
         {
-          "t": "2026-10-10T18:00:00.000Z",
-          "lat": 33.4,
-          "lonW": 87.2,
-          "wind": 40
-        },
-        {
-          "t": "2026-10-11T06:00:00.000Z",
-          "lat": 35.6,
-          "lonW": 86.1,
+          "t": "2026-10-11T00:00:00.000Z",
+          "lat": 34.7,
+          "lonW": 86.7,
           "wind": 30
         },
         {
-          "t": "2026-10-11T18:00:00.000Z",
-          "lat": 38.1,
-          "lonW": 82.5,
+          "t": "2026-10-11T12:00:00.000Z",
+          "lat": 36.9,
+          "lonW": 84.4,
+          "wind": 30
+        },
+        {
+          "t": "2026-10-12T00:00:00.000Z",
+          "lat": 39,
+          "lonW": 80.5,
           "wind": 25
         }
       ],
@@ -60,6 +60,251 @@
   ],
   "watchesWarnings": {
     "note": "",
+    "unavailable": [
+      "FL",
+      "LA"
+    ],
+    "FL": {
+      "level": "warning",
+      "text": "Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning",
+      "counties": {
+        "12005": [
+          "HWR"
+        ],
+        "12013": [
+          "TWR"
+        ],
+        "12033": [
+          "HWR"
+        ],
+        "12037": [
+          "TWR"
+        ],
+        "12039": [
+          "TWR"
+        ],
+        "12045": [
+          "TWR"
+        ],
+        "12059": [
+          "HWR"
+        ],
+        "12063": [
+          "TWR"
+        ],
+        "12065": [
+          "TWR"
+        ],
+        "12073": [
+          "TWR"
+        ],
+        "12077": [
+          "TWR"
+        ],
+        "12091": [
+          "HWR"
+        ],
+        "12113": [
+          "HWR"
+        ],
+        "12129": [
+          "TWR"
+        ],
+        "12131": [
+          "HWR"
+        ],
+        "12133": [
+          "HWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "tae",
+          "name": "Tallahassee"
+        },
+        {
+          "code": "mob",
+          "name": "Mobile"
+        },
+        {
+          "code": "tbw",
+          "name": "Tampa Bay Ruskin"
+        }
+      ]
+    },
+    "AL": {
+      "level": "warning",
+      "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning",
+      "counties": {
+        "01069": [
+          "TWR"
+        ],
+        "01045": [
+          "TWR"
+        ],
+        "01067": [
+          "TWR"
+        ],
+        "01061": [
+          "HWR"
+        ],
+        "01031": [
+          "HWR"
+        ],
+        "01047": [
+          "TWR"
+        ],
+        "01105": [
+          "TWR"
+        ],
+        "01017": [
+          "TWR"
+        ],
+        "01125": [
+          "TWR"
+        ],
+        "01119": [
+          "TWR"
+        ],
+        "01027": [
+          "TWR"
+        ],
+        "01011": [
+          "TWR"
+        ],
+        "01057": [
+          "TWR"
+        ],
+        "01121": [
+          "TWR"
+        ],
+        "01133": [
+          "TWR"
+        ],
+        "01007": [
+          "TWR"
+        ],
+        "01051": [
+          "TWR"
+        ],
+        "01065": [
+          "TWR"
+        ],
+        "01115": [
+          "TWR"
+        ],
+        "01005": [
+          "TWR"
+        ],
+        "01107": [
+          "TWR"
+        ],
+        "01127": [
+          "TWR"
+        ],
+        "01075": [
+          "TWR"
+        ],
+        "01087": [
+          "TWR"
+        ],
+        "01085": [
+          "TWR"
+        ],
+        "01111": [
+          "TWR"
+        ],
+        "01117": [
+          "TWR"
+        ],
+        "01073": [
+          "TWR"
+        ],
+        "01109": [
+          "TWR"
+        ],
+        "01093": [
+          "TWR"
+        ],
+        "01123": [
+          "TWR"
+        ],
+        "01081": [
+          "TWR"
+        ],
+        "01091": [
+          "TWR"
+        ],
+        "01063": [
+          "TWR"
+        ],
+        "01113": [
+          "TWR"
+        ],
+        "01001": [
+          "TWR"
+        ],
+        "01021": [
+          "TWR"
+        ],
+        "01101": [
+          "TWR"
+        ],
+        "01037": [
+          "TWR"
+        ],
+        "01025": [
+          "TWR"
+        ],
+        "01003": [
+          "HWR"
+        ],
+        "01099": [
+          "HWR"
+        ],
+        "01053": [
+          "HWR"
+        ],
+        "01097": [
+          "HWR"
+        ],
+        "01035": [
+          "HWR"
+        ],
+        "01023": [
+          "TWR"
+        ],
+        "01129": [
+          "TWR"
+        ],
+        "01039": [
+          "HWR"
+        ],
+        "01041": [
+          "HWR"
+        ],
+        "01131": [
+          "TWR"
+        ],
+        "01013": [
+          "HWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "bmx",
+          "name": "Birmingham"
+        },
+        {
+          "code": "mob",
+          "name": "Mobile"
+        },
+        {
+          "code": "tae",
+          "name": "Tallahassee"
+        }
+      ]
+    },
     "LA": {
       "level": "warning",
       "text": "Storm Surge Warning, Tropical Storm Warning",
@@ -190,247 +435,6 @@
           "name": "Memphis"
         }
       ]
-    },
-    "FL": {
-      "level": "warning",
-      "text": "Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning",
-      "counties": {
-        "12005": [
-          "HWR"
-        ],
-        "12013": [
-          "TWR"
-        ],
-        "12033": [
-          "HWR"
-        ],
-        "12037": [
-          "TWR"
-        ],
-        "12039": [
-          "TWR"
-        ],
-        "12045": [
-          "TWR"
-        ],
-        "12059": [
-          "HWR"
-        ],
-        "12063": [
-          "TWR"
-        ],
-        "12065": [
-          "TWR"
-        ],
-        "12073": [
-          "TWR"
-        ],
-        "12077": [
-          "TWR"
-        ],
-        "12091": [
-          "HWR"
-        ],
-        "12113": [
-          "HWR"
-        ],
-        "12129": [
-          "TWR"
-        ],
-        "12131": [
-          "HWR"
-        ],
-        "12133": [
-          "HWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "tae",
-          "name": "Tallahassee"
-        },
-        {
-          "code": "mob",
-          "name": "Mobile"
-        },
-        {
-          "code": "tbw",
-          "name": "Tampa Bay Ruskin"
-        }
-      ]
-    },
-    "AL": {
-      "level": "warning",
-      "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning",
-      "counties": {
-        "01011": [
-          "TWR"
-        ],
-        "01063": [
-          "TWR"
-        ],
-        "01117": [
-          "TWR"
-        ],
-        "01113": [
-          "TWR"
-        ],
-        "01115": [
-          "TWR"
-        ],
-        "01107": [
-          "TWR"
-        ],
-        "01021": [
-          "TWR"
-        ],
-        "01125": [
-          "TWR"
-        ],
-        "01087": [
-          "TWR"
-        ],
-        "01075": [
-          "TWR"
-        ],
-        "01081": [
-          "TWR"
-        ],
-        "01001": [
-          "TWR"
-        ],
-        "01005": [
-          "TWR"
-        ],
-        "01111": [
-          "TWR"
-        ],
-        "01057": [
-          "TWR"
-        ],
-        "01123": [
-          "TWR"
-        ],
-        "01127": [
-          "TWR"
-        ],
-        "01105": [
-          "TWR"
-        ],
-        "01037": [
-          "TWR"
-        ],
-        "01047": [
-          "TWR"
-        ],
-        "01133": [
-          "TWR"
-        ],
-        "01027": [
-          "TWR"
-        ],
-        "01101": [
-          "TWR"
-        ],
-        "01017": [
-          "TWR"
-        ],
-        "01051": [
-          "TWR"
-        ],
-        "01091": [
-          "TWR"
-        ],
-        "01119": [
-          "TWR"
-        ],
-        "01093": [
-          "TWR"
-        ],
-        "01121": [
-          "TWR"
-        ],
-        "01109": [
-          "TWR"
-        ],
-        "01065": [
-          "TWR"
-        ],
-        "01007": [
-          "TWR"
-        ],
-        "01085": [
-          "TWR"
-        ],
-        "01073": [
-          "TWR"
-        ],
-        "01129": [
-          "TWR"
-        ],
-        "01131": [
-          "TWR"
-        ],
-        "01025": [
-          "TWR"
-        ],
-        "01097": [
-          "HWR"
-        ],
-        "01003": [
-          "HWR"
-        ],
-        "01099": [
-          "HWR"
-        ],
-        "01035": [
-          "HWR"
-        ],
-        "01023": [
-          "TWR"
-        ],
-        "01013": [
-          "HWR"
-        ],
-        "01053": [
-          "HWR"
-        ],
-        "01039": [
-          "HWR"
-        ],
-        "01041": [
-          "HWR"
-        ],
-        "01045": [
-          "TWR"
-        ],
-        "01069": [
-          "TWR"
-        ],
-        "01067": [
-          "TWR"
-        ],
-        "01031": [
-          "HWR"
-        ],
-        "01061": [
-          "HWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "bmx",
-          "name": "Birmingham"
-        },
-        {
-          "code": "mob",
-          "name": "Mobile"
-        },
-        {
-          "code": "tae",
-          "name": "Tallahassee"
-        }
-      ]
     }
   },
   "landfall": null,
@@ -466,8 +470,8 @@
     "stormId": "al092026",
     "name": "Hurricane Isaias",
     "lastPos": {
-      "lat": 30.5,
-      "lonW": 86.4
+      "lat": 30.8,
+      "lonW": 86.5
     },
     "since": "2026-10-07T09:00:00.000Z"
   },
@@ -476,7 +480,7 @@
     "outlook": "ok",
     "storms": "ok",
     "forecast": "ok",
-    "alerts": "ok",
+    "alerts": "unavailable for FL, LA",
     "map": "ok"
   },
   "google": {
@@ -496,26 +500,25 @@
     "peakMedianKt": 82,
     "text": "14 of 50 ensemble members forecast a track so far. 14 of 14 bring the center to the Louisiana-to-Florida coast (FL 14), typically around Sat, Oct 10, 1 AM CT. 14 of 14 reach hurricane strength (3 major); typical peak 95 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-10T02:35:06.273Z"
+    "computedAt": "2026-10-10T03:05:16.066Z"
   },
   "discussion": {
     "storm": "al092026",
     "url": "https://www.nhc.noaa.gov/text/MIATCDAT4.shtml",
-    "issuedAt": "2026-10-09T21:00:00.000Z",
-    "number": 13,
-    "issued": "400 PM CDT Fri Oct 09 2026",
+    "issuedAt": "2026-10-10T03:00:00.000Z",
+    "number": 14,
+    "issued": "1000 PM CDT Fri Oct 09 2026",
     "paragraphs": [
-      "Deep-layer shear from the southwest has increased to 30-40 kt, and the hurricane's structure is responding accordingly. WSR-88D radar data shows that the structure is becoming increasingly asymmetric, with very intense convection mainly confined to the northern eyewall. Tail Doppler radar data from the NOAA P-3 has also shown that the circulation is becoming tilted with height. That said, some impressive winds were measured at flight-level--136 kt by the Air Force Reserve at 10,000 feet and 126 kt by NOAA at 8,000 ft. While these winds themselves would normally support a higher intensity, several dropsondes released in the eyewall showed that there is a sharp drop-off of winds at the ocean surface, with layer-averaging suggesting a surface intensity of 90-95 kt. In addition, recent Doppler radar data from Mobile show winds of 100-110 kt at about 10,000 feet in the northern eyewall. Combining all this data together, the maximum surface winds appear to be around 100 kt, although it's very likely that Isaias will be a gustier-than-normal hurricane when it makes landfall.",
-      "Isaias has turned northward and is accelerating with a current motion of 010/15 kt. The track guidance has honed in on a landfall over the western Florida Panhandle near the Pensacola area sometime this evening. A northward motion is expected to continue through Saturday, bringing Isaias's center through Alabama, followed by a northeastward trajectory across the Tennessee and the central Appalachians on Sunday. The circulation is expected to dissipate by hour 60.",
-      "The high-resolution hurricane regional models (HAFS-A, HAFS-B, and HWRF), as well as the statistical-dynamical models (SHIPS and LGEM) indicate that Isaias is likely to be at or near major hurricane strength at landfall this evening. After landfall, fast weakening is expected, with some caveats. As mentioned previously, Isaias is likely to be a gusty hurricane, and its fast motion could bring strong hurricane-force gusts well inland. Simulated satellite imagery from global model guidance indicates that Isaias is likely to transition to a post-tropical cyclone over Alabama by Saturday afternoon, although it could still be producing tropical-storm-force gusts, especially in areas of higher terrain."
+      "Isaias made landfall as a 90-kt hurricane at 0130 UTC near Destin, Florida. Since that time, the radar structure of the storm has continued to degrade as strong vertical wind shear disrupts the circulation. However, Eglin AFB (KEVX) radar data and surface observations indicate damaging, gusty winds are persisting in the residual northern eyewall and in a band wrapping around the western side of the circulation. Now that the system is farther inland and losing organization, the initial intensity is lowered to 80 kt for this advisory.",
+      "Isaias is rapidly losing tropical characteristics, and it is forecast to become post-tropical within the next 12 h while it continues moving quickly northward through Alabama. Although the sustained surface winds associated with Isaias will quickly weaken now that the storm is inland, damaging wind gusts associated with the system are expected to extend well inland through Saturday, especially in areas of higher terrain. Because of this, the gust factors in the forecast have been slightly increased during the first 24 h. A turn toward the northeast is forecast later this weekend, bringing the center of the system into the Tennessee Valley before it dissipates."
     ],
     "keyMessages": [
-      "A life-threatening storm surge is expected from the Mouth of the Mississippi River to Suwannee, Florida. Residents under evacuation orders should leave immediately and follow advice from local officials.",
-      "Extremely dangerous and damaging hurricane force-winds are expected over portions of the Florida Panhandle, southern Alabama, and southern Mississippi where a Hurricane Warning is in effect. Residents in these areas should have a safe room to ride out the storm and prepare for long-duration power outages.",
+      "A life-threatening storm surge is expected from Dauphin Island, Alabama, to Suwannee, Florida where a Storm Surge Warning remains in effect. Residents in the warning area should continue to follow advice given by local officials.",
+      "Extremely dangerous and damaging hurricane-force winds, especially in gusts, are expected over portions of the Florida Panhandle and southern Alabama where a Hurricane Warning remains in effect. Residents in these areas should have a safe room to ride out the storm and prepare for long-duration power outages.",
       "Damaging wind gusts are likely over a large portion of the southeastern United States from western and northern Georgia and the southern Appalachians, westward over much of central and northern Alabama, southern middle Tennessee, and Mississippi, especially in areas of higher terrain. Residents should secure loose outdoor items, avoid driving high-profile vehicles, prepare for power outages, and be aware of the potential for falling trees.",
       "Isaias will bring areas of heavy rainfall to the central U.S. Gulf coast and much of the Southeast through the weekend. Considerable flash and urban flooding, along with significant river flooding, will be possible. Landslides are also possible across the Southern Appalachians.",
       "The tornado potential will continue through tonight. The greatest risk will be east of the center, particularly across the Florida Panhandle into southern Georgia. This risk will continue spreading north-northeast across parts of the Southeast on Saturday."
     ],
-    "forecaster": "Berg"
+    "forecaster": "Reinhart"
   }
 }
