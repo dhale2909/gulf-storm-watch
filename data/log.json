@@ -1,5 +1,19 @@
 [
   {
+    "ts": "2026-10-10T03:35:03.094Z",
+    "changed": true,
+    "alertLevel": "landfall",
+    "formation7d": null,
+    "pushed": true,
+    "delivery": {
+      "private": true,
+      "browser": true,
+      "browserFailed": []
+    },
+    "updated": false,
+    "summary": "FL: alerts now Hurricane Warning, Storm Surge Warning, Tropical Storm Warning (was Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning). MS: alerts now Tropical Storm Warning (was Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning). LA: tropical warning dropped."
+  },
+  {
     "ts": "2026-10-10T03:05:16.066Z",
     "changed": true,
     "alertLevel": "landfall",
@@ -1565,16 +1579,6 @@
   },
   {
     "ts": "2026-10-07T11:05:14.517Z",
-    "changed": false,
-    "alertLevel": "threat",
-    "formation7d": null,
-    "pushed": false,
-    "delivery": null,
-    "updated": false,
-    "summary": "No change. Tropical Storm Isaias: 40 mph, 22.0N 94.1W, Gulf, moving ENE at 9 mph. Forecast track reaches the coast near Gulf Shores, AL around Fri, Oct 9, 11 PM CT (approximate)."
-  },
-  {
-    "ts": "2026-10-07T10:58:40.966Z",
     "changed": false,
     "alertLevel": "threat",
     "formation7d": null,
