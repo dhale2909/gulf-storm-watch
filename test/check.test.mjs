@@ -175,7 +175,7 @@ test('P1: landfall expected (forecast within 24 h) is not a 48-hour hold; an obs
   const ashore = [{ ...expected[0], landfall: null, ashore: { state: 'LA', t: '2026-10-08T15:00:00Z' } }];
   const e = m.build(d, null, ashore, ww());
   assert.equal(e.alertLevel, 'landfall'); assert.equal(e.landfallOccurred.state, 'LA'); assert.equal(e.internal.landfallHoldUntil, '2026-10-10T15:00:00.000Z');
-  assert.match(m.diff(d, e).join(' | '), /Landfall in LA/);
+  assert.match(m.diff(d, e).join(' | '), /LANDFALL: Tropical Storm Test has made landfall in LA around .* with 60 mph winds/);
   // storm gone from the feed afterwards: the hold keeps the level and the headline says it made landfall
   const f = m.build(e, null, [], ww());
   assert.equal(f.alertLevel, 'landfall'); assert.match(f.headline, /Made landfall in LA/);
@@ -597,7 +597,7 @@ fixed('F28', 'an inland center is not a moving forecast landfall, and reaching l
   const prior = m.build(state(), null, [forecastStorm({ landfall: { state: 'MS', eta: '2026-10-08T14:00:00Z', near: 'Pascagoula, MS' }, ashore: null })], ww());
   const cur = m.build(prior, null, [{ ...st, tropical: true }], ww());
   const ch = m.diff(prior, cur).join(' | ');
-  assert.match(ch, /Landfall in MS/); assert.doesNotMatch(ch, /no longer reaches|shifted|timing moved/);
+  assert.match(ch, /has made landfall in MS around/, 'an inland first fix with no previous at-sea fix names the state, not a town across the line'); assert.doesNotMatch(ch, /no longer reaches|shifted|timing moved/);
 });
 fixed('F33', 'an inland center is described as inland, not "approaching the Gulf"', async () => {
   responses[FEED] = { activeStorms: [storm({ latitudeNumeric: 32.5, longitudeNumeric: -88.6 })] };
@@ -975,4 +975,34 @@ test("the headline's alert line is each state's strongest wind and surge product
   const d = m.build(state(), null, [forecastStorm()], tonight);
   assert.match(d.headline, /\. Hurricane warning: AL, FL, MS\. Tropical storm warning: LA\. Storm surge warning: AL, FL, MS, LA\.$/);
   assert.equal(m.alertSummary({ ...ww(), FL: { level: 'watch', text: 'Storm Surge Watch, Tropical Storm Watch' } }), 'Tropical storm watch: FL. Storm surge watch: FL.');
+});
+
+// ---- observed landfall: the record carries the shore point, the town, the crossing time and the strength ----
+test('landfall record: the crossing from the last at-sea fix gives the town, the time and the wind; the alert names them', async () => {
+  // Previous check: 30 miles off Destin at 00Z, 95 kt. This check: inland at 03Z, 75 kt. The crossing is on the leg between them.
+  const prev = { id: 'al092026', pos: { lat: 29.9, lonW: 86.6 }, posAt: '2026-10-10T00:00:00.000Z', winds: 95 };
+  responses[FEED] = { activeStorms: [{ id: 'al092026', binNumber: 'AT4', name: 'Isaias', classification: 'HU', intensity: '75', latitudeNumeric: 31.2, longitudeNumeric: -86.8, movementDir: 10, movementSpeed: 18, lastUpdate: '2026-10-10T03:00:00.000Z' }] };
+  const st = (await m.gatherStorms(state({ storms: [prev] })))[0];
+  assert.equal(st.ashore.state, 'FL'); assert.equal(st.ashore.near, 'Destin, FL');
+  assert.ok(st.ashore.lat > 30.3 && st.ashore.lat < 30.45, `shore point ${st.ashore.lat}`);
+  const t = Date.parse(st.ashore.t); assert.ok(t > Date.parse(prev.posAt) && t < Date.parse('2026-10-10T03:00:00Z'), 'crossing time between the two fixes');
+  assert.ok(st.ashore.windKt >= 75 && st.ashore.windKt <= 95, `crossing wind ${st.ashore.windKt}`);
+  const prior = m.build(state({ alertLevel: 'threat' }), null, [forecastStorm({ id: 'al092026', name: 'Hurricane Isaias', landfall: { state: 'FL', eta: st.ashore.t, near: 'Destin, FL' }, ashore: null })], ww());
+  const cur = m.build(prior, null, [forecastStorm({ id: 'al092026', name: 'Hurricane Isaias', winds: 75, landfall: null, ashore: st.ashore })], ww());
+  assert.equal(cur.landfallOccurred.near, 'Destin, FL'); assert.equal(cur.landfallOccurred.lat, st.ashore.lat); assert.equal(cur.landfallOccurred.windKt, st.ashore.windKt);
+  assert.match(cur.headline, /made landfall near Destin, FL around/);
+  const ch = m.diff(prior, cur);
+  assert.match(ch.join(' | '), /LANDFALL: Hurricane Isaias has made landfall near Destin, FL around .* with \d+ mph winds \(Category [12]\)/);
+  const msg = m.composeMessage({ level: 'landfall', changes: ch, headline: cur.headline });
+  assert.equal(msg.privateTitle, 'Gulf Storm Watch: LANDFALL \u2014 Hurricane Isaias ashore near Destin, FL');
+  assert.equal(msg.publicTitle, "Daniel's Storm Page: LANDFALL \u2014 Hurricane Isaias ashore near Destin, FL");
+  // The record survives the next check unchanged (place, point and wind are kept in internal state).
+  const next = m.build(cur, null, [forecastStorm({ id: 'al092026', name: 'Hurricane Isaias', winds: 60, landfall: null, ashore: st.ashore })], ww());
+  assert.deepEqual(next.landfallOccurred, cur.landfallOccurred); assert.equal(m.diff(cur, next).join(' '), '', 'not announced twice');
+});
+test('landfall record: without a usable previous fix the inland fix itself is the record, and an old record without a town still reads', () => {
+  const d = m.build(state(), null, [forecastStorm({ winds: 40, ashore: { state: 'LA', t: '2026-10-08T12:00:00Z' } })], ww());
+  assert.deepEqual(d.landfallOccurred, { state: 'LA', at: '2026-10-08T12:00:00Z' }); assert.match(d.headline, /made landfall in LA around/);
+  const msg = m.composeMessage({ level: 'landfall', changes: m.diff(state(), d), headline: d.headline });
+  assert.equal(msg.privateTitle, 'Gulf Storm Watch: LANDFALL \u2014 Tropical Storm Test ashore in LA');
 });

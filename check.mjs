@@ -287,6 +287,20 @@ function landfallPoint(path) {
   const b = path.length && !coastHit(path[0]) ? path.find(coastHit) : null;
   return b ? { lat: b.lat, lonW: b.lonW, t: b.t, wind: b.wind ?? null, crossing: false } : null;
 }
+// Observed landfall record for a center seen on or inland of the coast. The crossing is placed on the leg from the last
+// at-sea fix (the previous check's position) to this one, so the record carries the shore point, the nearest town and
+// the estimated crossing time rather than the first inland fix. Without a usable previous fix, the fix itself is used.
+function landed(here, prev, winds) {
+  if (!here || !ashore(here)) return null;
+  const from = prev?.pos && prev.posAt && !Number.isNaN(Date.parse(prev.posAt)) && Date.parse(prev.posAt) < Date.parse(here.t) && !coastHit(prev.pos)
+    ? { t: prev.posAt, lat: prev.pos.lat, lonW: prev.pos.lonW, ...(prev.winds != null ? { wind: prev.winds } : {}) } : null;
+  const x = from ? landfallPoint([from, here]) : null;
+  const p = x && x.crossing ? x : here;
+  const windKt = (x && x.crossing ? x.wind : null) ?? here.wind ?? winds ?? null;
+  // The town is named only when it sits in the announced state: an inland fix with no crossing can be nearer a town across the line.
+  const state = coastState(p), town = nearestTown(p);
+  return { state, t: p.t, ...(town.endsWith(`, ${state}`) ? { near: town } : {}), lat: +p.lat.toFixed(2), lonW: +p.lonW.toFixed(2), ...(windKt != null ? { windKt } : {}) };
+}
 // For the location text only: over land, either inside the coastline or north of the northern Gulf coast.
 const overLand = (p) => coastHit(p) || (p.lat > 31 && p.lonW >= 82 && p.lonW <= 100);
 const nearestTown = (p) => TOWNS.map(([name, lat, lonW]) => [name, Math.hypot(lat - p.lat, (lonW - p.lonW) * Math.cos(p.lat * Math.PI / 180))]).sort((a, b) => a[1] - b[1])[0][0];
@@ -356,7 +370,7 @@ export async function gatherStorms(prior) {
       advisory: s.forecastAdvisory?.advNum ? `NHC advisory ${String(s.forecastAdvisory.advNum).replace(/^0+(?=\d)/, '')}` : '', // "002" -> "2", as NHC's map service writes it
       advisoryAt: s.forecastAdvisory?.issuance || when || null,
       landfall,
-      ashore: here && ashore(here) ? { state: coastState(here), t: here.t } : null,
+      ashore: landed(here, prev, winds),
       pos: here ? { lat: here.lat, lonW: here.lonW } : prev?.pos || null,
       posAt: here ? here.t : prev?.posAt || null, // time of that fix (intermediate advisories move it between forecast advisories)
       forecast: track === null ? prev?.forecast || [] : track, // [] is a verified "no track", never replaced by an old one
@@ -753,6 +767,8 @@ export function alertSummary(ww) {
   return [...WIND_ORDER, ...SURGE_ORDER].filter((p) => groups.has(p)).map((p) => `${p[0]}${p.slice(1).toLowerCase()}: ${groups.get(p).join(', ')}.`).join(' ');
 }
 
+// "near Destin, FL" when the record has the shore point, "in FL" for an older record without one.
+const lfPlace = (o) => (o.near ? `near ${o.near}` : `in ${o.state}`);
 const lcFirst = (t) => String(t || '').replace(/^./, (c) => c.toLowerCase()); // mid-sentence, keeping town names and times as written
 
 export function build(prior, gulf, storms, ww) {
@@ -766,16 +782,17 @@ export function build(prior, gulf, storms, ww) {
   // time and is never restarted by the same storm sitting inland after the hold expires. A different storm, or a
   // storm with no record yet, can create a new one; a record from another storm does not apply.
   const pi = prior?.internal || {};
-  let rec = pi.landfallAt ? { state: pi.landfallState, at: pi.landfallAt, stormId: pi.landfallStormId || null } : null;
+  let rec = pi.landfallAt ? { state: pi.landfallState, at: pi.landfallAt, stormId: pi.landfallStormId || null, near: pi.landfallNear || null, pos: pi.landfallPos || null, windKt: pi.landfallWindKt ?? null } : null;
   const forThisStorm = !!rec && (!storm || !rec.stormId || rec.stormId === storm.id);
   if (storm?.ashore && !forThisStorm) {
     const t = storm.ashore.t && !Number.isNaN(Date.parse(storm.ashore.t)) ? storm.ashore.t : NOW.toISOString();
-    rec = { state: storm.ashore.state, at: t, stormId: storm.id };
+    const a = storm.ashore;
+    rec = { state: a.state, at: t, stormId: storm.id, near: a.near || null, pos: a.lat != null && a.lonW != null ? { lat: a.lat, lonW: a.lonW } : null, windKt: a.windKt ?? null };
   }
   const applies = !!rec && (!storm || !rec.stormId || rec.stormId === storm.id);
   const heldNow = applies && NOW.getTime() - new Date(rec.at).getTime() < 48 * 3600e3;
   // Reported while the hold runs, and for as long as the storm that made it is still being tracked.
-  const occurred = applies && (heldNow || storm) ? { state: rec.state, at: rec.at } : null;
+  const occurred = applies && (heldNow || storm) ? { state: rec.state, at: rec.at, ...(rec.near ? { near: rec.near } : {}), ...(rec.pos ? { lat: rec.pos.lat, lonW: rec.pos.lonW } : {}), ...(rec.windKt != null ? { windKt: rec.windKt } : {}) } : null;
   const held = !!occurred && heldNow;
 
   let alertLevel = 'quiet';
@@ -785,10 +802,10 @@ export function build(prior, gulf, storms, ww) {
 
   let headline;
   if (storm) {
-    headline = (occurred ? `${storm.name} made landfall in ${occurred.state} around ${fmtCT(occurred.at)}. ` : '') +
+    headline = (occurred ? `${storm.name} made landfall ${lfPlace(occurred)} around ${fmtCT(occurred.at)}. ` : '') +
       `${storm.name}: ${mph(storm.winds)} mph${storm.category ? ` (Category ${storm.category})` : ''}, ${storm.location}, moving ${storm.movement}. ${storm.gulfRisk}.`;
   } else if (occurred) {
-    headline = `Made landfall in ${occurred.state} around ${fmtCT(occurred.at)}; the system is no longer an active NHC storm.`;
+    headline = `Made landfall ${lfPlace(occurred)} around ${fmtCT(occurred.at)}; the system is no longer an active NHC storm.`;
   } else if (gulf) {
     headline = `NHC gives the ${gulf.area} disturbance a ${gulf.formation7d}% chance of forming within 7 days (${gulf.formation48}% within 48 hours). No advisories or forecast track yet.`;
   } else {
@@ -820,6 +837,7 @@ export function build(prior, gulf, storms, ww) {
       landfallStormId: rec?.stormId || null,
       landfallHoldUntil: held ? new Date(new Date(occurred.at).getTime() + 48 * 3600e3).toISOString() : null,
       landfallState: rec?.state || (imminent ? landfall.state : null),
+      landfallNear: rec?.near || null, landfallPos: rec?.pos || null, landfallWindKt: rec?.windKt ?? null,
     },
   };
 }
@@ -870,7 +888,10 @@ export function diff(prior, cur) {
   for (const o of othersNew) ch.push(`Another Gulf system: ${o.name} ${o.detail}`);
 
   // Announced when the record is made; a record restored for a storm that returns to the feed later is not news.
-  if (cur.landfallOccurred && !prior.landfallOccurred && cur.internal?.landfallAt !== prior.internal?.landfallAt) ch.push(`Landfall in ${cur.landfallOccurred.state} around ${fmtCT(cur.landfallOccurred.at)}`);
+  if (cur.landfallOccurred && !prior.landfallOccurred && cur.internal?.landfallAt !== prior.internal?.landfallAt) {
+    const o = cur.landfallOccurred, s = cur.storms?.[0], w = o.windKt ?? s?.winds ?? null;
+    ch.push(`LANDFALL: ${s?.name || 'The storm'} has made landfall ${lfPlace(o)} around ${fmtCT(o.at)}${w != null ? ` with ${mph(w)} mph winds${category(w) ? ` (Category ${category(w)})` : ''}` : ''}`);
+  }
 
   // Forecast landfalls are compared only for the same storm: a storm that takes over starts its own story.
   const pl = sameStorm(prior, cur) ? prior.landfall : null, cl = cur.landfall;
@@ -989,11 +1010,14 @@ export function composeMessage(ev) {
   const play = plays[ev.level] ? `\n\nPlay: ${plays[ev.level]}` : '';
   const goog = ev.google ? `\n\nGoogle AI ensemble (experimental, not a forecast): ${ev.google}` : '';
   const body = `${ev.changes.join('. ')}.\n\n${ev.headline}`;
+  // An observed landfall is the biggest moment: its title names the storm and where it came ashore.
+  const made = /^LANDFALL: (.+?) has made landfall ((?:near|in) .+?) around /.exec(ev.changes.find((c) => /^LANDFALL: /.test(c)) || '');
+  const label = made ? `LANDFALL \u2014 ${made[1]} ashore ${made[2]}` : LEVEL_LABEL[ev.level];
   return {
     level: ev.level,
-    privateTitle: `Gulf Storm Watch: ${LEVEL_LABEL[ev.level]}`, privateBody: `${body}${goog}${play}`,
+    privateTitle: `Gulf Storm Watch: ${label}`, privateBody: `${body}${goog}${play}`,
     // Public subscribers (browser notifications) get the same change, weather facts only.
-    publicTitle: `Daniel's Storm Page: ${LEVEL_LABEL[ev.level]}`, publicBody: body,
+    publicTitle: `Daniel's Storm Page: ${label}`, publicBody: body,
   };
 }
 

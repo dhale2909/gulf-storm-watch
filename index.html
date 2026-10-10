@@ -153,6 +153,16 @@ body.cardx #card,body.cardx #map{height:628px}
 #card #c-pill.num b{font-size:118px;font-weight:700;color:#fff;letter-spacing:-.02em}#card #c-pill.num small{font-size:30px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-top:4px;color:#fff}
 #c-l2.lead{font:700 50px/58px var(--display);color:#fff}
 #c-l3{font:500 32px/38px var(--body);color:#c3ced6}#c-l3:empty{display:none}
+/* Landfall phase (expected within 24 hours, or made): the bar grows to carry the place, the date and the strength. */
+#card.lf .c-bar{height:auto;padding-bottom:16px}
+#card.lf #c-l2.lead{font-size:62px;line-height:68px;margin-top:2px}
+#card.lf #c-l2.lead em{font-style:normal;color:var(--lvl,var(--landfall))}
+#c-ld{font:700 46px/52px var(--display);color:#fff;margin-top:2px;overflow:hidden;text-overflow:ellipsis}#c-ld:empty{display:none}
+#card.lf #c-l3{font-size:28px;line-height:34px;margin-top:4px}
+#c-l4{font:600 23px/28px var(--body);color:#9fb0bc;margin-top:6px;overflow:hidden;text-overflow:ellipsis}#c-l4:empty{display:none}
+body.cardx #c-l4{display:none}
+.c-lf i{display:block;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;border:7px solid var(--landfall);box-shadow:0 0 0 4px #0d151c,inset 0 0 0 4px #0d151c;box-sizing:border-box}
+.c-lf span{position:absolute;left:0;top:36px;transform:translateX(-50%);font:700 36px/1 var(--display);color:#fff;white-space:nowrap;text-shadow:0 0 5px #0d151c,0 0 5px #0d151c,0 0 12px #0d151c}
 #card .c-bar{position:absolute;left:0;right:0;top:0;z-index:550;height:204px;box-sizing:border-box;background:rgba(13,21,28,.88);border-bottom:10px solid var(--lvl,var(--watch));padding:12px 330px 0 34px;font-family:var(--display);white-space:nowrap;overflow:hidden}
 #c-l0{position:absolute;right:28px;bottom:24px;z-index:600;font:700 26px/32px var(--display);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:rgba(13,21,28,.82);padding:8px 16px;border-radius:8px;white-space:nowrap}
 #c-l0:empty{display:none}
@@ -190,7 +200,7 @@ body.card .leaflet-control-container{display:none}
 <div id="card">
   <div id="card-map"></div>
   <span class="pill" id="c-pill">Watch</span>
-  <div class="c-bar"><div id="c-l1"></div><div id="c-l2"></div><div id="c-l3"></div></div><div id="c-l0"></div>
+  <div class="c-bar"><div id="c-l1"></div><div id="c-l2"></div><div id="c-ld"></div><div id="c-l3"></div><div id="c-l4"></div></div><div id="c-l0"></div>
 </div>
 <dialog id="alerts-dlg">
   <h2>Get storm alerts on this device</h2>
@@ -369,11 +379,22 @@ body.card .leaflet-control-container{display:none}
 
   // Card mode (index.html?card=1): the share preview image. Default layers, local data, Central time.
   var CARD=/[?&]card=(1|x)/.test(location.search), CARDX=/[?&]card=x/.test(location.search), ready={}, K=CARD?2.6:1; // K: line weight multiplier for the card; card=x is the wide 2:1 version X/Twitter previews use
-  var cardKeys={};
+  var cardKeys={}, cardFocus=null, cityMarks=[]; // cardFocus: the landfall point the card zooms to in the landfall phase
   var done=function(k){ ready[k]=1; if(!(ready.s&&ready.m&&ready.e)) return;
     // The card's layout settles after the text is filled in; re-measure the map and refit before the screenshot.
-    // The card always frames the Gulf edge to edge at one fixed zoom (the text bar sits over the inland US).
-    if(CARD&&map){ setTimeout(function(){ map.invalidateSize(); if(CARDX) map.setView([28.4,-89.2],5.5,{animate:false}); else map.setView([27.1,-89.3],6,{animate:false}); window.cardReady=true; },400); return; }
+    // The card frames the Gulf edge to edge at one fixed zoom (the text bar sits over the inland US), except in the
+    // landfall phase, when it closes in on the coast with the landfall point just under the bar and a ring on the spot.
+    if(CARD&&map){ setTimeout(function(){ map.invalidateSize();
+      var f=cardFocus;
+      if(f){ var z=CARDX?6.6:7, bar=document.querySelector("#card .c-bar").offsetHeight, H=map.getSize().y, p=map.project([f.lat,-f.lonW],z);
+        p.y+=H/2-(bar+(H-bar)*0.4); map.setView(map.unproject(p,z),z,{animate:false});
+        L.marker([f.lat,-f.lonW],{interactive:false,zIndexOffset:1000,icon:L.divIcon({className:"c-lf",html:"<i></i>"+(f.label?"<span>"+esc(f.label)+"</span>":""),iconSize:[0,0]})}).addTo(map);
+        // Big city labels give way near the landfall ring; towns along this stretch of coast come in where there is room.
+        var far=function(lat,lon){ return Math.abs(lat-f.lat)>0.75||Math.abs(lon+f.lonW)>1.6; };
+        cityMarks.forEach(function(m){ var ll=m.getLatLng(); if(!far(ll.lat,ll.lng)) map.removeLayer(m); });
+        [["Mobile",30.69,-88.04],["Panama City",30.16,-85.66],["Tallahassee",30.44,-84.28]].forEach(function(c){ if(far(c[1],c[2])&&!cityMarks.some(function(m){ var ll=m.getLatLng(); return Math.abs(ll.lat-c[1])<0.75&&Math.abs(ll.lng-c[2])<1.6; })) cityLabel(c); }); }
+      else if(CARDX) map.setView([28.4,-89.2],5.5,{animate:false}); else map.setView([27.1,-89.3],6,{animate:false});
+      window.cardReady=true; },400); return; }
     window.cardReady=true; };
   if(CARD){ document.body.classList.add("card"); if(CARDX) document.body.classList.add("cardx"); $("card-map").appendChild($("map")); }
   var ct=function(iso){ return new Date(iso).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"})+" CT"; };
@@ -381,6 +402,16 @@ body.card .leaflet-control-container{display:none}
   var ctShort=function(iso){ return new Date(Math.round(new Date(iso).getTime()/36e5)*36e5).toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",hour:"numeric"}); };
   var shareText="";
   var STATE_NAME={AL:"Alabama",FL:"Florida",MS:"Mississippi",LA:"Louisiana"};
+  // "Fri, Oct 9 \u00b7 about 8 PM CT": the card's landfall date line (rounded to the hour, like every estimate).
+  var ctDate=function(iso){ var d=new Date(Math.round(new Date(iso).getTime()/36e5)*36e5); return d.toLocaleString("en-US",{timeZone:"America/Chicago",weekday:"short",month:"short",day:"numeric"})+" \u00b7 about "+d.toLocaleString("en-US",{timeZone:"America/Chicago",hour:"numeric"})+" CT"; };
+  // Where the NHC track crosses the coast: the forecast path interpolated at the landfall time (the current fix if the path has no times).
+  var lfPoint=function(s,eta){ var pts=[], T=Date.parse(eta); if(s.pos&&s.posAt) pts.push({t:Date.parse(s.posAt),lat:s.pos.lat,lonW:s.pos.lonW}); (s.forecast||[]).forEach(function(q){ if(q.t&&q.lat!=null) pts.push({t:Date.parse(q.t),lat:+q.lat,lonW:+q.lonW}); });
+    for(var i=1;i<pts.length;i++){ var a=pts[i-1], b=pts[i]; if(T>=a.t&&T<=b.t&&b.t>a.t){ var f=(T-a.t)/(b.t-a.t); return {lat:a.lat+(b.lat-a.lat)*f,lonW:a.lonW+(b.lonW-a.lonW)*f}; } }
+    return s.pos?{lat:s.pos.lat,lonW:s.pos.lonW}:null; };
+  // One short line of coastal alerts for the card: each state under its strongest tropical product.
+  var RANK=[["Hurricane Warning",/Hurricane Warning/],["Hurricane Watch",/Hurricane Watch/],["Tropical Storm Warning",/Tropical Storm Warning/],["Tropical Storm Watch",/Tropical Storm Watch/]];
+  var briefAlerts=function(ww){ var by={}; STATES.forEach(function(st){ var v=ww[st]||{}; if(!v.level) return; var r=RANK.filter(function(r){return r[1].test(v.text||"")})[0]; var k=r?r[0]:(v.level==="warning"?"Tropical Storm Warning":"Tropical Storm Watch"); (by[k]=by[k]||[]).push(st); });
+    return RANK.map(function(r){ return by[r[0]]?r[0]+": "+by[r[0]].join(", "):""; }).filter(Boolean).join("   \u00b7   "); };
   var mph=function(kt){ return Math.round((+kt||0)*1.15078/5)*5; }; // public wording in mph, as NHC's advisories do
   // NHC numbers depressions in words ("Nine"); show digits. Named storms keep their names.
   var NUMS={One:1,Two:2,Three:3,Four:4,Five:5,Six:6,Seven:7,Eight:8,Nine:9,Ten:10,Eleven:11,Twelve:12,Thirteen:13,Fourteen:14,Fifteen:15,Sixteen:16,Seventeen:17,Eighteen:18,Nineteen:19,Twenty:20,"Twenty-One":21,"Twenty-Two":22,"Twenty-Three":23,"Twenty-Four":24,"Twenty-Five":25};
@@ -400,17 +431,34 @@ body.card .leaflet-control-container{display:none}
       var lf=d.landfallOccurred?("Made landfall in "+(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+" about "+ctShort(d.landfallOccurred.at)):d.landfall?("Landfall expected near "+(d.landfall.near||STATE_NAME[d.landfall.state]+" coast")+", about "+ctShort(d.landfall.eta)+(s0.forecastStale?" (last available forecast)":"")):(s0.forecastStale?"Latest forecast unavailable":"No landfall on the AL\u2013FL coast in the forecast");
       var lfKt=d.landfall&&d.landfall.windKt!=null?+d.landfall.windKt:null, lfCat=lfKt==null?0:lfKt>=137?5:lfKt>=113?4:lfKt>=96?3:lfKt>=83?2:lfKt>=64?1:0;
       var arrival=lfKt==null?"":"Arriving at about "+mph(lfKt)+" mph"+(lfCat?" \u00b7 Category "+lfCat+" hurricane":lfKt>=34?" \u00b7 tropical storm":" \u00b7 depression")+(s0.forecastStale?" (last available forecast)":"");
-      if(d.landfall&&!d.landfallOccurred) lf="Landfall near "+(d.landfall.near||STATE_NAME[d.landfall.state]+" coast")+" \u00b7 about "+ctShort(d.landfall.eta);
-      $("c-l3").textContent=d.landfall&&!d.landfallOccurred?arrival:"";
+      var lo=d.landfallOccurred, lfOn=!!d.landfall&&!lo;
+      var catText=function(kt){ var c=kt>=137?5:kt>=113?4:kt>=96?3:kt>=83?2:kt>=64?1:0; return c?" \u00b7 Category "+c+" hurricane":kt>=34?" \u00b7 tropical storm":" \u00b7 depression"; };
       $("c-l0").textContent=(s0.advisory||"NHC advisory")+(s0.advisoryAt?" \u00b7 "+ctShort(s0.advisoryAt):"")+(s0.category?" \u00b7 Category "+s0.category:"");
       $("c-l1").innerHTML='<b class="nm">'+esc(stormName(s0))+"</b>";
       $("c-pill").innerHTML='<b>'+esc(mph(s0.winds))+'</b><small>mph</small>'; $("c-pill").classList.add("num");
-      $("c-l2").textContent=lf+(alerts?" \u00b7 "+alerts:""); $("c-l2").classList.toggle("lead",!!d.landfall);
-      shareText=s0.name+": "+mph(s0.winds)+" mph. "+(d.landfall?("Forecast track reaches the coast near "+(d.landfall.near||d.landfall.state)+" about "+ctShort(d.landfall.eta)+". "):"")+line;
+      if(lfOn||lo){
+        // Landfall phase: where, when (with the date) and how strong, each on its own line; the alerts in one short line.
+        $("card").classList.add("lf"); $("c-l2").classList.add("lead");
+        var place=lo?(lo.near?"near "+lo.near:"in "+(STATE_NAME[lo.state]||lo.state)):"near "+(d.landfall.near||STATE_NAME[d.landfall.state]+" coast");
+        $("c-l2").innerHTML="<em>"+(lo?"Made landfall":"Landfall")+"</em> "+esc(place);
+        $("c-ld").textContent=ctDate(lo?lo.at:d.landfall.eta);
+        var w=lo?(lo.windKt!=null?+lo.windKt:null):lfKt;
+        $("c-l3").textContent=w==null?"":(lo?"Came ashore at about ":"Arriving at about ")+mph(w)+" mph"+catText(w)+(!lo&&s0.forecastStale?" (last available forecast)":"");
+        $("c-l4").textContent=briefAlerts(ww);
+        cardFocus=lo&&lo.lat!=null?{lat:+lo.lat,lonW:+lo.lonW,label:lo.near||""}:lfOn?Object.assign(lfPoint(s0,d.landfall.eta)||{},{label:d.landfall.near||""}):null; if(cardFocus&&cardFocus.lat==null) cardFocus=null;
+        shareText=s0.name+": "+mph(s0.winds)+" mph. "+(lo?s0.name+" made landfall "+place+" about "+ctDate(lo.at)+". ":"Forecast track reaches the coast "+place+" about "+ctDate(d.landfall.eta)+". ")+line;
+      } else {
+        $("c-ld").textContent=""; $("c-l3").textContent=""; $("c-l4").textContent="";
+        $("c-l2").textContent=lf+(alerts?" \u00b7 "+alerts:""); $("c-l2").classList.remove("lead");
+        shareText=s0.name+": "+mph(s0.winds)+" mph. "+line;
+      }
     } else if(held){
-      $("c-l3").textContent=""; $("c-l0").textContent="Landfall \u00b7 last 48 hours \u00b7 "+asOf(d);
-      $("c-l1").innerHTML='<b class="nm">Made landfall in '+esc(STATE_NAME[d.landfallOccurred.state]||d.landfallOccurred.state)+'</b>';
-      $("c-l2").textContent=alerts||"No longer an active NHC storm";
+      var ho=d.landfallOccurred; $("card").classList.add("lf");
+      $("c-l3").textContent=ho.windKt!=null?"Came ashore at about "+mph(ho.windKt)+" mph":""; $("c-l0").textContent="Landfall \u00b7 last 48 hours \u00b7 "+asOf(d);
+      $("c-l1").innerHTML='<b class="nm">Made landfall '+(ho.near?"near "+esc(ho.near):"in "+esc(STATE_NAME[ho.state]||ho.state))+'</b>';
+      $("c-ld").textContent=ctDate(ho.at); $("c-l4").textContent=briefAlerts(ww);
+      $("c-l2").textContent=alerts?"":"No longer an active NHC storm";
+      cardFocus=ho.lat!=null?{lat:+ho.lat,lonW:+ho.lonW,label:ho.near||""}:null;
       shareText=d.headline||"";
     } else if(g.area){
       $("c-l3").textContent=""; $("c-l0").textContent=(g.invest||"Gulf disturbance")+" \u00b7 formation chance \u00b7 "+asOf(d);
@@ -423,7 +471,7 @@ body.card .leaflet-control-container{display:none}
       shareText="Gulf storm update: nothing brewing in the Gulf right now.";
     }
     // Shrink long lines (long storm names, several alerts) until they fit the card width.
-    ["c-l1","c-l2","c-l3"].forEach(function(id){ var el=$(id), size=parseFloat(getComputedStyle(el.querySelector(".nm")||el).fontSize);
+    ["c-l1","c-l2","c-ld","c-l3","c-l4"].forEach(function(id){ var el=$(id), size=parseFloat(getComputedStyle(el.querySelector(".nm")||el).fontSize);
       var t=el.querySelector(".nm")||el; while(CARD&&el.scrollWidth>el.clientWidth&&size>24){ size-=2; t.style.fontSize=size+"px"; } });
     done("s");
   }
@@ -655,8 +703,7 @@ body.card .leaflet-control-container{display:none}
     if(!CARD) L.tileLayer(esri+"Reference/MapServer/tile/{z}/{y}/{x}",{maxZoom:10}).addTo(map);
     // The card is viewed at thumbnail size, so it gets a few large city labels instead of the fine map text.
     // On the wide X card (zoom 5.5) Houston's label would run into New Orleans, and Cancun sits under the advisory label.
-    else [["Houston",29.76,-95.37,1],["New Orleans",29.95,-90.07,1],["Pensacola",30.42,-87.22],["Tampa",27.95,-82.46],["Canc\u00fan",21.16,-86.85]].filter(function(c){ return !CARDX||(c[0]!=="Houston"&&c[0]!=="Canc\u00fan"); }).forEach(function(c){
-      L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city"+(c[3]?" left":""),html:c[3]?'<span class="l">'+c[0]+"<i></i></span>":"<i></i>"+c[0],iconSize:[0,0],iconAnchor:c[3]?[-14,20]:[14,20]})}).addTo(map); });
+    else [["Houston",29.76,-95.37,1],["New Orleans",29.95,-90.07,1],["Pensacola",30.42,-87.22],["Tampa",27.95,-82.46],["Canc\u00fan",21.16,-86.85]].filter(function(c){ return !CARDX||(c[0]!=="Houston"&&c[0]!=="Canc\u00fan"); }).forEach(cityLabel);
     // European ensemble lines sit in their own pane under everything else, each with an on/off switch.
     map.createPane("ec").style.zIndex=350;
     // Watch and warning areas: faint fills just above the Euro spread, under every line and label.
@@ -683,6 +730,7 @@ body.card .leaflet-control-container{display:none}
       try{ localStorage.setItem("gsw-layers-off-3",JSON.stringify(mine)); }catch(x){} };
     map.on("overlayadd",remember); map.on("overlayremove",remember);
   }
+  function cityLabel(c){ var m=L.marker([c[1],c[2]],{interactive:false,icon:L.divIcon({className:"c-city"+(c[3]?" left":""),html:c[3]?'<span class="l">'+c[0]+"<i></i></span>":"<i></i>"+c[0],iconSize:[0,0],iconAnchor:c[3]?[-14,20]:[14,20]})}).addTo(map); cityMarks.push(m); return m; }
   function renderMap(m){
     initMap(); if(!map) return;
     group.clearLayers(); Object.keys(modelGroups).forEach(function(k){modelGroups[k].clearLayers()}); if(danielGroup) danielGroup.clearLayers();
