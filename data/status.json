@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-10T06:05:13.252Z",
-  "lastAttemptAt": "2026-10-10T06:05:13.252Z",
-  "nextCheck": "2026-10-10T06:35:00.000Z",
+  "updatedAt": "2026-10-10T07:05:13.098Z",
+  "lastAttemptAt": "2026-10-10T07:05:13.098Z",
+  "nextCheck": "2026-10-10T07:35:00.000Z",
   "alertLevel": "landfall",
-  "headline": "Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 65 mph, 31.5N 86.5W, inland, moving N at 23 mph. The center is over land. Hurricane warning: AL, FL. Tropical storm warning: MS. Storm surge warning: FL.",
+  "headline": "Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 65 mph, 31.5N 86.5W, inland, moving N at 23 mph. The center is over land. Tropical storm warning: AL, FL, MS. Storm surge warning: FL.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -60,7 +60,6 @@
   ],
   "watchesWarnings": {
     "note": "",
-    "LA": {},
     "MS": {
       "level": "warning",
       "text": "Tropical Storm Warning",
@@ -134,14 +133,94 @@
         }
       ]
     },
+    "LA": {},
+    "FL": {
+      "level": "warning",
+      "text": "Storm Surge Warning, Tropical Storm Warning",
+      "counties": {
+        "12005": [
+          "TWR"
+        ],
+        "12013": [
+          "TWR"
+        ],
+        "12033": [
+          "TWR"
+        ],
+        "12037": [
+          "TWR"
+        ],
+        "12039": [
+          "TWR"
+        ],
+        "12045": [
+          "TWR"
+        ],
+        "12059": [
+          "TWR"
+        ],
+        "12063": [
+          "TWR"
+        ],
+        "12065": [
+          "TWR"
+        ],
+        "12073": [
+          "TWR"
+        ],
+        "12077": [
+          "TWR"
+        ],
+        "12091": [
+          "TWR"
+        ],
+        "12113": [
+          "TWR"
+        ],
+        "12129": [
+          "TWR"
+        ],
+        "12131": [
+          "TWR"
+        ],
+        "12133": [
+          "TWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "tae",
+          "name": "Tallahassee"
+        },
+        {
+          "code": "mob",
+          "name": "Mobile"
+        }
+      ]
+    },
     "AL": {
       "level": "warning",
-      "text": "Hurricane Warning, Tropical Storm Warning",
+      "text": "Tropical Storm Warning",
       "counties": {
+        "01067": [
+          "TWR"
+        ],
+        "01069": [
+          "TWR"
+        ],
+        "01031": [
+          "TWR"
+        ],
+        "01061": [
+          "TWR"
+        ],
+        "01045": [
+          "TWR"
+        ],
         "01041": [
           "TWR"
         ],
-        "01053": [
+        "01131": [
           "TWR"
         ],
         "01099": [
@@ -156,34 +235,13 @@
         "01013": [
           "TWR"
         ],
-        "01131": [
-          "TWR"
-        ],
-        "01061": [
-          "HWR"
-        ],
-        "01045": [
-          "TWR"
-        ],
-        "01069": [
-          "TWR"
-        ],
-        "01031": [
-          "HWR"
-        ],
-        "01067": [
-          "TWR"
-        ],
-        "01047": [
-          "TWR"
-        ],
-        "01087": [
-          "TWR"
-        ],
-        "01105": [
+        "01053": [
           "TWR"
         ],
         "01037": [
+          "TWR"
+        ],
+        "01105": [
           "TWR"
         ],
         "01101": [
@@ -192,10 +250,10 @@
         "01021": [
           "TWR"
         ],
-        "01001": [
+        "01113": [
           "TWR"
         ],
-        "01113": [
+        "01001": [
           "TWR"
         ],
         "01063": [
@@ -225,22 +283,19 @@
         "01111": [
           "TWR"
         ],
-        "01107": [
-          "TWR"
-        ],
         "01085": [
           "TWR"
         ],
-        "01125": [
-          "TWR"
-        ],
-        "01017": [
+        "01087": [
           "TWR"
         ],
         "01075": [
           "TWR"
         ],
         "01127": [
+          "TWR"
+        ],
+        "01107": [
           "TWR"
         ],
         "01005": [
@@ -275,6 +330,15 @@
         ],
         "01119": [
           "TWR"
+        ],
+        "01125": [
+          "TWR"
+        ],
+        "01017": [
+          "TWR"
+        ],
+        "01047": [
+          "TWR"
         ]
       },
       "offices": [
@@ -289,70 +353,6 @@
         {
           "code": "tae",
           "name": "Tallahassee"
-        }
-      ]
-    },
-    "FL": {
-      "level": "warning",
-      "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning",
-      "counties": {
-        "12005": [
-          "HWR"
-        ],
-        "12013": [
-          "TWR"
-        ],
-        "12033": [
-          "TWR"
-        ],
-        "12037": [
-          "TWR"
-        ],
-        "12039": [
-          "TWR"
-        ],
-        "12045": [
-          "TWR"
-        ],
-        "12059": [
-          "HWR"
-        ],
-        "12063": [
-          "TWR"
-        ],
-        "12065": [
-          "TWR"
-        ],
-        "12073": [
-          "TWR"
-        ],
-        "12077": [
-          "TWR"
-        ],
-        "12091": [
-          "TWR"
-        ],
-        "12113": [
-          "TWR"
-        ],
-        "12129": [
-          "TWR"
-        ],
-        "12131": [
-          "HWR"
-        ],
-        "12133": [
-          "HWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "tae",
-          "name": "Tallahassee"
-        },
-        {
-          "code": "mob",
-          "name": "Mobile"
         }
       ]
     }
