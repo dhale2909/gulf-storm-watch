@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-10T05:30:49.366Z",
-  "lastAttemptAt": "2026-10-10T05:30:49.366Z",
-  "nextCheck": "2026-10-10T05:35:00.000Z",
+  "updatedAt": "2026-10-10T06:05:13.252Z",
+  "lastAttemptAt": "2026-10-10T06:05:13.252Z",
+  "nextCheck": "2026-10-10T06:35:00.000Z",
   "alertLevel": "landfall",
-  "headline": "Hurricane Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Hurricane Isaias: 90 mph (Category 1), 30.8N 86.5W, inland, moving N at 23 mph. The center is over land. Hurricane warning: AL, FL. Tropical storm warning: MS. Storm surge warning: AL, FL.",
+  "headline": "Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 65 mph, 31.5N 86.5W, inland, moving N at 23 mph. The center is over land. Hurricane warning: AL, FL. Tropical storm warning: MS. Storm surge warning: FL.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -15,19 +15,19 @@
     {
       "id": "al092026",
       "bin": "AT4",
-      "name": "Hurricane Isaias",
-      "type": "Hurricane",
-      "winds": 80,
-      "category": 1,
-      "location": "30.8N 86.5W, inland",
+      "name": "Post-Tropical Cyclone Isaias",
+      "type": "Post-Tropical Cyclone",
+      "winds": 55,
+      "category": 0,
+      "location": "31.5N 86.5W, inland",
       "movement": "N at 23 mph",
       "advisory": "NHC advisory 14",
       "advisoryAt": "2026-10-10T03:00:00.000Z",
       "pos": {
-        "lat": 30.8,
+        "lat": 31.5,
         "lonW": 86.5
       },
-      "posAt": "2026-10-10T03:00:00.000Z",
+      "posAt": "2026-10-10T06:00:00.000Z",
       "forecast": [
         {
           "t": "2026-10-10T12:00:00.000Z",
@@ -61,179 +61,6 @@
   "watchesWarnings": {
     "note": "",
     "LA": {},
-    "AL": {
-      "level": "warning",
-      "text": "Hurricane Warning, Storm Surge Warning, Tropical Storm Warning",
-      "counties": {
-        "01013": [
-          "HWR"
-        ],
-        "01039": [
-          "HWR"
-        ],
-        "01099": [
-          "HWR"
-        ],
-        "01053": [
-          "HWR"
-        ],
-        "01041": [
-          "HWR"
-        ],
-        "01003": [
-          "HWR"
-        ],
-        "01035": [
-          "HWR"
-        ],
-        "01097": [
-          "HWR"
-        ],
-        "01129": [
-          "TWR"
-        ],
-        "01023": [
-          "TWR"
-        ],
-        "01131": [
-          "TWR"
-        ],
-        "01025": [
-          "TWR"
-        ],
-        "01069": [
-          "TWR"
-        ],
-        "01045": [
-          "TWR"
-        ],
-        "01067": [
-          "TWR"
-        ],
-        "01061": [
-          "HWR"
-        ],
-        "01031": [
-          "HWR"
-        ],
-        "01117": [
-          "TWR"
-        ],
-        "01001": [
-          "TWR"
-        ],
-        "01113": [
-          "TWR"
-        ],
-        "01063": [
-          "TWR"
-        ],
-        "01091": [
-          "TWR"
-        ],
-        "01081": [
-          "TWR"
-        ],
-        "01123": [
-          "TWR"
-        ],
-        "01093": [
-          "TWR"
-        ],
-        "01109": [
-          "TWR"
-        ],
-        "01073": [
-          "TWR"
-        ],
-        "01005": [
-          "TWR"
-        ],
-        "01111": [
-          "TWR"
-        ],
-        "01085": [
-          "TWR"
-        ],
-        "01127": [
-          "TWR"
-        ],
-        "01075": [
-          "TWR"
-        ],
-        "01101": [
-          "TWR"
-        ],
-        "01021": [
-          "TWR"
-        ],
-        "01107": [
-          "TWR"
-        ],
-        "01115": [
-          "TWR"
-        ],
-        "01065": [
-          "TWR"
-        ],
-        "01051": [
-          "TWR"
-        ],
-        "01007": [
-          "TWR"
-        ],
-        "01121": [
-          "TWR"
-        ],
-        "01133": [
-          "TWR"
-        ],
-        "01057": [
-          "TWR"
-        ],
-        "01011": [
-          "TWR"
-        ],
-        "01027": [
-          "TWR"
-        ],
-        "01119": [
-          "TWR"
-        ],
-        "01125": [
-          "TWR"
-        ],
-        "01017": [
-          "TWR"
-        ],
-        "01047": [
-          "TWR"
-        ],
-        "01087": [
-          "TWR"
-        ],
-        "01105": [
-          "TWR"
-        ],
-        "01037": [
-          "TWR"
-        ]
-      },
-      "offices": [
-        {
-          "code": "bmx",
-          "name": "Birmingham"
-        },
-        {
-          "code": "mob",
-          "name": "Mobile"
-        },
-        {
-          "code": "tae",
-          "name": "Tallahassee"
-        }
-      ]
-    },
     "MS": {
       "level": "warning",
       "text": "Tropical Storm Warning",
@@ -251,12 +78,6 @@
           "TWR"
         ],
         "28035": [
-          "TWR"
-        ],
-        "28039": [
-          "TWR"
-        ],
-        "28041": [
           "TWR"
         ],
         "28057": [
@@ -295,15 +116,6 @@
         "28105": [
           "TWR"
         ],
-        "28111": [
-          "TWR"
-        ],
-        "28131": [
-          "TWR"
-        ],
-        "28153": [
-          "TWR"
-        ],
         "28155": [
           "TWR"
         ],
@@ -317,12 +129,166 @@
           "name": "Jackson"
         },
         {
+          "code": "meg",
+          "name": "Memphis"
+        }
+      ]
+    },
+    "AL": {
+      "level": "warning",
+      "text": "Hurricane Warning, Tropical Storm Warning",
+      "counties": {
+        "01041": [
+          "TWR"
+        ],
+        "01053": [
+          "TWR"
+        ],
+        "01099": [
+          "TWR"
+        ],
+        "01039": [
+          "TWR"
+        ],
+        "01035": [
+          "TWR"
+        ],
+        "01013": [
+          "TWR"
+        ],
+        "01131": [
+          "TWR"
+        ],
+        "01061": [
+          "HWR"
+        ],
+        "01045": [
+          "TWR"
+        ],
+        "01069": [
+          "TWR"
+        ],
+        "01031": [
+          "HWR"
+        ],
+        "01067": [
+          "TWR"
+        ],
+        "01047": [
+          "TWR"
+        ],
+        "01087": [
+          "TWR"
+        ],
+        "01105": [
+          "TWR"
+        ],
+        "01037": [
+          "TWR"
+        ],
+        "01101": [
+          "TWR"
+        ],
+        "01021": [
+          "TWR"
+        ],
+        "01001": [
+          "TWR"
+        ],
+        "01113": [
+          "TWR"
+        ],
+        "01063": [
+          "TWR"
+        ],
+        "01091": [
+          "TWR"
+        ],
+        "01081": [
+          "TWR"
+        ],
+        "01123": [
+          "TWR"
+        ],
+        "01093": [
+          "TWR"
+        ],
+        "01109": [
+          "TWR"
+        ],
+        "01073": [
+          "TWR"
+        ],
+        "01117": [
+          "TWR"
+        ],
+        "01111": [
+          "TWR"
+        ],
+        "01107": [
+          "TWR"
+        ],
+        "01085": [
+          "TWR"
+        ],
+        "01125": [
+          "TWR"
+        ],
+        "01017": [
+          "TWR"
+        ],
+        "01075": [
+          "TWR"
+        ],
+        "01127": [
+          "TWR"
+        ],
+        "01005": [
+          "TWR"
+        ],
+        "01115": [
+          "TWR"
+        ],
+        "01065": [
+          "TWR"
+        ],
+        "01051": [
+          "TWR"
+        ],
+        "01007": [
+          "TWR"
+        ],
+        "01133": [
+          "TWR"
+        ],
+        "01121": [
+          "TWR"
+        ],
+        "01057": [
+          "TWR"
+        ],
+        "01011": [
+          "TWR"
+        ],
+        "01027": [
+          "TWR"
+        ],
+        "01119": [
+          "TWR"
+        ]
+      },
+      "offices": [
+        {
+          "code": "bmx",
+          "name": "Birmingham"
+        },
+        {
           "code": "mob",
           "name": "Mobile"
         },
         {
-          "code": "meg",
-          "name": "Memphis"
+          "code": "tae",
+          "name": "Tallahassee"
         }
       ]
     },
@@ -337,7 +303,7 @@
           "TWR"
         ],
         "12033": [
-          "HWR"
+          "TWR"
         ],
         "12037": [
           "TWR"
@@ -364,10 +330,10 @@
           "TWR"
         ],
         "12091": [
-          "HWR"
+          "TWR"
         ],
         "12113": [
-          "HWR"
+          "TWR"
         ],
         "12129": [
           "TWR"
@@ -422,9 +388,9 @@
   "tracked": {
     "invest": "Invest 92L",
     "stormId": "al092026",
-    "name": "Hurricane Isaias",
+    "name": "Post-Tropical Cyclone Isaias",
     "lastPos": {
-      "lat": 30.8,
+      "lat": 31.5,
       "lonW": 86.5
     },
     "since": "2026-10-07T09:00:00.000Z"
@@ -449,12 +415,12 @@
       "FL": 14
     },
     "eta": "2026-10-10T06:00:00.000Z",
-    "hurricane": 14,
-    "major": 3,
-    "peakMedianKt": 82,
-    "text": "14 of 50 ensemble members forecast a track so far. 14 of 14 bring the center to the Louisiana-to-Florida coast (FL 14), typically around Sat, Oct 10, 1 AM CT. 14 of 14 reach hurricane strength (3 major); typical peak 95 mph.",
+    "hurricane": 0,
+    "major": 0,
+    "peakMedianKt": 43,
+    "text": "14 of 50 ensemble members forecast a track so far. 14 of 14 bring the center to the Louisiana-to-Florida coast (FL 14), typically around Sat, Oct 10, 1 AM CT. 0 of 14 reach hurricane strength; typical peak 50 mph.",
     "system": "Invest 92L",
-    "computedAt": "2026-10-10T05:30:49.366Z"
+    "computedAt": "2026-10-10T06:05:13.252Z"
   },
   "discussion": {
     "storm": "al092026",
