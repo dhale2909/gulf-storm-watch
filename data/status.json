@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-10T19:35:04.725Z",
-  "lastAttemptAt": "2026-10-10T19:35:04.725Z",
-  "nextCheck": "2026-10-10T20:05:00.000Z",
+  "updatedAt": "2026-10-10T20:05:13.628Z",
+  "lastAttemptAt": "2026-10-10T20:05:13.628Z",
+  "nextCheck": "2026-10-10T20:35:00.000Z",
   "alertLevel": "landfall",
   "headline": "Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 35 mph, 32.8N 86.8W, inland, moving NNW at 12 mph. The center is over land.",
   "gulf": {
@@ -54,10 +54,10 @@
   ],
   "watchesWarnings": {
     "note": "",
-    "MS": {},
     "FL": {},
     "LA": {},
-    "AL": {}
+    "AL": {},
+    "MS": {}
   },
   "landfall": null,
   "landfallOccurred": {
