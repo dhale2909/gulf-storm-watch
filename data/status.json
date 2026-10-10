@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-10T14:05:11.854Z",
-  "lastAttemptAt": "2026-10-10T14:05:11.854Z",
-  "nextCheck": "2026-10-10T14:35:00.000Z",
+  "updatedAt": "2026-10-10T15:05:13.393Z",
+  "lastAttemptAt": "2026-10-10T15:05:13.393Z",
+  "nextCheck": "2026-10-10T15:35:00.000Z",
   "alertLevel": "landfall",
-  "headline": "Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 35 mph, 32.0N 86.5W, inland, moving N at 16 mph. The center is over land.",
+  "headline": "Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 35 mph, 32.8N 86.8W, inland, moving NNW at 12 mph. The center is over land.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -19,32 +19,32 @@
       "type": "Post-Tropical Cyclone",
       "winds": 30,
       "category": 0,
-      "location": "32.0N 86.5W, inland",
-      "movement": "N at 16 mph",
-      "advisory": "NHC advisory 15",
-      "advisoryAt": "2026-10-10T09:00:00.000Z",
+      "location": "32.8N 86.8W, inland",
+      "movement": "NNW at 12 mph",
+      "advisory": "NHC advisory 16",
+      "advisoryAt": "2026-10-10T15:00:00.000Z",
       "pos": {
-        "lat": 32,
-        "lonW": 86.5
+        "lat": 32.8,
+        "lonW": 86.8
       },
-      "posAt": "2026-10-10T09:00:00.000Z",
+      "posAt": "2026-10-10T15:00:00.000Z",
       "forecast": [
         {
-          "t": "2026-10-10T18:00:00.000Z",
-          "lat": 33.7,
-          "lonW": 86.7,
+          "t": "2026-10-11T00:00:00.000Z",
+          "lat": 34,
+          "lonW": 87.4,
+          "wind": 30
+        },
+        {
+          "t": "2026-10-11T12:00:00.000Z",
+          "lat": 36.7,
+          "lonW": 85.5,
           "wind": 25
         },
         {
-          "t": "2026-10-11T06:00:00.000Z",
-          "lat": 35.2,
-          "lonW": 86,
-          "wind": 25
-        },
-        {
-          "t": "2026-10-11T18:00:00.000Z",
-          "lat": 37.6,
-          "lonW": 82.7,
+          "t": "2026-10-12T00:00:00.000Z",
+          "lat": 38.3,
+          "lonW": 81,
           "wind": 20
         }
       ],
@@ -55,9 +55,9 @@
   "watchesWarnings": {
     "note": "",
     "LA": {},
+    "MS": {},
     "AL": {},
-    "FL": {},
-    "MS": {}
+    "FL": {}
   },
   "landfall": null,
   "landfallOccurred": {
@@ -92,8 +92,8 @@
     "stormId": "al092026",
     "name": "Post-Tropical Cyclone Isaias",
     "lastPos": {
-      "lat": 32,
-      "lonW": 86.5
+      "lat": 32.8,
+      "lonW": 86.8
     },
     "since": "2026-10-07T09:00:00.000Z"
   },
@@ -127,19 +127,16 @@
   "discussion": {
     "storm": "al092026",
     "url": "https://www.nhc.noaa.gov/text/MIATCDAT4.shtml",
-    "issuedAt": "2026-10-10T09:00:00.000Z",
-    "number": 15,
-    "issued": "400 AM CDT Sat Oct 10 2026",
-    "paragraphs": [
-      "Isaias has very rapidly weakened over Alabama and has transitioned into a post-tropical cyclone. Satellite images show that all deep convection has been scoured well northward away from the low-level center, with a warm front extending eastward from the former tropical cyclone. Thus this is the last advisory on Isaias, with an initial intensity of 30 kt set from surface observations.",
-      "The cyclone should move northward and north-northeastward this weekend and gradually weaken as it moves across the Tennessee and Ohio Valleys. No significant changes were made to the track or intensity forecasts, except lower wind speed on day 1. Note there is still a risk of some high wind gusts over the southern Appalachians as the cyclone moves just to the west of those mountains, along with the potential for heavy rain causing flash floods.",
-      "This is the last tropical cyclone discussion issued by the National Hurricane Center on this system. Future information on this system can be found in discussions issued by the Weather Prediction Center beginning at 1000 AM CDT, under AWIPS header TCDAT4, WMO header WTNT44 KWNH, and on the web at www.hurricanes.gov.",
-      "Rainfall forecasts for the United States are at: https://www.wpc.ncep.noaa.gov/qpf/qpf2.shtml and outlooks of flash flood risks can be found at https://www.wpc.ncep.noaa.gov/qpf/excessive_rainfall_outlook_ero.php"
-    ],
+    "issuedAt": "2026-10-10T15:00:00.000Z",
+    "number": 16,
+    "issued": "1000 AM CDT Sat Oct 10 2026",
+    "paragraphs": [],
     "keyMessages": [
-      "Heavy rainfall associated with the post-tropical remnants of Isaias will be spreading quickly northward into the Tennessee Valley, Southern Appalachians and Southeast today. Considerable flash and urban flooding will be possible. Landslides are also possible across the Southern Appalachians. Additional heavy rains are possible across portions of Northwest Florida and heavy rains are also possible across coastal Southwest Florida, resulting in flash and urban flooding.",
-      "Post-storm safety: Follow advice of local officials and avoid areas of downed power lines and flooding. Ensure generators are properly ventilated and placed outside at least 20 feet away from dwellings and garages to avoid carbon monoxide poisoning. During clean up, be careful when using chainsaws and power tools. Drink plenty of water to avoid heat exhaustion."
+      "Heavy rainfall associated with post-tropical cyclone Isaias will continue across the Southern Appalachians and Southeast today. Considerable flash and urban flooding will be possible. Landslides are also possible across the Southern Appalachians.",
+      "Strong wind gusts continue to pose a threat across the southeastern United States today, including Georgia, the southern Appalachians, and extending west through much of central and northern Alabama, Mississippi, and Tennessee. Scattered power outages and downed trees and powerlines may occur, with the risk highest in elevated terrain.",
+      "Swells from Isaias will continue to affect much of the Gulf coasts of the United States, Mexico, and western Cuba this weekend. These swells are likely to cause life-threatening surf and rip current conditions. Please consult products from your local weather office.",
+      "A couple of tornadoes are possible today across eastern Georgia and the Carolinas."
     ],
-    "forecaster": "Blake"
+    "forecaster": "Chenard"
   }
 }
