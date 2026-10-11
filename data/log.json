@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-10-11T14:35:04.804Z",
+    "changed": false,
+    "alertLevel": "landfall",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 25 mph, 35.4N 85.9W, inland, moving NE at 26 mph. The center is over land."
+  },
+  {
     "ts": "2026-10-11T14:05:11.709Z",
     "changed": false,
     "alertLevel": "landfall",
@@ -1564,15 +1574,5 @@
     },
     "updated": false,
     "summary": "AL: alerts now Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Warning, Tropical Storm Watch (was Hurricane Warning, Hurricane Watch, Storm Surge Warning, Tropical Storm Watch)."
-  },
-  {
-    "ts": "2026-10-08T11:35:05.372Z",
-    "changed": false,
-    "alertLevel": "threat",
-    "formation7d": null,
-    "pushed": false,
-    "delivery": null,
-    "updated": false,
-    "summary": "No change. Hurricane Isaias: 80 mph (Category 1), 23.3N 91.2W, Gulf, moving ENE at 10 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA."
   }
 ]
