@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-11T08:05:14.387Z",
-  "lastAttemptAt": "2026-10-11T08:05:14.387Z",
-  "nextCheck": "2026-10-11T08:35:00.000Z",
+  "updatedAt": "2026-10-11T08:35:04.823Z",
+  "lastAttemptAt": "2026-10-11T08:35:04.823Z",
+  "nextCheck": "2026-10-11T09:05:00.000Z",
   "alertLevel": "landfall",
-  "headline": "Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 25 mph, 35.0N 86.7W, inland, moving NE at 18 mph. The center is over land.",
+  "headline": "Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 25 mph, 35.4N 85.9W, inland, moving NE at 26 mph. The center is over land.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -19,26 +19,26 @@
       "type": "Post-Tropical Cyclone",
       "winds": 20,
       "category": 0,
-      "location": "35.0N 86.7W, inland",
-      "movement": "NE at 18 mph",
-      "advisory": "NHC advisory 18",
-      "advisoryAt": "2026-10-11T03:00:00.000Z",
+      "location": "35.4N 85.9W, inland",
+      "movement": "NE at 26 mph",
+      "advisory": "NHC advisory 19",
+      "advisoryAt": "2026-10-11T09:00:00.000Z",
       "pos": {
-        "lat": 35,
-        "lonW": 86.7
+        "lat": 35.4,
+        "lonW": 85.9
       },
-      "posAt": "2026-10-11T03:00:00.000Z",
+      "posAt": "2026-10-11T09:00:00.000Z",
       "forecast": [
         {
-          "t": "2026-10-11T12:00:00.000Z",
-          "lat": 36.8,
-          "lonW": 84.6,
+          "t": "2026-10-11T18:00:00.000Z",
+          "lat": 37.1,
+          "lonW": 82.8,
           "wind": 20
         },
         {
-          "t": "2026-10-12T00:00:00.000Z",
-          "lat": 38.5,
-          "lonW": 80.5,
+          "t": "2026-10-12T06:00:00.000Z",
+          "lat": 38.4,
+          "lonW": 77.7,
           "wind": 20
         }
       ],
@@ -48,10 +48,10 @@
   ],
   "watchesWarnings": {
     "note": "",
-    "MS": {},
-    "LA": {},
     "AL": {},
-    "FL": {}
+    "LA": {},
+    "FL": {},
+    "MS": {}
   },
   "landfall": null,
   "landfallOccurred": {
@@ -86,8 +86,8 @@
     "stormId": "al092026",
     "name": "Post-Tropical Cyclone Isaias",
     "lastPos": {
-      "lat": 35,
-      "lonW": 86.7
+      "lat": 35.4,
+      "lonW": 85.9
     },
     "since": "2026-10-07T09:00:00.000Z"
   },
@@ -113,6 +113,7 @@
       "Swells from Isaias will continue to affect much of the Gulf coasts of the United States, Mexico, and western Cuba this weekend. These swells are likely to cause life-threatening surf and rip current conditions. Please consult products from your local weather office.",
       "A couple of tornadoes are possible tonight across eastern Georgia and the Carolinas."
     ],
-    "forecaster": "Roth"
+    "forecaster": "Roth",
+    "stale": true
   }
 }
