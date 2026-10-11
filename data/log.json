@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-10-11T23:35:03.477Z",
+    "changed": false,
+    "alertLevel": "landfall",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. Made landfall near Destin, FL around Fri, Oct 9, 8 PM CT; the system is no longer an active NHC storm."
+  },
+  {
     "ts": "2026-10-11T23:05:16.855Z",
     "changed": false,
     "alertLevel": "landfall",
@@ -1552,19 +1562,5 @@
     },
     "updated": false,
     "summary": "FL: alerts now Hurricane Warning, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch (was Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch)."
-  },
-  {
-    "ts": "2026-10-08T21:05:16.774Z",
-    "changed": true,
-    "alertLevel": "threat",
-    "formation7d": null,
-    "pushed": true,
-    "delivery": {
-      "private": true,
-      "browser": true,
-      "browserFailed": []
-    },
-    "updated": false,
-    "summary": "Hurricane Isaias is now Category 2 (100 mph)."
   }
 ]
