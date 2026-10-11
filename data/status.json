@@ -1,7 +1,7 @@
 {
   "updatedAt": "2026-10-11T14:35:04.804Z",
-  "lastAttemptAt": "2026-10-11T14:35:04.804Z",
-  "nextCheck": "2026-10-11T15:05:00.000Z",
+  "lastAttemptAt": "2026-10-11T15:05:12.910Z",
+  "nextCheck": "2026-10-11T15:35:00.000Z",
   "alertLevel": "landfall",
   "headline": "Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 25 mph, 35.4N 85.9W, inland, moving NE at 26 mph. The center is over land.",
   "gulf": {
@@ -42,7 +42,7 @@
           "wind": 20
         }
       ],
-      "forecastStale": false,
+      "forecastStale": true,
       "gulfRisk": "The center is over land"
     }
   ],
@@ -78,7 +78,7 @@
     "landfallWindKt": 90,
     "othersAlerted": [],
     "downCount": 0,
-    "vanishedChecks": 0,
+    "vanishedChecks": 1,
     "pending": null
   },
   "tracked": {
@@ -95,7 +95,7 @@
   "sources": {
     "outlook": "ok",
     "storms": "ok",
-    "forecast": "ok",
+    "forecast": "unavailable",
     "alerts": "ok",
     "map": "ok"
   },
@@ -103,16 +103,15 @@
   "discussion": {
     "storm": "al092026",
     "url": "https://www.nhc.noaa.gov/text/MIATCDAT4.shtml",
-    "issuedAt": "2026-10-11T09:00:00.000Z",
-    "number": 19,
-    "issued": "400 AM CDT Sun Oct 11 2026",
+    "issuedAt": "2026-10-11T15:00:00.000Z",
+    "number": 20,
+    "issued": "1100 AM EDT Sun Oct 11 2026",
     "paragraphs": [],
     "keyMessages": [
-      "Heavy rainfall associated with Post-Tropical Cyclone Isaias will spread into the Central Appalachians and Mid-Atlantic on Sunday. Isolated flash and urban flooding will be possible.",
-      "Strong wind gusts continue to pose a threat across the southeastern United States today, particularly near the southern Appalachians. Scattered power outages and downed trees and power-lines may occur, with the risk highest in elevated terrain.",
-      "Swells from Isaias will continue to affect much of the Gulf and Southeastern Atlantic coasts of the United States, Mexico, and western Cuba this weekend. These swells are likely to cause life-threatening surf and rip current conditions. Please consult products from your local weather office.",
+      "Areas of heavy rainfall will continue across portions of the Central Appalachians and Mid-Atlantic today, with localized flash and urban flooding possible. River flooding continues in western North Carolina.",
+      "Swells from Isaias will continue to affect much of the Gulf and Southeastern Atlantic coasts of the United States today. These swells are likely to cause life-threatening surf and rip current conditions. Please consult products from your local weather office.",
       "A couple of tornadoes are possible today across the Piedmont and Coastal Plain of Virginia and North Carolina."
     ],
-    "forecaster": "Gallina"
+    "forecaster": "Chenard"
   }
 }
