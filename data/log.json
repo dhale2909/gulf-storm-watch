@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-10-11T18:05:14.190Z",
+    "changed": false,
+    "alertLevel": "landfall",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. Made landfall near Destin, FL around Fri, Oct 9, 8 PM CT; the system is no longer an active NHC storm."
+  },
+  {
     "ts": "2026-10-11T17:35:06.181Z",
     "changed": false,
     "alertLevel": "landfall",
@@ -1560,19 +1570,5 @@
     },
     "updated": false,
     "summary": "FL: alerts now Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch (was Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning)."
-  },
-  {
-    "ts": "2026-10-08T15:05:31.676Z",
-    "changed": true,
-    "alertLevel": "threat",
-    "formation7d": null,
-    "pushed": true,
-    "delivery": {
-      "private": true,
-      "browser": true,
-      "browserFailed": []
-    },
-    "updated": false,
-    "summary": "Forecast landfall shifted AL -> FL, near Orange Beach, AL (Fri, Oct 9, 10 PM CT)."
   }
 ]
