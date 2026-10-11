@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-10-11T18:35:06.895Z",
+    "changed": false,
+    "alertLevel": "landfall",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. Made landfall near Destin, FL around Fri, Oct 9, 8 PM CT; the system is no longer an active NHC storm."
+  },
+  {
     "ts": "2026-10-11T18:05:14.190Z",
     "changed": false,
     "alertLevel": "landfall",
@@ -1556,19 +1566,5 @@
     "delivery": null,
     "updated": false,
     "summary": "No change. Hurricane Isaias: 85 mph (Category 1), 23.7N 90.2W, Gulf, moving ENE at 12 mph. Forecast track reaches the coast near Orange Beach, AL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA."
-  },
-  {
-    "ts": "2026-10-08T15:35:05.351Z",
-    "changed": true,
-    "alertLevel": "threat",
-    "formation7d": null,
-    "pushed": true,
-    "delivery": {
-      "private": true,
-      "browser": true,
-      "browserFailed": []
-    },
-    "updated": false,
-    "summary": "FL: alerts now Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning, Tropical Storm Watch (was Hurricane Warning, Hurricane Watch, Storm Surge Warning, Storm Surge Watch, Tropical Storm Warning)."
   }
 ]

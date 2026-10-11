@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-10-11T18:05:14.190Z",
-  "lastAttemptAt": "2026-10-11T18:05:14.190Z",
-  "nextCheck": "2026-10-11T18:35:00.000Z",
+  "updatedAt": "2026-10-11T18:35:06.895Z",
+  "lastAttemptAt": "2026-10-11T18:35:06.895Z",
+  "nextCheck": "2026-10-11T19:05:00.000Z",
   "alertLevel": "landfall",
   "headline": "Made landfall near Destin, FL around Fri, Oct 9, 8 PM CT; the system is no longer an active NHC storm.",
   "gulf": {
@@ -14,10 +14,10 @@
   "storms": [],
   "watchesWarnings": {
     "note": "",
-    "AL": {},
     "LA": {},
     "FL": {},
-    "MS": {}
+    "MS": {},
+    "AL": {}
   },
   "landfall": null,
   "landfallOccurred": {
