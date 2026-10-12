@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-10-12T11:35:02.579Z",
+    "changed": false,
+    "alertLevel": "quiet",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. No Gulf disturbance in the NHC outlook and no Gulf storm."
+  },
+  {
     "ts": "2026-10-12T11:05:19.497Z",
     "changed": false,
     "alertLevel": "quiet",
@@ -1548,15 +1558,5 @@
     "delivery": null,
     "updated": false,
     "summary": "No change. Hurricane Isaias: 105 mph (Category 2), 25.8N 88.4W, Gulf, moving NNE at 16 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA."
-  },
-  {
-    "ts": "2026-10-09T05:47:55.701Z",
-    "changed": false,
-    "alertLevel": "landfall",
-    "formation7d": null,
-    "pushed": false,
-    "delivery": null,
-    "updated": false,
-    "summary": "No change. Hurricane Isaias: 105 mph (Category 2), 25.4N 88.4W, Gulf, moving NE at 16 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA."
   }
 ]
