@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-10-12T00:35:03.268Z",
+    "changed": false,
+    "alertLevel": "landfall",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. Made landfall near Destin, FL around Fri, Oct 9, 8 PM CT; the system is no longer an active NHC storm."
+  },
+  {
     "ts": "2026-10-12T00:05:12.114Z",
     "changed": false,
     "alertLevel": "landfall",
@@ -1541,16 +1551,6 @@
   },
   {
     "ts": "2026-10-08T22:35:05.571Z",
-    "changed": false,
-    "alertLevel": "threat",
-    "formation7d": null,
-    "pushed": false,
-    "delivery": null,
-    "updated": false,
-    "summary": "No change. Hurricane Isaias: 100 mph (Category 2), 24.4N 89.3W, Gulf, moving NE at 14 mph. Forecast track reaches the coast near Pensacola, FL around Fri, Oct 9, 10 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA."
-  },
-  {
-    "ts": "2026-10-08T22:05:17.861Z",
     "changed": false,
     "alertLevel": "threat",
     "formation7d": null,
