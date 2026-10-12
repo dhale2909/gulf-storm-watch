@@ -1,9 +1,9 @@
 {
-  "updatedAt": "2026-10-12T01:05:12.883Z",
-  "lastAttemptAt": "2026-10-12T01:05:12.883Z",
-  "nextCheck": "2026-10-12T01:35:00.000Z",
-  "alertLevel": "landfall",
-  "headline": "Made landfall near Destin, FL around Fri, Oct 9, 8 PM CT; the system is no longer an active NHC storm.",
+  "updatedAt": "2026-10-12T01:35:06.220Z",
+  "lastAttemptAt": "2026-10-12T01:35:06.220Z",
+  "nextCheck": "2026-10-12T02:05:00.000Z",
+  "alertLevel": "quiet",
+  "headline": "No Gulf disturbance in the NHC outlook and no Gulf storm.",
   "gulf": {
     "area": "",
     "formation48": null,
@@ -14,27 +14,20 @@
   "storms": [],
   "watchesWarnings": {
     "note": "",
-    "FL": {},
-    "MS": {},
+    "LA": {},
     "AL": {},
-    "LA": {}
+    "MS": {},
+    "FL": {}
   },
   "landfall": null,
-  "landfallOccurred": {
-    "state": "FL",
-    "at": "2026-10-10T01:22:30.000Z",
-    "near": "Destin, FL",
-    "lat": 30.35,
-    "lonW": 86.5,
-    "windKt": 90
-  },
+  "landfallOccurred": null,
   "internal": {
     "failCount": 0,
     "baseline7d": null,
     "baseline48": null,
     "landfallAt": "2026-10-10T01:22:30.000Z",
     "landfallStormId": "al092026",
-    "landfallHoldUntil": "2026-10-12T01:22:30.000Z",
+    "landfallHoldUntil": null,
     "landfallState": "FL",
     "landfallNear": "Destin, FL",
     "landfallPos": {
