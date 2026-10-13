@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-10-13T03:35:04.050Z",
+    "changed": false,
+    "alertLevel": "quiet",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. No Gulf disturbance in the NHC outlook and no Gulf storm."
+  },
+  {
     "ts": "2026-10-13T03:05:14.036Z",
     "changed": false,
     "alertLevel": "quiet",
@@ -1536,15 +1546,5 @@
     "delivery": null,
     "updated": false,
     "summary": "No change. Hurricane Isaias: 115 mph (Category 3), 29.5N 86.9W, Gulf, moving N at 20 mph. Forecast track reaches the coast near Navarre, FL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA."
-  },
-  {
-    "ts": "2026-10-09T21:35:05.765Z",
-    "changed": false,
-    "alertLevel": "landfall",
-    "formation7d": null,
-    "pushed": false,
-    "delivery": null,
-    "updated": false,
-    "summary": "No change. Hurricane Isaias: 115 mph (Category 3), 29.2N 87.0W, Gulf, moving N at 20 mph. Forecast track reaches the coast near Navarre, FL around Fri, Oct 9, 9 PM CT (approximate). Hurricane warning: AL, FL, MS. Tropical storm warning: LA. Storm surge warning: AL, FL, MS, LA."
   }
 ]
