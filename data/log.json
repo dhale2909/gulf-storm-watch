@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-10-14T05:35:05.845Z",
+    "changed": false,
+    "alertLevel": "quiet",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. No Gulf disturbance in the NHC outlook and no Gulf storm."
+  },
+  {
     "ts": "2026-10-14T05:05:12.691Z",
     "changed": false,
     "alertLevel": "quiet",
@@ -1489,16 +1499,6 @@
   },
   {
     "ts": "2026-10-11T05:05:11.474Z",
-    "changed": false,
-    "alertLevel": "landfall",
-    "formation7d": null,
-    "pushed": false,
-    "delivery": null,
-    "updated": false,
-    "summary": "No change. Post-Tropical Cyclone Isaias made landfall near Destin, FL around Fri, Oct 9, 8 PM CT. Post-Tropical Cyclone Isaias: 25 mph, 35.0N 86.7W, inland, moving NE at 18 mph. The center is over land."
-  },
-  {
-    "ts": "2026-10-11T04:35:05.059Z",
     "changed": false,
     "alertLevel": "landfall",
     "formation7d": null,
