@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-11-11T08:13:01.790Z",
-  "lastAttemptAt": "2026-11-11T12:37:21.020Z",
-  "nextCheck": "2026-11-11T13:05:00.000Z",
+  "updatedAt": "2026-11-11T13:13:04.219Z",
+  "lastAttemptAt": "2026-11-11T13:13:04.219Z",
+  "nextCheck": "2026-11-11T13:35:00.000Z",
   "alertLevel": "quiet",
   "headline": "No Gulf disturbance in the NHC outlook and no Gulf storm.",
   "gulf": {
@@ -14,21 +14,15 @@
   "storms": [],
   "watchesWarnings": {
     "note": "",
-    "unavailable": [
-      "AL",
-      "FL",
-      "MS",
-      "LA"
-    ],
-    "AL": {},
+    "LA": {},
     "FL": {},
-    "MS": {},
-    "LA": {}
+    "AL": {},
+    "MS": {}
   },
   "landfall": null,
   "landfallOccurred": null,
   "internal": {
-    "failCount": 9,
+    "failCount": 0,
     "baseline7d": null,
     "baseline48": null,
     "landfallAt": "2026-10-10T01:22:30.000Z",
@@ -42,18 +36,18 @@
     },
     "landfallWindKt": 90,
     "othersAlerted": [],
-    "downCount": 9,
+    "downCount": 0,
     "vanishedChecks": 0,
     "pending": null
   },
   "tracked": null,
   "others": [],
   "sources": {
-    "outlook": "unavailable",
-    "storms": "unavailable",
+    "outlook": "ok",
+    "storms": "ok",
     "forecast": "n/a",
-    "alerts": "unavailable for AL, FL, MS, LA",
-    "map": "unavailable"
+    "alerts": "ok",
+    "map": "ok"
   },
   "google": null,
   "discussion": null
