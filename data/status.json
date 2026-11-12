@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-11-12T15:13:06.328Z",
-  "lastAttemptAt": "2026-11-12T15:13:06.328Z",
-  "nextCheck": "2026-11-12T15:35:00.000Z",
+  "updatedAt": "2026-11-12T15:35:06.864Z",
+  "lastAttemptAt": "2026-11-12T15:35:06.864Z",
+  "nextCheck": "2026-11-12T16:05:00.000Z",
   "alertLevel": "quiet",
   "headline": "No Gulf disturbance in the NHC outlook and no Gulf storm.",
   "gulf": {
@@ -14,10 +14,10 @@
   "storms": [],
   "watchesWarnings": {
     "note": "",
-    "AL": {},
-    "MS": {},
+    "LA": {},
     "FL": {},
-    "LA": {}
+    "MS": {},
+    "AL": {}
   },
   "landfall": null,
   "landfallOccurred": null,
