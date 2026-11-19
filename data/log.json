@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-11-19T14:13:05.390Z",
+    "changed": false,
+    "alertLevel": "quiet",
+    "formation7d": null,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. No Gulf disturbance in the NHC outlook and no Gulf storm."
+  },
+  {
     "ts": "2026-11-19T13:35:05.325Z",
     "changed": false,
     "alertLevel": "quiet",
@@ -1482,16 +1492,6 @@
   },
   {
     "ts": "2026-11-16T05:13:07.042Z",
-    "changed": false,
-    "alertLevel": "quiet",
-    "formation7d": null,
-    "pushed": false,
-    "delivery": null,
-    "updated": false,
-    "summary": "No change. No Gulf disturbance in the NHC outlook and no Gulf storm."
-  },
-  {
-    "ts": "2026-11-16T04:35:07.064Z",
     "changed": false,
     "alertLevel": "quiet",
     "formation7d": null,
