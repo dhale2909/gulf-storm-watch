@@ -1,24 +1,24 @@
 {
-  "updatedAt": "2026-11-21T04:35:06.152Z",
-  "lastAttemptAt": "2026-11-21T04:35:06.152Z",
-  "nextCheck": "2026-11-21T05:05:00.000Z",
+  "updatedAt": "2026-11-21T05:13:06.220Z",
+  "lastAttemptAt": "2026-11-21T05:13:06.220Z",
+  "nextCheck": "2026-11-21T05:35:00.000Z",
   "alertLevel": "watch",
-  "headline": "NHC gives the Offshore of the Southeast U.S. Coast disturbance a 30% chance of forming within 7 days (30% within 48 hours). No advisories or forecast track yet.",
+  "headline": "NHC gives the Offshore of the Southeast U.S. Coast disturbance a 20% chance of forming within 7 days (20% within 48 hours). No advisories or forecast track yet.",
   "gulf": {
     "area": "Offshore of the Southeast U.S. Coast",
-    "text": "A complex and large low pressure system includes three embedded low pressure centers, one over the Gulf of America, another over west-central Florida, and a third a few hundred miles east-northeast of the northwestern Bahamas. All of these systems are currently non-tropical. However, the system over the western Atlantic still has some potential to acquire subtropical or tropical characteristics over the next day or two while it moves northward, passing near the North Carolina and mid-Atlantic coasts on Sunday. Although the chances of subtropical or tropical development appear to be decreasing, this large weather system is still expected to produce gusty winds, dangerous surf, rip currents and coastal flooding along portions of the southeast and mid-Atlantic U.S. coasts into early next week. In addition, heavy rainfall and the threat of flash flooding will continue across portions of the northeast Florida peninsula tonight, spreading northward over coastal portions of the Carolinas and the mid-Atlantic over the weekend. Interests along the eastern coast of the United States should continue to monitor the progress of this system. Additional information on this system, including Gale Warnings, can be found in High Seas Forecasts issued by the National Weather Service, as well as products issued by your local National Weather Service forecast office.",
-    "formation48": 30,
-    "formation7d": 30,
-    "source": "NHC outlook, 700 PM EST Fri Nov 20 2026",
-    "issuedAt": "2026-11-21T00:00:00.000Z"
+    "text": "A complex and large low pressure system includes three embedded low pressure centers, one over the Gulf of America, another over northern Florida, and a third a few hundred miles northeast of the northwestern Bahamas. All of these systems are currently non-tropical. However, the system over the western Atlantic still has some potential to acquire subtropical or tropical characteristics over the next day or two while it moves northward, passing near the North Carolina and mid-Atlantic coasts on Sunday. Although the chances of subtropical or tropical development continue to decrease, this large weather system is still expected to produce gusty winds, dangerous surf, rip currents, and coastal flooding along portions of the southeast and mid-Atlantic U.S. coasts into early next week. In addition, heavy rainfall and the threat of flash flooding will continue across portions of northeastern Florida today, spreading northward over coastal portions of the Carolinas and the mid-Atlantic through the weekend. Interests along the U.S. East Coast should continue to monitor the progress of this system. Additional information on this system, including Gale Warnings, can be found in High Seas Forecasts issued by the National Weather Service, as well as products issued by your local National Weather Service forecast office.",
+    "formation48": 20,
+    "formation7d": 20,
+    "source": "NHC outlook, 100 AM EST Sat Nov 21 2026",
+    "issuedAt": "2026-11-21T06:00:00.000Z"
   },
   "storms": [],
   "watchesWarnings": {
     "note": "",
+    "LA": {},
     "AL": {},
     "MS": {},
-    "FL": {},
-    "LA": {}
+    "FL": {}
   },
   "landfall": null,
   "landfallOccurred": null,
