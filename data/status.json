@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-11-21T08:13:06.427Z",
-  "lastAttemptAt": "2026-11-21T08:13:06.427Z",
-  "nextCheck": "2026-11-21T08:35:00.000Z",
+  "updatedAt": "2026-11-21T08:35:06.283Z",
+  "lastAttemptAt": "2026-11-21T08:35:06.283Z",
+  "nextCheck": "2026-11-21T09:05:00.000Z",
   "alertLevel": "watch",
   "headline": "NHC gives the Offshore of the Southeast U.S. Coast disturbance a 20% chance of forming within 7 days (20% within 48 hours). No advisories or forecast track yet.",
   "gulf": {
@@ -15,10 +15,10 @@
   "storms": [],
   "watchesWarnings": {
     "note": "",
-    "FL": {},
     "AL": {},
     "LA": {},
-    "MS": {}
+    "MS": {},
+    "FL": {}
   },
   "landfall": null,
   "landfallOccurred": null,
