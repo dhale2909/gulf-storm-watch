@@ -1,32 +1,30 @@
 {
-  "updatedAt": "2026-11-21T11:35:06.163Z",
-  "lastAttemptAt": "2026-11-21T12:13:03.216Z",
-  "nextCheck": "2026-11-21T12:35:00.000Z",
-  "alertLevel": "watch",
-  "headline": "NHC gives the Offshore of the Southeast U.S. Coast disturbance a 20% chance of forming within 7 days (20% within 48 hours). No advisories or forecast track yet.",
+  "updatedAt": "2026-11-21T12:35:06.338Z",
+  "lastAttemptAt": "2026-11-21T12:35:06.338Z",
+  "nextCheck": "2026-11-21T13:05:00.000Z",
+  "alertLevel": "quiet",
+  "headline": "No Gulf disturbance in the NHC outlook and no Gulf storm.",
   "gulf": {
-    "area": "Offshore of the Southeast U.S. Coast",
-    "text": "A complex and large low pressure system includes three embedded low pressure centers, one over the Gulf of America, another over northern Florida, and a third a few hundred miles northeast of the northwestern Bahamas. All of these systems are currently non-tropical. However, the system over the western Atlantic still has some potential to acquire subtropical or tropical characteristics over the next day or two while it moves northward, passing near the North Carolina and mid-Atlantic coasts on Sunday. Although the chances of subtropical or tropical development continue to decrease, this large weather system is still expected to produce gusty winds, dangerous surf, rip currents, and coastal flooding along portions of the southeast and mid-Atlantic U.S. coasts into early next week. In addition, heavy rainfall and the threat of flash flooding will continue across portions of northeastern Florida today, spreading northward over coastal portions of the Carolinas and the mid-Atlantic through the weekend. Interests along the U.S. East Coast should continue to monitor the progress of this system. Additional information on this system, including Gale Warnings, can be found in High Seas Forecasts issued by the National Weather Service, as well as products issued by your local National Weather Service forecast office.",
-    "formation48": 20,
-    "formation7d": 20,
-    "source": "NHC outlook, 100 AM EST Sat Nov 21 2026",
-    "issuedAt": "2026-11-21T06:00:00.000Z",
-    "stale": true
+    "area": "",
+    "formation48": null,
+    "formation7d": null,
+    "source": "NHC outlook",
+    "text": ""
   },
   "storms": [],
   "watchesWarnings": {
     "note": "",
-    "MS": {},
     "AL": {},
-    "LA": {},
-    "FL": {}
+    "MS": {},
+    "FL": {},
+    "LA": {}
   },
   "landfall": null,
   "landfallOccurred": null,
   "internal": {
     "failCount": 0,
-    "baseline7d": 30,
-    "baseline48": 30,
+    "baseline7d": null,
+    "baseline48": null,
     "landfallAt": "2026-10-10T01:22:30.000Z",
     "landfallStormId": "al092026",
     "landfallHoldUntil": null,
@@ -39,15 +37,10 @@
     "landfallWindKt": 90,
     "othersAlerted": [],
     "downCount": 0,
-    "vanishedChecks": 1,
+    "vanishedChecks": 0,
     "pending": null
   },
-  "tracked": {
-    "invest": null,
-    "stormId": null,
-    "name": "Offshore of the Southeast U.S. Coast",
-    "lastPos": null
-  },
+  "tracked": null,
   "others": [],
   "sources": {
     "outlook": "ok",
