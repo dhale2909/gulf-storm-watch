@@ -1,5 +1,15 @@
 [
   {
+    "ts": "2026-11-21T02:13:04.814Z",
+    "changed": false,
+    "alertLevel": "watch",
+    "formation7d": 30,
+    "pushed": false,
+    "delivery": null,
+    "updated": false,
+    "summary": "No change. NHC gives the Offshore of the Southeast U.S. Coast disturbance a 30% chance of forming within 7 days (30% within 48 hours). No advisories or forecast track yet."
+  },
+  {
     "ts": "2026-11-21T01:35:06.360Z",
     "changed": false,
     "alertLevel": "watch",
@@ -1486,16 +1496,6 @@
   },
   {
     "ts": "2026-11-17T17:13:05.864Z",
-    "changed": false,
-    "alertLevel": "quiet",
-    "formation7d": null,
-    "pushed": false,
-    "delivery": null,
-    "updated": false,
-    "summary": "No change. No Gulf disturbance in the NHC outlook and no Gulf storm."
-  },
-  {
-    "ts": "2026-11-17T16:35:03.954Z",
     "changed": false,
     "alertLevel": "quiet",
     "formation7d": null,
